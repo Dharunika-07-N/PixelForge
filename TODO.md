@@ -20,17 +20,17 @@ A comprehensive roadmap for building, testing, and deploying the Design2Code AI 
   - [x] Set up ESLint and Prettier for code quality
 
 ## 🔐 2. Authentication & User Management
-- [ ] **Backend Auth**
-  - [ ] Implement JWT-based authentication
-  - [ ] Set up secure password hashing (bcrypt)
-  - [ ] Create `Users` table schema
-- [ ] **Frontend Auth**
-  - [ ] Build Login / Signup / Logout pages
-  - [ ] Implement "My Account" and profile management
-  - [ ] Add skill level preference (beginner/intermediate/advanced)
-- [ ] **Security Extras**
-  - [ ] Implement rate limiting on auth endpoints
-  - [ ] Add input validation (Zod)
+- [x] **Backend Auth**
+  - [x] Implement JWT-based authentication
+  - [x] Set up secure password hashing (bcrypt)
+  - [x] Create `Users` table schema
+- [x] **Frontend Auth**
+  - [x] Build Login / Signup / Logout pages
+  - [x] Implement "My Account" and profile management
+  - [x] Add skill level preference (beginner/intermediate/advanced)
+- [x] **Security Extras**
+  - [x] Implement rate limiting on auth endpoints (Middleware/Config ready)
+  - [x] Add input validation (Zod)
 
 ## 📸 3. Phase 1: Element Extraction (MVP)
 - [ ] **Image Upload System (1.1)**
