@@ -15,6 +15,7 @@ import {
     Sparkles
 } from "lucide-react";
 import Link from "next/link";
+import Canvas from "@/components/canvas/Canvas";
 
 // Mock data for extracted elements
 const MOCK_ELEMENTS = [
@@ -26,7 +27,7 @@ const MOCK_ELEMENTS = [
 ];
 
 export default function WorkspacePage({ params }: { params: { id: string } }) {
-    const [activeTab, setActiveTab] = useState("library");
+    const [activeTab, setActiveTab] = useState("canvas");
     const [elements, setElements] = useState(MOCK_ELEMENTS);
 
     return (
@@ -112,19 +113,30 @@ export default function WorkspacePage({ params }: { params: { id: string } }) {
                     </div>
 
                     {/* Canvas Viewport */}
-                    <div className="flex-1 relative overflow-auto bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] flex items-center justify-center p-20">
-                        <div className="w-[375px] h-[812px] bg-gray-900 border border-gray-800 rounded-[3rem] shadow-[0_0_100px_rgba(0,0,0,0.5)] relative overflow-hidden ring-8 ring-gray-900/50">
-                            <div className="absolute top-0 w-full h-8 bg-black flex justify-center items-end">
-                                <div className="w-24 h-6 bg-gray-900 rounded-b-2xl"></div>
-                            </div>
-                            <div className="p-8 pt-12 text-center h-full flex flex-col items-center justify-center">
-                                <div className="w-16 h-16 bg-blue-600/10 rounded-2xl flex items-center justify-center mb-6 border border-blue-500/20">
-                                    <Layout className="w-8 h-8 text-blue-500" />
+                    <div className="flex-1 relative overflow-hidden bg-gray-950">
+                        {activeTab === "canvas" ? (
+                            <Canvas />
+                        ) : activeTab === "library" ? (
+                            <div className="flex-1 h-full relative overflow-auto bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] flex items-center justify-center p-20">
+                                <div className="w-[375px] h-[812px] bg-gray-900 border border-gray-800 rounded-[3rem] shadow-[0_0_100px_rgba(0,0,0,0.5)] relative overflow-hidden ring-8 ring-gray-900/50">
+                                    <div className="absolute top-0 w-full h-8 bg-black flex justify-center items-end">
+                                        <div className="w-24 h-6 bg-gray-900 rounded-b-2xl"></div>
+                                    </div>
+                                    <div className="p-8 pt-12 text-center h-full flex flex-col items-center justify-center">
+                                        <div className="w-16 h-16 bg-blue-600/10 rounded-2xl flex items-center justify-center mb-6 border border-blue-500/20">
+                                            <Layout className="w-8 h-8 text-blue-500" />
+                                        </div>
+                                        <h3 className="text-xl font-bold mb-2">Workspace Canvas</h3>
+                                        <p className="text-xs text-gray-500 px-6">Drag components from the library to compose your mobile application design.</p>
+                                    </div>
                                 </div>
-                                <h3 className="text-xl font-bold mb-2">Workspace Canvas</h3>
-                                <p className="text-xs text-gray-500 px-6">Drag components from the library to compose your mobile application design.</p>
                             </div>
-                        </div>
+                        ) : (
+                            <div className="flex items-center justify-center h-full text-gray-500">
+                                <Code className="w-12 h-12 mb-4 block mx-auto opacity-20" />
+                                <p>AI Code View - Run "Analyze Design" to generate code.</p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </main>
