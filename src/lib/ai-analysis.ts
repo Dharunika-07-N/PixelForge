@@ -3,6 +3,7 @@ import {
     parseAIResponse,
     AIAnalysisResponse,
     AISuggestion,
+    AIRefinementResponse,
 } from "./ai-service";
 import { CanvasData, calculateElementStats } from "./canvas-utils";
 
@@ -275,6 +276,51 @@ export async function evaluateAccessibility(
     } catch (error) {
         console.error("Accessibility evaluation failed:", error);
         return [];
+    }
+}
+
+/**
+ * Refine design based on user feedback using AI
+ */
+export async function refineDesignWithFeedback(
+    originalDesign: CanvasData,
+    optimizedDesign: CanvasData,
+    feedback: string,
+    category: string
+): Promise<AIRefinementResponse> {
+    const systemPrompt = `You are an AI Design Refinement Specialist. Your goal is to adjust an existing AI-optimized design based on specific user feedback.
+  You MUST return a valid JSON object in this format:
+  {
+    "refinedDesign": <canvas JSON data>,
+    "changes": ["list", "of", "applied", "changes"],
+    "explanation": "Brief explanation of how you addressed the user's feedback"
+  }`;
+
+    const prompt = `Refine this design based on user feedback.
+
+Original Design:
+${JSON.stringify(originalDesign, null, 2)}
+
+Current AI Optimized Design:
+${JSON.stringify(optimizedDesign, null, 2)}
+
+User Feedback (Category: ${category}):
+"${feedback}"
+
+Instructions:
+1. Carefully analyze the user's feedback.
+2. Modify the "Current AI Optimized Design" JSON to address exactly what the user requested.
+3. If the user feedback contradicts best practices, prioritize the user's preference while keeping the design as balanced as possible.
+4. Return the refined canvas JSON data along with a list of changes and an explanation.
+
+Return ONLY valid JSON.`;
+
+    try {
+        const response = await callAnthropic(prompt, systemPrompt, 5000);
+        return parseAIResponse<AIRefinementResponse>(response);
+    } catch (error) {
+        console.error("Design refinement failed:", error);
+        throw error;
     }
 }
 
