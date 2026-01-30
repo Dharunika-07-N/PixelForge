@@ -10,6 +10,8 @@ const signupSchema = z.object({
     skillLevel: z.enum(["BEGINNER", "INTERMEDIATE", "ADVANCED"]).default("BEGINNER"),
 });
 
+console.log("Signup route module loaded");
+
 export async function POST(req: Request) {
     console.log("Signup attempt started");
     try {
