@@ -182,6 +182,36 @@ export async function evaluateLayout(
 }
 
 /**
+ * Specialized Typography Evaluation
+ */
+export async function evaluateTypography(
+    canvasData: CanvasData
+): Promise<AISuggestion[]> {
+    const systemPrompt = `You are a Typography Expert. Analyze the design's font choices, sizes, weights, and readability.
+  Provide feedback on text hierarchy and font pairings.
+  Return only a JSON array of suggestions.`;
+
+    const prompt = `Analyze the typography of this design:
+  ${JSON.stringify(canvasData.objects.filter(o => o.type === 'textbox' || o.type === 'text'), null, 2)}
+  
+  Focus on:
+  1. Font Size: Are titles large enough? Is body text legible?
+  2. Weights: Is there enough contrast between bold and regular text?
+  3. Line Height: Is the text too cramped or too loose?
+  4. Hierarchy: Is it clear what the H1, H2, and Body text are?
+  
+  Return a JSON array of suggestions with "category": "typography".`;
+
+    try {
+        const response = await callAnthropic(prompt, systemPrompt, 2000);
+        return parseAIResponse<AISuggestion[]>(response);
+    } catch (error) {
+        console.error("Typography evaluation failed:", error);
+        return [];
+    }
+}
+
+/**
  * Generate quick quality metrics without AI
  */
 export function generateQuickMetrics(canvasData: CanvasData): {
