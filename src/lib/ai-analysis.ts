@@ -243,6 +243,42 @@ export async function evaluateColors(
 }
 
 /**
+ * Specialized Accessibility Evaluation
+ */
+export async function evaluateAccessibility(
+    canvasData: CanvasData
+): Promise<AISuggestion[]> {
+    const systemPrompt = `You are an Accessibility (a11y) Expert. Analyze the design for WCAG compliance.
+  Focus on contrast, touch targets, and structural clarity.
+  Return only a JSON array of suggestions.`;
+
+    const prompt = `Analyze the accessibility of this design:
+  ${JSON.stringify(canvasData.objects.map(o => ({
+        type: o.type,
+        width: o.width,
+        height: o.height,
+        fill: o.fill,
+        text: o.text || o.type
+    })), null, 2)}
+  
+  Focus on:
+  1. Contrast: Is the text/background contrast sufficient?
+  2. Touch Targets: Are interactive elements (buttons) at least 44x44px?
+  3. Legibility: Is font size at least 16px for body text?
+  4. Visual Indicators: Are links or buttons distinguishable by more than just color?
+  
+  Return a JSON array of suggestions with "category": "accessibility".`;
+
+    try {
+        const response = await callAnthropic(prompt, systemPrompt, 2000);
+        return parseAIResponse<AISuggestion[]>(response);
+    } catch (error) {
+        console.error("Accessibility evaluation failed:", error);
+        return [];
+    }
+}
+
+/**
  * Generate quick quality metrics without AI
  */
 export function generateQuickMetrics(canvasData: CanvasData): {
