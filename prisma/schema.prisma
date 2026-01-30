@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
 }
 
 enum SkillLevel {
@@ -67,6 +67,6 @@ model GeneratedCode {
   projectId     String
   project       Project  @relation(fields: [projectId], references: [id])
   framework     String
-  codeContent   String   @db.Text
+  codeContent   String
   createdAt     DateTime @default(now())
 }
