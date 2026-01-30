@@ -21,6 +21,13 @@ enum ProjectStatus {
   COMPLETED
 }
 
+enum OptimizationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  REVISED
+}
+
 model User {
   id            String      @id @default(cuid())
   email         String      @unique
@@ -36,24 +43,57 @@ model User {
 model Project {
   id              String          @id @default(cuid())
   userId          String
-  user            User            @relation(fields: [userId], references: [id])
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   name            String
   description     String?
-  canvasData      Json?           // JSONB
-  analysisResult  Json?           // JSONB
   status          ProjectStatus   @default(DRAFT)
-  elements        Element[]
-  generatedCodes  GeneratedCode[]
+  pages           Page[]
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
+
+  @@index([userId])
 }
 
+model Page {
+  id              String          @id @default(cuid())
+  projectId       String
+  project         Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name            String
+  order           Int             @default(0)
+  canvasData      String?         // JSON stored as text
+  optimizations   Optimization[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([projectId])
+  @@index([projectId, order])
+}
+
+model Optimization {
+  id                String              @id @default(cuid())
+  pageId            String
+  page              Page                @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  originalDesign    String              // JSON stored as text
+  optimizedDesign   String?             // JSON stored as text
+  suggestions       String?             // JSON array stored as text
+  userFeedback      String?             // JSON stored as text
+  status            OptimizationStatus  @default(PENDING)
+  aiAnalysis        String?             // Text analysis from AI
+  qualityScore      Int?                // 0-100
+  generatedCode     String?             // JSON stored as text
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([pageId])
+  @@index([status])
+}
+
+// Legacy models (kept for backward compatibility)
 model Element {
   id              String   @id @default(cuid())
   projectId       String
-  project         Project  @relation(fields: [projectId], references: [id])
   type            String
-  properties      Json     // JSONB
+  properties      String   // JSON stored as text
   positionX       Float
   positionY       Float
   width           Float
@@ -65,7 +105,6 @@ model Element {
 model GeneratedCode {
   id            String   @id @default(cuid())
   projectId     String
-  project       Project  @relation(fields: [projectId], references: [id])
   framework     String
   codeContent   String
   createdAt     DateTime @default(now())
