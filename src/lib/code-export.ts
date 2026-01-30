@@ -56,3 +56,38 @@ Generated on: ${new Date().toLocaleString()}
     const content = await zip.generateAsync({ type: "blob" });
     saveAs(content, `${projectName.toLowerCase().replace(/\s+/g, "-")}-export.zip`);
 }
+
+/**
+ * Export canvas to Figma-compatible JSON (Conceptual)
+ */
+export function exportToFigma(canvasData: any) {
+    const figmaJson = {
+        document: {
+            type: "DOCUMENT",
+            children: [{
+                type: "CANVAS",
+                children: canvasData.objects.map((obj: any) => ({
+                    type: obj.type === 'textbox' ? 'TEXT' : 'RECTANGLE',
+                    name: obj.type,
+                    absoluteBoundingBox: { x: obj.left, y: obj.top, width: obj.width, height: obj.height },
+                    fills: [{ type: "SOLID", color: { r: 0, g: 0, b: 0 } }] // Simplified
+                }))
+            }]
+        }
+    };
+    const blob = new Blob([JSON.stringify(figmaJson, null, 2)], { type: "application/json" });
+    saveAs(blob, "design-export-figma.json");
+}
+
+/**
+ * Export canvas to Sketch-compatible JSON (Conceptual)
+ */
+export function exportToSketch(canvasData: any) {
+    // Similar to Figma but with Sketch properties
+    const sketchJson = {
+        _class: "document",
+        pages: [{ _class: "page", name: "Page 1", layers: [] }]
+    };
+    const blob = new Blob([JSON.stringify(sketchJson, null, 2)], { type: "application/json" });
+    saveAs(blob, "design-export-sketch.json");
+}

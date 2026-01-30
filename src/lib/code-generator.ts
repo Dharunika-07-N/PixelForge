@@ -17,25 +17,39 @@ export interface CodeGenerationResponse {
     instructions: string;
 }
 
+export interface CodeOptions {
+    framework: "nextjs" | "vite" | "remix";
+    styling: "tailwind" | "css-modules" | "styled-components";
+    namingConvention: "pascal" | "camel" | "kebab";
+    includeTests: boolean;
+}
+
 /**
  * Generate production-ready code from canvas design using AI
  */
 export async function generateFullStackCode(
     canvasData: CanvasData,
     projectName: string,
-    pageName: string
+    pageName: string,
+    options: CodeOptions = {
+        framework: "nextjs",
+        styling: "tailwind",
+        namingConvention: "pascal",
+        includeTests: false
+    }
 ): Promise<CodeGenerationResponse> {
     const systemPrompt = `You are a Senior Full-Stack Engineer and UI Architect. Your task is to transform a visual canvas design into precise, production-ready code.
 
 Guidelines:
-1. Framework: Next.js 14+ (App Router).
-2. Styling: Tailwind CSS.
-3. Components: Functional React components using TypeScript.
+1. Framework: ${options.framework === 'nextjs' ? 'Next.js 14+ (App Router)' : options.framework}.
+2. Styling: ${options.styling}.
+3. Components: Functional React components using TypeScript (${options.namingConvention}Case naming).
 4. Database: Prisma (PostgreSQL preference).
 5. Validation: Zod.
 6. Design: Match the visual canvas elements (sizes, colors, layout) perfectly.
 7. Quality: Clean, modular, and DRY code.
 8. Animations: Use Framer Motion where appropriate for premium feel.
+${options.includeTests ? "9. Testing: Include Vitest/React Testing Library unit tests for components." : ""}
 
 Your response MUST be valid JSON in this exact format:
 {
