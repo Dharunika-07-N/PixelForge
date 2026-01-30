@@ -10,20 +10,14 @@ const signupSchema = z.object({
     skillLevel: z.enum(["BEGINNER", "INTERMEDIATE", "ADVANCED"]).default("BEGINNER"),
 });
 
-console.log("Signup route module loaded");
-
 export async function POST(req: Request) {
-    console.log("Signup attempt started");
     try {
         const body = await req.json();
-        console.log("Request body:", body);
         const { email, password, name, skillLevel } = signupSchema.parse(body);
-        console.log("Parsed data:", { email, name, skillLevel });
 
         const existingUser = await prisma.user.findUnique({
             where: { email },
         });
-        console.log("Existing user checked");
 
         if (existingUser) {
             return NextResponse.json(
@@ -48,12 +42,11 @@ export async function POST(req: Request) {
             { status: 201 }
         );
     } catch (error: any) {
-        console.error("Signup error caught:", error);
         if (error instanceof z.ZodError) {
             return NextResponse.json({ error: error.issues }, { status: 400 });
         }
         return NextResponse.json(
-            { error: error?.message || "Internal Server Error" },
+            { error: "Internal Server Error" },
             { status: 500 }
         );
     }
