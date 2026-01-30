@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
     try {
         const session = await getServerSession(authOptions);
 
+        // @ts-ignore
         if (!session?.user?.id) {
             throw new AppError("Unauthorized", 401, "UNAUTHORIZED");
         }
@@ -42,6 +43,7 @@ export async function POST(request: NextRequest) {
             throw new AppError("Optimization not found", 404, "NOT_FOUND");
         }
 
+        // @ts-ignore - session.user.id is added in authOptions
         if (optimization.page.project.userId !== session.user.id) {
             throw new AppError("Forbidden", 403, "FORBIDDEN");
         }
@@ -51,33 +53,39 @@ export async function POST(request: NextRequest) {
         }
 
         // 2. Call AI Refinement
-        const refinement = await refineDesignWithFeedback(
+        const refinementResult = await refineDesignWithFeedback(
             JSON.parse(optimization.originalDesign),
             JSON.parse(optimization.optimizedDesign),
             validatedData.feedback,
             validatedData.category
         );
 
-        // 3. Update optimization record with refinement
-        // We update the record to store the latest refinement
-        const updatedOptimization = await prisma.optimization.update({
-            where: { id: validatedData.optimizationId },
-            data: {
-                optimizedDesign: JSON.stringify(refinement.refinedDesign),
-                userFeedback: JSON.stringify({
+        // 3. Update optimization record and create refinement in a transaction
+        const [updatedOptimization, refinementRecord] = await prisma.$transaction([
+            prisma.optimization.update({
+                where: { id: validatedData.optimizationId },
+                data: {
+                    optimizedDesign: JSON.stringify(refinementResult.refinedDesign),
+                    status: "REFINED",
+                }
+            }),
+            prisma.refinement.create({
+                data: {
+                    optimizationId: validatedData.optimizationId,
                     feedback: validatedData.feedback,
                     category: validatedData.category,
-                    timestamp: new Date().toISOString()
-                }),
-                aiAnalysis: `Refinement: ${refinement.explanation}`,
-                status: "REFINED",
-            }
-        });
+                    refinedDesign: JSON.stringify(refinementResult.refinedDesign),
+                    aiExplanation: refinementResult.explanation,
+                    changes: JSON.stringify(refinementResult.changes),
+                }
+            })
+        ]);
 
         return NextResponse.json({
             optimization: updatedOptimization,
-            changes: refinement.changes,
-            explanation: refinement.explanation
+            refinement: refinementRecord,
+            changes: refinementResult.changes,
+            explanation: refinementResult.explanation
         }, { status: 200 });
 
     } catch (error) {

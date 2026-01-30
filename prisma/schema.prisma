@@ -25,7 +25,7 @@ enum OptimizationStatus {
   PENDING
   APPROVED
   REJECTED
-  REVISED
+  REFINED
 }
 
 model User {
@@ -81,11 +81,26 @@ model Optimization {
   aiAnalysis        String?             // Text analysis from AI
   qualityScore      Int?                // 0-100
   generatedCode     String?             // JSON stored as text
+  refinements       Refinement[]
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
 
   @@index([pageId])
   @@index([status])
+}
+
+model Refinement {
+  id                String          @id @default(cuid())
+  optimizationId    String
+  optimization      Optimization    @relation(fields: [optimizationId], references: [id], onDelete: Cascade)
+  feedback          String          // User feedback text
+  category          String          // layout, typography, etc.
+  refinedDesign     String          // JSON stored as text
+  aiExplanation     String?         // AI's explanation for changes
+  changes           String?         // JSON array of changes
+  createdAt         DateTime        @default(now())
+
+  @@index([optimizationId])
 }
 
 // Legacy models (kept for backward compatibility)
