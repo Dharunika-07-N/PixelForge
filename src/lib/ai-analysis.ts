@@ -152,6 +152,36 @@ export function calculateComplexityScore(canvasData: CanvasData): number {
 }
 
 /**
+ * Specialized Layout Evaluation
+ */
+export async function evaluateLayout(
+    canvasData: CanvasData
+): Promise<AISuggestion[]> {
+    const systemPrompt = `You are a Layout Expert. Analyze the design's spacing, alignment, and hierarchy. 
+  Identify if the design follows a grid, if items are properly aligned, and if the visual hierarchy is clear.
+  Return only a JSON array of suggestions.`;
+
+    const prompt = `Analyze the layout of this design:
+  ${JSON.stringify(canvasData.objects, null, 2)}
+  
+  Focus on:
+  1. Alignment: Are elements left/center/right aligned consistently?
+  2. Spacing: Is there sufficient whitespace? Are gaps consistent (e.g., 8px, 16px, 24px)?
+  3. Visual Hierarchy: Do larger elements lead the eye correctly?
+  4. Balance: Is the design top-heavy or cluttered?
+  
+  Return a JSON array of suggestions with "category": "layout".`;
+
+    try {
+        const response = await callAnthropic(prompt, systemPrompt, 2000);
+        return parseAIResponse<AISuggestion[]>(response);
+    } catch (error) {
+        console.error("Layout evaluation failed:", error);
+        return [];
+    }
+}
+
+/**
  * Generate quick quality metrics without AI
  */
 export function generateQuickMetrics(canvasData: CanvasData): {
