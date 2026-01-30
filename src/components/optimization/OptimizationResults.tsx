@@ -17,14 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
-interface Suggestion {
-    id: string;
-    category: "layout" | "typography" | "color" | "accessibility" | "other";
-    priority: "high" | "medium" | "low";
-    title: string;
-    description: string;
-    impact: string;
-}
+import { SuggestionCard, Suggestion } from "./SuggestionCard";
 
 interface OptimizationResultsProps {
     qualityScore: number;
@@ -142,35 +135,10 @@ export function OptimizationResults({
                 <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest px-1">Top Suggestions</h3>
                 <div className="space-y-3">
                     {suggestions.map((suggestion) => (
-                        <div
+                        <SuggestionCard
                             key={suggestion.id}
-                            className="group bg-gray-900 border border-gray-800 p-4 rounded-2xl hover:border-blue-500/50 transition-all flex gap-4"
-                        >
-                            <div className={cn(
-                                "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
-                                suggestion.priority === 'high' ? "bg-red-500/10 text-red-500" :
-                                    suggestion.priority === 'medium' ? "bg-blue-500/10 text-blue-500" : "bg-gray-800 text-gray-400"
-                            )}>
-                                {categoryIcons[suggestion.category] || categoryIcons.other}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <h4 className="font-bold text-sm truncate">{suggestion.title}</h4>
-                                    <span className={cn(
-                                        "text-[8px] px-1.5 py-0.5 rounded uppercase font-black tracking-tighter",
-                                        suggestion.priority === 'high' ? "bg-red-500/20 text-red-500" : "bg-gray-800 text-gray-500"
-                                    )}>
-                                        {suggestion.priority}
-                                    </span>
-                                </div>
-                                <p className="text-xs text-gray-400 line-clamp-2 mb-2">{suggestion.description}</p>
-                                <div className="text-[10px] text-blue-400 font-bold flex items-center gap-1">
-                                    <ArrowRight className="w-3 h-3" />
-                                    Impact: {suggestion.impact}
-                                </div>
-                            </div>
-                            <ChevronRight className="w-4 h-4 text-gray-700 self-center group-hover:text-blue-500 transition-colors" />
-                        </div>
+                            suggestion={suggestion}
+                        />
                     ))}
                 </div>
             </div>
