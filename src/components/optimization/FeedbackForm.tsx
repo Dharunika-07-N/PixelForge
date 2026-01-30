@@ -30,6 +30,15 @@ const categories = [
     { id: "other", label: "Other", icon: PlusCircle, color: "text-gray-500", bgColor: "bg-gray-500/10" },
 ];
 
+const FEEDBACK_TEMPLATES = [
+    { id: "t1", text: "Make the overall layout cleaner and add more whitespace.", category: "layout" },
+    { id: "t2", text: "Improve the contrast of the buttons to make them stand out.", category: "color" },
+    { id: "t3", text: "Use more modern typography and adjust the heading hierarchy.", category: "typography" },
+    { id: "t4", text: "Ensure the design is fully accessible for screen readers.", category: "accessibility" },
+    { id: "t5", text: "Group related elements together more logically.", category: "layout" },
+];
+
+
 export function FeedbackForm({ optimizationId, onSubmit, isSubmitting }: FeedbackFormProps) {
     const [feedback, setFeedback] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("other");
@@ -96,6 +105,26 @@ export function FeedbackForm({ optimizationId, onSubmit, isSubmitting }: Feedbac
                     </div>
                 </div>
 
+                <div className="flex flex-col gap-3">
+                    <label className="text-xs font-black text-gray-500 uppercase tracking-widest">
+                        Quick Templates
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                        {FEEDBACK_TEMPLATES.map((tmpl) => (
+                            <button
+                                key={tmpl.id}
+                                onClick={() => {
+                                    setFeedback(tmpl.text);
+                                    setSelectedCategory(tmpl.category);
+                                }}
+                                className="px-3 py-1.5 rounded-lg bg-gray-800/30 border border-gray-800 text-[10px] text-gray-400 hover:bg-gray-800 hover:text-white transition-all text-left max-w-[200px] truncate"
+                            >
+                                {tmpl.text}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
                 <div className="flex-1 flex flex-col gap-3">
                     <label htmlFor="feedback" className="text-xs font-black text-gray-500 uppercase tracking-widest">
                         Your Feedback
@@ -106,7 +135,7 @@ export function FeedbackForm({ optimizationId, onSubmit, isSubmitting }: Feedbac
                         value={feedback}
                         onChange={(e) => setFeedback(e.target.value)}
                         disabled={isSubmitting}
-                        className="flex-1 w-full bg-black/40 border border-gray-800 rounded-2xl p-4 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all resize-none min-h-[150px]"
+                        className="flex-1 w-full bg-black/40 border border-gray-800 rounded-2xl p-4 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all resize-none min-h-[100px]"
                     />
                 </div>
 
