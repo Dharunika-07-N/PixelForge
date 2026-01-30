@@ -212,6 +212,37 @@ export async function evaluateTypography(
 }
 
 /**
+ * Specialized Color Scheme Evaluation
+ */
+export async function evaluateColors(
+    canvasData: CanvasData
+): Promise<AISuggestion[]> {
+    const stats = calculateElementStats(canvasData.objects);
+    const systemPrompt = `You are a Color Theory Expert. Analyze the design's color palette, harmony, and branding.
+  Return only a JSON array of suggestions.`;
+
+    const prompt = `Analyze the color scheme of this design:
+  Current Palette: ${JSON.stringify(stats.colorPalette)}
+  Elements: ${JSON.stringify(canvasData.objects.map(o => ({ type: o.type, fill: o.fill })), null, 2)}
+  
+  Focus on:
+  1. Palette Harmony: Do the colors work well together (e.g., monochromatic, analogous)?
+  2. Meaning: Are colors used correctly for actions (e.g., blue for links, red for danger)?
+  3. Saturation: Are the colors too vibrant or too dull?
+  4. Brand Consistency: Is there a primary/secondary color strategy?
+  
+  Return a JSON array of suggestions with "category": "color".`;
+
+    try {
+        const response = await callAnthropic(prompt, systemPrompt, 2000);
+        return parseAIResponse<AISuggestion[]>(response);
+    } catch (error) {
+        console.error("Color evaluation failed:", error);
+        return [];
+    }
+}
+
+/**
  * Generate quick quality metrics without AI
  */
 export function generateQuickMetrics(canvasData: CanvasData): {
