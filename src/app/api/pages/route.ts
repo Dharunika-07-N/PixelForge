@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
     try {
         const session = await getServerSession(authOptions);
 
+        // @ts-expect-error session.user.id is added in authOptions
         if (!session?.user?.id) {
             throw new AppError("Unauthorized", 401, "UNAUTHORIZED");
         }
@@ -33,6 +34,7 @@ export async function GET(request: NextRequest) {
             throw new AppError("Project not found", 404, "NOT_FOUND");
         }
 
+        // @ts-expect-error session.user.id is added in authOptions
         if (project.userId !== session.user.id) {
             throw new AppError("Forbidden", 403, "FORBIDDEN");
         }
@@ -74,6 +76,7 @@ export async function POST(request: NextRequest) {
     try {
         const session = await getServerSession(authOptions);
 
+        // @ts-expect-error session.user.id is added in authOptions
         if (!session?.user?.id) {
             throw new AppError("Unauthorized", 401, "UNAUTHORIZED");
         }
@@ -90,6 +93,7 @@ export async function POST(request: NextRequest) {
             throw new AppError("Project not found", 404, "NOT_FOUND");
         }
 
+        // @ts-expect-error session.user.id is added in authOptions
         if (project.userId !== session.user.id) {
             throw new AppError("Forbidden", 403, "FORBIDDEN");
         }
@@ -101,7 +105,7 @@ export async function POST(request: NextRequest) {
                 if (!validateCanvasData(canvasObj)) {
                     throw new AppError("Invalid canvas data format", 400, "INVALID_CANVAS_DATA");
                 }
-            } catch (e) {
+            } catch {
                 throw new AppError("Invalid canvas data JSON", 400, "INVALID_JSON");
             }
         }

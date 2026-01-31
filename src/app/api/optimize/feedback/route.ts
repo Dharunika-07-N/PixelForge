@@ -90,6 +90,6 @@ export async function POST(request: NextRequest) {
 
     } catch (error) {
         const err = handleApiError(error);
-        return NextResponse.json({ error: err.message }, { status: err.statusCode });
+        return NextResponse.json({ error: err.error }, { status: err.statusCode });
     }
 }

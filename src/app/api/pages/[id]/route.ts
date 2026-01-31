@@ -16,6 +16,7 @@ export async function GET(
     try {
         const session = await getServerSession(authOptions);
 
+        // @ts-expect-error session.user.id is added in authOptions
         if (!session?.user?.id) {
             throw new AppError("Unauthorized", 401, "UNAUTHORIZED");
         }
@@ -44,6 +45,7 @@ export async function GET(
             throw new AppError("Page not found", 404, "NOT_FOUND");
         }
 
+        // @ts-expect-error session.user.id is added in authOptions
         if (page.project.userId !== session.user.id) {
             throw new AppError("Forbidden", 403, "FORBIDDEN");
         }
@@ -65,6 +67,7 @@ export async function PUT(
     try {
         const session = await getServerSession(authOptions);
 
+        // @ts-expect-error session.user.id is added in authOptions
         if (!session?.user?.id) {
             throw new AppError("Unauthorized", 401, "UNAUTHORIZED");
         }
@@ -88,6 +91,7 @@ export async function PUT(
             throw new AppError("Page not found", 404, "NOT_FOUND");
         }
 
+        // @ts-expect-error session.user.id is added in authOptions
         if (existingPage.project.userId !== session.user.id) {
             throw new AppError("Forbidden", 403, "FORBIDDEN");
         }
@@ -99,7 +103,7 @@ export async function PUT(
                 if (!validateCanvasData(canvasObj)) {
                     throw new AppError("Invalid canvas data format", 400, "INVALID_CANVAS_DATA");
                 }
-            } catch (e) {
+            } catch {
                 throw new AppError("Invalid canvas data JSON", 400, "INVALID_JSON");
             }
         }
@@ -128,6 +132,7 @@ export async function DELETE(
     try {
         const session = await getServerSession(authOptions);
 
+        // @ts-expect-error session.user.id is added in authOptions
         if (!session?.user?.id) {
             throw new AppError("Unauthorized", 401, "UNAUTHORIZED");
         }
@@ -148,6 +153,7 @@ export async function DELETE(
             throw new AppError("Page not found", 404, "NOT_FOUND");
         }
 
+        // @ts-expect-error session.user.id is added in authOptions
         if (existingPage.project.userId !== session.user.id) {
             throw new AppError("Forbidden", 403, "FORBIDDEN");
         }

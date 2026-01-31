@@ -23,8 +23,10 @@ import {
     Zap
 } from "lucide-react";
 import Link from "next/link";
-import Canvas from "@/components/canvas/Canvas";
-import CodePreview from "@/components/workspace/CodePreview";
+import dynamic from "next/dynamic";
+
+const Canvas = dynamic(() => import("@/components/canvas/Canvas"), { ssr: false });
+const CodePreview = dynamic(() => import("@/components/workspace/CodePreview"), { ssr: false });
 
 // Mock AI Optimization Data
 const AI_PROPOSALS = [
