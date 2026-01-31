@@ -5,7 +5,6 @@ import {
     Plus,
     Files,
     Trash2,
-    ChevronRight,
     Copy,
     Layout
 } from "lucide-react";
