@@ -3,7 +3,6 @@
 import React from "react";
 import {
     Square,
-    Circle,
     Type,
     Image as ImageIcon,
     Layout,
@@ -11,7 +10,7 @@ import {
     Search,
     Grid
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+// import { cn } from "@/lib/utils";
 
 const libraryItems = [
     { id: "hero", label: "Hero Section", icon: Layout, category: "Sections" },

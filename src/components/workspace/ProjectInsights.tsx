@@ -2,11 +2,9 @@
 
 import React from "react";
 import {
-    BarChart,
     TrendingUp,
     Users,
     Clock,
-    Layout,
     MousePointer2
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";

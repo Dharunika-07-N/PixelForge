@@ -3,11 +3,7 @@
 import React, { useState } from "react";
 import {
     GitBranch,
-    GitMerge,
-    GitPullRequest,
-    CheckCircle2,
-    Clock,
-    ArrowRight
+    GitMerge
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";

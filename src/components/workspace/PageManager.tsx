@@ -7,8 +7,7 @@ import {
     Trash2,
     ChevronRight,
     Copy,
-    Layout,
-    MoreVertical
+    Layout
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";

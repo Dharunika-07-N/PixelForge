@@ -18,7 +18,6 @@ import ts from "react-syntax-highlighter/dist/esm/languages/hljs/typescript";
 import atomOneDark from "react-syntax-highlighter/dist/esm/styles/hljs/atom-one-dark";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
-import { downloadCodeAsZip } from "@/lib/code-export";
 
 SyntaxHighlighter.registerLanguage("javascript", js);
 SyntaxHighlighter.registerLanguage("typescript", ts);

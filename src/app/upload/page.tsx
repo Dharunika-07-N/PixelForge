@@ -10,7 +10,7 @@ export default function UploadPage() {
     const [progress, setProgress] = useState(0);
     const router = useRouter();
 
-    const handleUpload = async (_file: File) => {
+    const handleUpload = async () => {
         setIsProcessing(true);
 
         // Simulate processing steps
