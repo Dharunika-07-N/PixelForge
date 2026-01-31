@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 
 describe("PixelForge AI Core Logic", () => {
     it("should validate design quality scoring", () => {
