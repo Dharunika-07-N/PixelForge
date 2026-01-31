@@ -6,26 +6,27 @@ import {
     TrendingUp,
     Target,
     Zap,
-    MessageCircle,
-    AlertCircle
+    MessageCircle
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
 
 interface FeedbackAnalyticsProps {
-    refinements: any[];
+    refinements: {
+        category: string;
+    }[];
 }
 
 export function FeedbackAnalytics({ refinements }: FeedbackAnalyticsProps) {
     const totalIterations = refinements.length;
 
     // Calculate category distribution
-    const categories = refinements.reduce((acc: any, ref) => {
+    const categories = refinements.reduce((acc: Record<string, number>, ref) => {
         acc[ref.category] = (acc[ref.category] || 0) + 1;
         return acc;
     }, {});
 
-    const mostFrequentCategory = Object.entries(categories).sort((a: any, b: any) => b[1] - a[1])[0]?.[0] || "None";
+    const mostFrequentCategory = Object.entries(categories).sort((a, b) => b[1] - a[1])[0]?.[0] || "None";
 
     const stats = [
         { label: "Total Refinements", value: totalIterations, icon: MessageCircle, color: "text-blue-500" },
@@ -63,7 +64,7 @@ export function FeedbackAnalytics({ refinements }: FeedbackAnalyticsProps) {
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-4">
-                        {Object.entries(categories).map(([cat, count]: [string, any]) => {
+                        {Object.entries(categories).map(([cat, count]) => {
                             const percentage = (count / totalIterations) * 100;
                             return (
                                 <div key={cat} className="flex flex-col gap-1.5">

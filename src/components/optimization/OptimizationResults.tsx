@@ -2,16 +2,12 @@
 
 import React from "react";
 import {
-    CheckCircle2,
-    AlertTriangle,
-    Info,
     Layout,
     Type,
     Palette,
     Accessibility,
-    ArrowRight,
-    TrendingUp,
-    ChevronRight
+    Info,
+    TrendingUp
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -21,12 +17,7 @@ import { SuggestionCard, Suggestion } from "./SuggestionCard";
 
 interface OptimizationResultsProps {
     qualityScore: number;
-    categories: {
-        layout: number;
-        typography: number;
-        color: number;
-        accessibility: number;
-    };
+    categories: Record<string, number>;
     suggestions: Suggestion[];
     analysis: string;
     onApply: () => void;
@@ -95,7 +86,7 @@ export function OptimizationResults({
                             <div key={name} className="flex flex-col gap-1.5">
                                 <div className="flex justify-between items-center text-xs">
                                     <span className="capitalize text-gray-400 flex items-center gap-2">
-                                        {categoryIcons[name as keyof typeof categoryIcons]}
+                                        {categoryIcons[name as keyof typeof categoryIcons] || categoryIcons.other}
                                         {name}
                                     </span>
                                     <span className="font-bold">{score}%</span>
@@ -125,7 +116,7 @@ export function OptimizationResults({
                 </CardHeader>
                 <CardContent>
                     <p className="text-gray-300 leading-relaxed text-sm italic">
-                        "{analysis}"
+                        &quot;{analysis}&quot;
                     </p>
                 </CardContent>
             </Card>

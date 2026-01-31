@@ -2,38 +2,15 @@
 
 import React from "react";
 import {
-    Plus,
-    Minus,
     RefreshCw,
     CheckCircle2,
-    Info,
-    Type,
-    Palette,
-    Layout,
-    MousePointer2
+    Info
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-
-interface DiffItem {
-    type: "added" | "removed" | "modified";
-    property?: string;
-    oldValue?: any;
-    newValue?: any;
-    description: string;
-    category: "layout" | "typography" | "color" | "other";
-}
 
 interface DesignDiffProps {
     changes: string[]; // List of change descriptions from AI
     aiExplanation?: string;
 }
-
-const categoryIcons = {
-    layout: <Layout className="w-4 h-4" />,
-    typography: <Type className="w-4 h-4" />,
-    color: <Palette className="w-4 h-4" />,
-    other: <Info className="w-4 h-4" />,
-};
 
 export function DesignDiff({ changes, aiExplanation }: DesignDiffProps) {
     if (changes.length === 0) {
@@ -41,7 +18,7 @@ export function DesignDiff({ changes, aiExplanation }: DesignDiffProps) {
             <div className="flex flex-col items-center justify-center p-12 text-center bg-gray-900/40 rounded-[2rem] border border-gray-800 border-dashed">
                 <CheckCircle2 className="w-10 h-10 text-gray-800 mb-4" />
                 <h4 className="text-sm font-black text-gray-500 uppercase tracking-widest mb-1">No Changes Detected</h4>
-                <p className="text-xs text-gray-600">The design refinement didn't modify any elements.</p>
+                <p className="text-xs text-gray-600">The design refinement didn&apos;t modify any elements.</p>
             </div>
         );
     }
@@ -55,7 +32,7 @@ export function DesignDiff({ changes, aiExplanation }: DesignDiffProps) {
                         <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">AI Strategy</span>
                     </div>
                     <p className="text-sm text-blue-200/80 italic leading-relaxed">
-                        "{aiExplanation}"
+                        &quot;{aiExplanation}&quot;
                     </p>
                 </div>
             )}

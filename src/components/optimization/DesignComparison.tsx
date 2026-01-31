@@ -11,8 +11,6 @@ interface DesignComparisonProps {
 }
 
 export function DesignComparison({
-    originalData: _originalData,
-    optimizedData: _optimizedData,
     onApply
 }: DesignComparisonProps) {
     return (

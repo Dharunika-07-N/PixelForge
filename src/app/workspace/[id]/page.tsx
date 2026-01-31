@@ -51,7 +51,7 @@ const AI_PROPOSALS = [
     }
 ];
 
-export default function WorkspacePage({ params: _params }: { params: { id: string } }) {
+export default function WorkspacePage() {
     const [activeTab, setActiveTab] = useState("canvas");
     const [pages, setPages] = useState([{ id: "home", name: "Home", data: null }]);
     const [activePageId, setActivePageId] = useState("home");
@@ -91,12 +91,14 @@ export default function WorkspacePage({ params: _params }: { params: { id: strin
     };
 
     const handleReject = () => {
-        const nextIdx = AI_PROPOSALS.findIndex(p => p.id === pendingApproval.id) + 1;
-        if (nextIdx < AI_PROPOSALS.length) {
-            setPendingApproval(AI_PROPOSALS[nextIdx]);
-        } else {
-            setPendingApproval(null);
-            setShowAIProposal(false);
+        if (pendingApproval) {
+            const nextIdx = AI_PROPOSALS.findIndex(p => p.id === pendingApproval.id) + 1;
+            if (nextIdx < AI_PROPOSALS.length) {
+                setPendingApproval(AI_PROPOSALS[nextIdx]);
+            } else {
+                setPendingApproval(null);
+                setShowAIProposal(false);
+            }
         }
     };
 
@@ -126,7 +128,6 @@ export default function WorkspacePage({ params: _params }: { params: { id: strin
             {/* Sub-Panel: Pages & Elements */}
             <aside className="w-[280px] border-r border-gray-800 bg-gray-900/20 flex flex-col shrink-0 overflow-hidden">
                 <div className="flex flex-col h-full">
-                    {/* Pages Section */}
                     <div className="p-4 border-b border-gray-800/50">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest">App Pages</h3>
@@ -146,11 +147,9 @@ export default function WorkspacePage({ params: _params }: { params: { id: strin
                         </div>
                     </div>
 
-                    {/* Element Library Section */}
                     <div className="flex-1 flex flex-col p-4 overflow-hidden">
                         <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-4">Element Library</h3>
                         <div className="flex-1 overflow-y-auto space-y-4 custom-scrollbar pr-2">
-                            {/* Element previews */}
                             {[1, 2, 3, 4].map((i) => (
                                 <div key={i} className="group bg-gray-900/50 border border-gray-800/50 rounded-xl p-3 cursor-grab hover:border-blue-500/50 transition-all">
                                     <div className="aspect-video bg-black/40 rounded-lg mb-2 flex items-center justify-center border border-white/5">
@@ -169,7 +168,6 @@ export default function WorkspacePage({ params: _params }: { params: { id: strin
 
             {/* Main Content Area */}
             <main className="flex-1 flex flex-col min-w-0 bg-gray-950">
-                {/* Global Top Header */}
                 <header className="h-16 border-b border-gray-800 bg-gray-900/30 flex items-center justify-between px-6 shrink-0 z-40 backdrop-blur-md">
                     <div className="flex items-center gap-4">
                         <h1 className="font-black text-lg tracking-tight">Project: <span className="text-blue-500">My App Prototype</span></h1>
@@ -220,7 +218,6 @@ export default function WorkspacePage({ params: _params }: { params: { id: strin
                         </div>
                     )}
 
-                    {/* AI Optimization Proposal Modal */}
                     {showAIProposal && pendingApproval && (
                         <div className="absolute inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center p-6">
                             <div className="bg-gray-900 border border-white/10 rounded-[2.5rem] w-full max-w-xl overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,1)] animate-in fade-in zoom-in duration-300">

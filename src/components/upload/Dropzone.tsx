@@ -80,7 +80,9 @@ export default function Dropzone({ onUpload }: DropzoneProps) {
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-white truncate max-w-[200px]">{file?.name}</p>
-                                <p className="text-xs text-gray-500">{(file?.size! / (1024 * 1024)).toFixed(2)} MB</p>
+                                <p className="text-xs text-gray-500">
+                                    {file ? (file.size / (1024 * 1024)).toFixed(2) : "0.00"} MB
+                                </p>
                             </div>
                         </div>
                         <button

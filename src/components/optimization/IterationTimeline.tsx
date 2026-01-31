@@ -2,8 +2,6 @@
 
 import React from "react";
 import {
-    GitCommit,
-    MessageCircle,
     ChevronRight,
     Clock,
     ArrowRight,
@@ -108,7 +106,7 @@ export function IterationTimeline({
                             </div>
 
                             <p className="text-xs text-gray-300 font-medium line-clamp-1 italic">
-                                "{refinement.feedback}"
+                                &quot;{refinement.feedback}&quot;
                             </p>
 
                             <div className="flex items-center gap-3 mt-1">

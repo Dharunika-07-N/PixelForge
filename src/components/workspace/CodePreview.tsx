@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { Copy, Download, Check, ExternalLink } from "lucide-react";
+import { Copy, Download, Check } from "lucide-react";
 import JSZip from "jszip";
 
 interface CodePreviewProps {

@@ -5,21 +5,26 @@ import {
     Sparkles,
     History,
     CheckCircle2,
-    AlertCircle,
     Layout,
     RefreshCw
 } from "lucide-react";
 import { OptimizationResults } from "./OptimizationResults";
 import { FeedbackForm } from "./FeedbackForm";
-import { DesignComparison } from "./DesignComparison";
 import { ComparisonSlider } from "./ComparisonSlider";
-import { Button } from "@/components/ui/Button";
-import { Modal } from "@/components/ui/Modal";
 import { useToast } from "@/components/ui/Toast";
 import { cn } from "@/lib/utils";
 
 interface RefinementWorkflowProps {
-    optimization: any;
+    optimization: {
+        id: string;
+        qualityScore: number;
+        categories: Record<string, number>;
+        suggestions?: string;
+        originalDesign?: string;
+        optimizedDesign?: string;
+        aiAnalysis?: string;
+        status: string;
+    };
     onApply: (optimizationId: string) => Promise<void>;
     onRefine: (feedback: string, category: string) => Promise<void>;
     isProcessing?: boolean;
@@ -38,14 +43,12 @@ export function RefinementWorkflow({
         try {
             await onApply(optimization.id);
             addToast("success", "Design changes applied successfully!");
-        } catch (error) {
+        } catch {
             addToast("error", "Failed to apply changes.");
         }
     };
 
     const suggestions = optimization.suggestions ? JSON.parse(optimization.suggestions) : [];
-    const originalDesign = optimization.originalDesign ? JSON.parse(optimization.originalDesign) : null;
-    const optimizedDesign = optimization.optimizedDesign ? JSON.parse(optimization.optimizedDesign) : null;
 
     return (
         <div className="flex flex-col h-full overflow-hidden">
