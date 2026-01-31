@@ -200,7 +200,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="px-8 py-32 max-w-7xl mx-auto w-full">
+      <section id="features" className="px-8 py-32 max-w-7xl mx-auto w-full outline-none" tabIndex={-1}>
         <div className="text-center mb-20">
           <h2 className="text-4xl md:text-5xl font-black mb-6">Built for high-velocity teams</h2>
           <p className="text-gray-400 text-lg">Stop hand-coding layouts. Start building products.</p>
