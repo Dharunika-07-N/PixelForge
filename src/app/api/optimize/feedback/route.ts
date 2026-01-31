@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     try {
         const session = await getServerSession(authOptions);
 
-        // @ts-ignore
+        // @ts-expect-error session.user.id is added in authOptions
         if (!session?.user?.id) {
             throw new AppError("Unauthorized", 401, "UNAUTHORIZED");
         }
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
             throw new AppError("Optimization not found", 404, "NOT_FOUND");
         }
 
-        // @ts-ignore - session.user.id is added in authOptions
+        // @ts-expect-error - session.user.id is added in authOptions
         if (optimization.page.project.userId !== session.user.id) {
             throw new AppError("Forbidden", 403, "FORBIDDEN");
         }
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
         }, { status: 200 });
 
     } catch (error) {
-        const { message, statusCode } = handleApiError(error) as any;
-        return NextResponse.json({ error: message || error instanceof Error ? (error as Error).message : "Unknown error" }, { status: statusCode || 500 });
+        const err = handleApiError(error);
+        return NextResponse.json({ error: err.message }, { status: err.statusCode });
     }
 }
