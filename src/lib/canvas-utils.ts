@@ -1,4 +1,4 @@
-import { fabric } from "fabric";
+import * as fabric from "fabric";
 
 /**
  * Canvas data types
@@ -16,20 +16,20 @@ export interface CanvasElement {
     stroke?: string;
     strokeWidth?: number;
     opacity?: number;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export interface CanvasData {
     version: string;
     objects: CanvasElement[];
     background?: string;
-    backgroundImage?: any;
+    backgroundImage?: unknown;
 }
 
 /**
  * Serialize Fabric.js canvas to JSON
  */
-export function serializeCanvas(canvas: any): string {
+export function serializeCanvas(canvas: fabric.Canvas | fabric.StaticCanvas): string {
     try {
         const canvasJSON = canvas.toJSON();
         return JSON.stringify(canvasJSON);
@@ -43,13 +43,14 @@ export function serializeCanvas(canvas: any): string {
  * Deserialize JSON to Fabric.js canvas
  */
 export function deserializeCanvas(
-    canvas: any,
+    canvas: fabric.Canvas,
     jsonString: string
 ): Promise<void> {
     return new Promise((resolve, reject) => {
         try {
             const canvasData = JSON.parse(jsonString);
-            canvas.loadFromJSON(canvasData, () => {
+            // @ts-expect-error loadFromJSON returns a promise in v6
+            canvas.loadFromJSON(canvasData).then(() => {
                 canvas.renderAll();
                 resolve();
             });
@@ -63,7 +64,7 @@ export function deserializeCanvas(
 /**
  * Validate canvas data structure
  */
-export function validateCanvasData(data: any): data is CanvasData {
+export function validateCanvasData(data: unknown): data is CanvasData {
     if (!data || typeof data !== "object") return false;
     if (!data.version || typeof data.version !== "string") return false;
     if (!Array.isArray(data.objects)) return false;
@@ -83,7 +84,7 @@ export function extractElements(canvasData: CanvasData): CanvasElement[] {
 /**
  * Get canvas dimensions
  */
-export function getCanvasDimensions(canvas: any): {
+export function getCanvasDimensions(canvas: fabric.Canvas | fabric.StaticCanvas): {
     width: number;
     height: number;
 } {
@@ -195,7 +196,7 @@ export function calculateElementStats(elements: CanvasElement[]): {
 /**
  * Export canvas to PNG data URL
  */
-export function exportCanvasToPNG(canvas: any, quality: number = 1): string {
+export function exportCanvasToPNG(canvas: fabric.Canvas | fabric.StaticCanvas, quality: number = 1): string {
     return canvas.toDataURL({
         format: "png",
         quality,

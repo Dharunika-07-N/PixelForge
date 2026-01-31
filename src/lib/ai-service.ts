@@ -6,7 +6,7 @@ import { AppError } from "./errors";
 export interface AIAnalysisResponse {
     qualityScore: number;
     suggestions: AISuggestion[];
-    optimizedDesign: any;
+    optimizedDesign: unknown;
     analysis: string;
     categories: {
         layout: number;
@@ -26,7 +26,7 @@ export interface AISuggestion {
 }
 
 export interface AIRefinementResponse {
-    refinedDesign: any;
+    refinedDesign: unknown;
     changes: string[];
     explanation: string;
 }
@@ -122,7 +122,7 @@ export function parseAIResponse<T>(response: string): T {
 
         // Try to parse the entire response
         return JSON.parse(response);
-    } catch (error) {
+    } catch {
         throw new AppError(
             "Failed to parse AI response as JSON",
             500,

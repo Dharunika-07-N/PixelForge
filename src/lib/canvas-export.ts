@@ -1,10 +1,11 @@
 import { exportCanvasToPNG, serializeCanvas } from "./canvas-utils";
+import * as fabric from "fabric";
 
 /**
  * Export canvas to PNG file
  */
 export async function exportToPNG(
-    canvas: any,
+    canvas: fabric.Canvas | fabric.StaticCanvas,
     filename: string = "canvas-export.png",
     quality: number = 1
 ): Promise<void> {
@@ -24,8 +25,8 @@ export async function exportToPNG(
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
-    } catch (error) {
-        console.error("Failed to export PNG:", error);
+    } catch (_error) {
+        console.error("Failed to export PNG:", _error);
         throw new Error("PNG export failed");
     }
 }
@@ -34,7 +35,7 @@ export async function exportToPNG(
  * Export canvas to JSON file
  */
 export function exportToJSON(
-    canvas: any,
+    canvas: fabric.Canvas | fabric.StaticCanvas,
     filename: string = "canvas-export.json"
 ): void {
     try {
@@ -48,8 +49,8 @@ export function exportToJSON(
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
-    } catch (error) {
-        console.error("Failed to export JSON:", error);
+    } catch (_error) {
+        console.error("Failed to export JSON:", _error);
         throw new Error("JSON export failed");
     }
 }
@@ -58,7 +59,7 @@ export function exportToJSON(
  * Import JSON file to canvas
  */
 export function importFromJSON(
-    canvas: any,
+    canvas: fabric.Canvas,
     file: File
 ): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -69,11 +70,12 @@ export function importFromJSON(
                 const jsonString = e.target?.result as string;
                 const canvasData = JSON.parse(jsonString);
 
-                canvas.loadFromJSON(canvasData, () => {
+                // @ts-expect-error loadFromJSON returns a promise in v6
+                canvas.loadFromJSON(canvasData).then(() => {
                     canvas.renderAll();
                     resolve();
                 });
-            } catch (error) {
+            } catch (_error) {
                 reject(new Error("Failed to parse JSON file"));
             }
         };
@@ -90,7 +92,7 @@ export function importFromJSON(
  * Export canvas to SVG
  */
 export function exportToSVG(
-    canvas: any,
+    canvas: fabric.Canvas | fabric.StaticCanvas,
     filename: string = "canvas-export.svg"
 ): void {
     try {
@@ -104,8 +106,8 @@ export function exportToSVG(
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
-    } catch (error) {
-        console.error("Failed to export SVG:", error);
+    } catch (_error) {
+        console.error("Failed to export SVG:", _error);
         throw new Error("SVG export failed");
     }
 }
@@ -113,7 +115,7 @@ export function exportToSVG(
 /**
  * Copy canvas to clipboard as image
  */
-export async function copyToClipboard(canvas: any): Promise<void> {
+export async function copyToClipboard(canvas: fabric.Canvas | fabric.StaticCanvas): Promise<void> {
     try {
         const dataURL = exportCanvasToPNG(canvas, 1);
         const response = await fetch(dataURL);
@@ -124,8 +126,8 @@ export async function copyToClipboard(canvas: any): Promise<void> {
                 [blob.type]: blob,
             }),
         ]);
-    } catch (error) {
-        console.error("Failed to copy to clipboard:", error);
+    } catch (_error) {
+        console.error("Failed to copy to clipboard:", _error);
         throw new Error("Clipboard copy failed");
     }
 }
@@ -134,7 +136,7 @@ export async function copyToClipboard(canvas: any): Promise<void> {
  * Export selected objects only
  */
 export function exportSelection(
-    canvas: any,
+    canvas: fabric.Canvas,
     filename: string = "selection-export.json"
 ): void {
     try {
@@ -154,8 +156,8 @@ export function exportSelection(
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
-    } catch (error) {
-        console.error("Failed to export selection:", error);
+    } catch (_error) {
+        console.error("Failed to export selection:", _error);
         throw new Error("Selection export failed");
     }
 }
@@ -164,7 +166,7 @@ export function exportSelection(
  * Import image file to canvas
  */
 export function importImage(
-    canvas: any,
+    canvas: fabric.Canvas,
     file: File
 ): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -173,13 +175,14 @@ export function importImage(
         reader.onload = (e) => {
             const imgUrl = e.target?.result as string;
 
-            (fabric as any).Image.fromURL(imgUrl, (img: any) => {
+            // @ts-expect-error fabric Image extension
+            fabric.Image.fromURL(imgUrl).then((img: fabric.Image) => {
                 // Scale image to fit canvas
                 const canvasWidth = canvas.getWidth();
                 const canvasHeight = canvas.getHeight();
                 const scale = Math.min(
-                    canvasWidth / img.width,
-                    canvasHeight / img.height,
+                    canvasWidth / (img.width || 1),
+                    canvasHeight / (img.height || 1),
                     1
                 );
 

@@ -57,16 +57,24 @@ Generated on: ${new Date().toLocaleString()}
     saveAs(content, `${projectName.toLowerCase().replace(/\s+/g, "-")}-export.zip`);
 }
 
+interface FigmaObject {
+    type: string;
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+}
+
 /**
  * Export canvas to Figma-compatible JSON (Conceptual)
  */
-export function exportToFigma(canvasData: any) {
+export function exportToFigma(canvasData: { objects: FigmaObject[] }) {
     const figmaJson = {
         document: {
             type: "DOCUMENT",
             children: [{
                 type: "CANVAS",
-                children: canvasData.objects.map((obj: any) => ({
+                children: canvasData.objects.map((obj: FigmaObject) => ({
                     type: obj.type === 'textbox' ? 'TEXT' : 'RECTANGLE',
                     name: obj.type,
                     absoluteBoundingBox: { x: obj.left, y: obj.top, width: obj.width, height: obj.height },
@@ -82,7 +90,7 @@ export function exportToFigma(canvasData: any) {
 /**
  * Export canvas to Sketch-compatible JSON (Conceptual)
  */
-export function exportToSketch(canvasData: any) {
+export function exportToSketch() {
     // Similar to Figma but with Sketch properties
     const sketchJson = {
         _class: "document",

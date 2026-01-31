@@ -9,6 +9,7 @@ const redisClientSingleton = () => {
 };
 
 declare global {
+    // eslint-disable-next-line no-var
     var redis: undefined | ReturnType<typeof redisClientSingleton>;
 }
 
