@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Sparkles,
   ArrowRight,
@@ -10,8 +12,121 @@ import {
   Github
 } from "lucide-react";
 import { motion } from "framer-motion";
+import Dropzone from "@/components/upload/Dropzone";
+import { Modal } from "@/components/ui/Modal";
 
 export default function LandingPage() {
+  const [activeFeature, setActiveFeature] = useState<number | null>(null);
+  const router = useRouter();
+
+  const features = [
+    {
+      icon: <Layers className="w-8 h-8 text-blue-500" />,
+      title: "AI Extraction",
+      desc: "Upload any screenshot. Our model identifies buttons, inputs, and layout blocks with 98% accuracy.",
+      modalTitle: "AI Extraction Engine",
+      modalDesc: "DRAG & DROP YOUR UI SCREENSHOTS",
+      content: (
+        <div className="space-y-8">
+          <div className="text-center max-w-lg mx-auto">
+            <p className="text-gray-400 mb-6">Experience our computer vision model in action. Upload a UI screenshot to extract components instantly.</p>
+          </div>
+          <Dropzone onUpload={(file) => console.log("Upload", file)} />
+          <div className="flex justify-center gap-4">
+            <button onClick={() => router.push('/signup')} className="text-sm text-blue-400 hover:text-blue-300 transition-colors">
+              Create account for full access &rarr;
+            </button>
+          </div>
+        </div>
+      )
+    },
+    {
+      icon: <Code2 className="w-8 h-8 text-purple-500" />,
+      title: "Clean React Output",
+      desc: "Get human-readable JSX code formatted with Tailwind CSS utility classes, ready to drop into your project.",
+      modalTitle: "Production-Ready Code",
+      modalDesc: "CLEAN • SEMANTIC • TYPESAFE",
+      content: (
+        <div className="space-y-6">
+          <div className="bg-[#0D1117] p-6 rounded-2xl border border-gray-800 font-mono text-sm leading-relaxed overflow-hidden relative group">
+            <div className="absolute top-4 right-4 flex gap-2">
+              <div className="w-3 h-3 rounded-full bg-red-500/20 text-red-500 border border-red-500/50" />
+              <div className="w-3 h-3 rounded-full bg-yellow-500/20 text-yellow-500 border border-yellow-500/50" />
+              <div className="w-3 h-3 rounded-full bg-green-500/20 text-green-500 border border-green-500/50" />
+            </div>
+            <div className="text-blue-400 mb-2">import <span className="text-white">React</span> from <span className="text-green-400">&apos;react&apos;</span>;</div>
+            <div className="text-purple-400 mb-4">export default function <span className="text-yellow-400">HeroSection</span>() {"{"}</div>
+            <div className="pl-4 text-gray-400 mb-1">return (</div>
+            <div className="pl-8 text-blue-300">
+              &lt;div className=<span className="text-green-400">&quot;flex flex-col items-center gap-6 p-8&quot;</span>&gt;
+            </div>
+            <div className="pl-12 text-blue-300">
+              &lt;h1 className=<span className="text-green-400">&quot;text-4xl font-bold text-gray-900&quot;</span>&gt;
+            </div>
+            <div className="pl-16 text-white">Turn designs into code</div>
+            <div className="pl-12 text-blue-300">&lt;/h1&gt;</div>
+            <div className="pl-12 text-blue-300">
+              &lt;Button variant=<span className="text-green-400">&quot;primary&quot;</span> size=<span className="text-green-400">&quot;lg&quot;</span>&gt;
+            </div>
+            <div className="pl-16 text-white">Get Started</div>
+            <div className="pl-12 text-blue-300">&lt;/Button&gt;</div>
+            <div className="pl-8 text-blue-300">&lt;/div&gt;</div>
+            <div className="pl-4 text-gray-400">);</div>
+            <div className="text-purple-400">{"}"}</div>
+          </div>
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="p-4 bg-gray-900 rounded-xl border border-gray-800">
+              <div className="font-bold text-white mb-1">React</div>
+              <div className="text-xs text-gray-500">Framework</div>
+            </div>
+            <div className="p-4 bg-gray-900 rounded-xl border border-gray-800">
+              <div className="font-bold text-white mb-1">TypeScript</div>
+              <div className="text-xs text-gray-500">Type Safety</div>
+            </div>
+            <div className="p-4 bg-gray-900 rounded-xl border border-gray-800">
+              <div className="font-bold text-white mb-1">Tailwind</div>
+              <div className="text-xs text-gray-500">Styling</div>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      icon: <Zap className="w-8 h-8 text-yellow-500" />,
+      title: "Instant Preview",
+      desc: "See your generated code come to life in our sandboxed environment before you even download it.",
+      modalTitle: "Live Sandbox Preview",
+      modalDesc: "REALTIME • RESPONSIVE • INTERACTIVE",
+      content: (
+        <div className="space-y-6">
+          <div className="aspect-video bg-white rounded-2xl flex flex-col overflow-hidden border-8 border-gray-800 relative shadow-2xl">
+            <div className="bg-gray-100 border-b border-gray-200 p-2 flex items-center gap-2">
+              <div className="flex gap-1.5 ml-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
+                <div className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
+                <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
+              </div>
+              <div className="flex-1 bg-white mx-4 rounded-md h-5 shadow-sm" />
+            </div>
+            <div className="flex-1 flex items-center justify-center bg-dots-pattern">
+              <div className="text-center">
+                <div className="inline-block p-4 rounded-xl bg-blue-50 text-blue-600 mb-4 animate-bounce">
+                  <Zap className="w-8 h-8" />
+                </div>
+                <h4 className="text-gray-900 font-bold text-lg">Live Interactive Component</h4>
+                <p className="text-gray-500 text-sm">Fully responsive & functional</p>
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-between items-center text-sm text-gray-400 px-2">
+            <span>Viewport: 1920x1080</span>
+            <span>Render time: 45ms</span>
+          </div>
+        </div>
+      )
+    }
+  ];
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-950 text-white selection:bg-blue-500/30">
       {/* Navigation */}
@@ -108,24 +223,12 @@ export default function LandingPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            {
-              icon: <Layers className="w-8 h-8 text-blue-500" />,
-              title: "AI Extraction",
-              desc: "Upload any screenshot. Our model identifies buttons, inputs, and layout blocks with 98% accuracy."
-            },
-            {
-              icon: <Code2 className="w-8 h-8 text-purple-500" />,
-              title: "Clean React Output",
-              desc: "Get human-readable JSX code formatted with Tailwind CSS utility classes, ready to drop into your project."
-            },
-            {
-              icon: <Zap className="w-8 h-8 text-yellow-500" />,
-              title: "Instant Preview",
-              desc: "See your generated code come to life in our sandboxed environment before you even download it."
-            }
-          ].map((feature, i) => (
-            <div key={i} className="p-10 bg-gray-900 border border-gray-800 rounded-3xl hover:border-blue-500/30 transition-all group">
+          {features.map((feature, i) => (
+            <div
+              key={i}
+              onClick={() => setActiveFeature(i)}
+              className="p-10 bg-gray-900 border border-gray-800 rounded-3xl hover:border-blue-500/30 transition-all group cursor-pointer hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-900/10"
+            >
               <div className="mb-8 w-16 h-16 bg-gray-950 rounded-2xl flex items-center justify-center border border-gray-800 group-hover:bg-blue-600/10 group-hover:border-blue-500/20 transition-colors">
                 {feature.icon}
               </div>
@@ -134,6 +237,16 @@ export default function LandingPage() {
             </div>
           ))}
         </div>
+
+        <Modal
+          isOpen={activeFeature !== null}
+          onClose={() => setActiveFeature(null)}
+          title={activeFeature !== null ? features[activeFeature].modalTitle : ""}
+          description={activeFeature !== null ? features[activeFeature].modalDesc : ""}
+          size="lg"
+        >
+          {activeFeature !== null && features[activeFeature].content}
+        </Modal>
       </section>
 
       {/* Footer */}
