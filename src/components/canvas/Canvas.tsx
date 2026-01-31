@@ -7,7 +7,6 @@ import {
     ZoomOut,
     Trash2,
     Layers,
-    Grid3X3,
     MousePointer2,
     Hand,
     Type,
@@ -24,21 +23,20 @@ import {
 } from "lucide-react";
 
 interface CanvasProps {
-    initialData?: any;
-    onSave?: (data: any) => void;
+    initialData?: unknown;
+    onSave?: (data: unknown) => void;
     pageId?: string;
 }
 
-export default function EnhancedCanvas({ initialData, onSave, pageId }: CanvasProps) {
+export default function EnhancedCanvas({ initialData, onSave, pageId: _pageId }: CanvasProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const fabricRef = useRef<any>(null);
-    const clipboardRef = useRef<any>(null);
+    const fabricRef = useRef<fabric.Canvas | null>(null);
+    const clipboardRef = useRef<fabric.Object | null>(null);
     const historyRef = useRef<string[]>([]);
     const historyIndexRef = useRef<number>(-1);
 
     const [zoom, setZoom] = useState(1);
-    const [isGridVisible, setIsGridVisible] = useState(true);
-    const [selectedObjects, setSelectedObjects] = useState<any[]>([]);
+    const [selectedObjects, setSelectedObjects] = useState<fabric.Object[]>([]);
     const [canUndo, setCanUndo] = useState(false);
     const [canRedo, setCanRedo] = useState(false);
 
@@ -313,6 +311,7 @@ export default function EnhancedCanvas({ initialData, onSave, pageId }: CanvasPr
         }
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const sendToBack = () => {
         if (!fabricRef.current) return;
         const activeObject = fabricRef.current.getActiveObject();

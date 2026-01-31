@@ -47,8 +47,8 @@ export default function SignupPage() {
             }
 
             router.push("/login?message=Account created successfully");
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "An unexpected error occurred");
         } finally {
             setLoading(false);
         }

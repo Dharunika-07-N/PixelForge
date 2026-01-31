@@ -1,23 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
-import { Maximize2, Minimize2, ArrowLeftRight, CheckCircle2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import React from "react";
+import { ArrowLeftRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 interface DesignComparisonProps {
-    originalData: any;
-    optimizedData: any;
+    originalData: unknown;
+    optimizedData: unknown;
     onApply: () => void;
 }
 
 export function DesignComparison({
-    originalData,
-    optimizedData,
+    originalData: _originalData,
+    optimizedData: _optimizedData,
     onApply
 }: DesignComparisonProps) {
-    const [view, setView] = useState<"side-by-side" | "split">("side-by-side");
-
     return (
         <div className="flex flex-col h-full gap-6">
             <div className="flex items-center justify-between shrink-0">
@@ -27,9 +24,9 @@ export function DesignComparison({
                 </div>
                 <div className="flex gap-2">
                     <Button
-                        variant={view === "side-by-side" ? "secondary" : "ghost"}
+                        variant="secondary"
                         size="sm"
-                        onClick={() => setView("side-by-side")}
+                        disabled
                         className="flex items-center gap-2"
                     >
                         <ArrowLeftRight className="w-4 h-4" />
@@ -51,7 +48,6 @@ export function DesignComparison({
                     </div>
                     <div className="flex-1 bg-gray-900 rounded-3xl border border-white/5 relative overflow-hidden flex items-center justify-center p-4">
                         <div className="w-full h-full scale-[0.6] opacity-60 grayscale-[0.5] pointer-events-none">
-                            {/* This would be a read-only Canvas instance or image preview */}
                             <div className="text-gray-600 font-mono text-center flex items-center justify-center h-full">
                                 Original Preview
                             </div>

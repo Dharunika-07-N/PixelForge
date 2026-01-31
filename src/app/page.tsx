@@ -7,8 +7,6 @@ import {
   Layers,
   Code2,
   Zap,
-  ShieldCheck,
-  ChevronRight,
   Github
 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -85,6 +83,7 @@ export default function LandingPage() {
             <div className="bg-gray-950 rounded-2xl overflow-hidden aspect-video border border-gray-800 relative group cursor-pointer">
               <img
                 src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=800&fit=crop"
+                alt="PixelForge AI Extraction Demo"
                 className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-1000"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-transparent to-transparent" />

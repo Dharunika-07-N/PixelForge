@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { ZoomIn, ZoomOut, Maximize2, Move } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ZoomIn, ZoomOut, Move } from "lucide-react";
 
 interface ComparisonSliderProps {
     originalView: React.ReactNode;
@@ -24,11 +23,12 @@ export function ComparisonSlider({
         setSliderPosition((x / rect.width) * 100);
     };
 
-    const onMouseDown = () => setIsDragging(true);
-    const onMouseUp = () => setIsDragging(false);
-    const onMouseMove = (e: React.MouseEvent) => {
+    const handleMouseMove = (e: React.MouseEvent) => {
         if (isDragging) handleMove(e.clientX);
     };
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const onMouseUp = () => setIsDragging(false);
 
     useEffect(() => {
         const handleMouseUp = () => setIsDragging(false);
@@ -52,8 +52,8 @@ export function ComparisonSlider({
             <div
                 ref={containerRef}
                 className="relative flex-1 bg-gray-950 rounded-[2rem] border border-white/5 overflow-hidden cursor-ew-resize select-none"
-                onMouseMove={onMouseMove}
-                onMouseDown={onMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseDown={() => setIsDragging(true)}
             >
                 {/* Optimized (Background) */}
                 <div className="absolute inset-0">

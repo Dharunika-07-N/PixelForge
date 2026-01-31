@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import {
     Library,
     Layout,
@@ -9,8 +9,6 @@ import {
     Download,
     Share2,
     ChevronLeft,
-    Maximize2,
-    Trash2,
     Sparkles,
     CheckCircle2,
     FileText,
@@ -53,13 +51,13 @@ const AI_PROPOSALS = [
     }
 ];
 
-export default function WorkspacePage({ params }: { params: { id: string } }) {
+export default function WorkspacePage({ params: _params }: { params: { id: string } }) {
     const [activeTab, setActiveTab] = useState("canvas");
     const [pages, setPages] = useState([{ id: "home", name: "Home", data: null }]);
     const [activePageId, setActivePageId] = useState("home");
     const [isOptimizing, setIsOptimizing] = useState(false);
     const [showAIProposal, setShowAIProposal] = useState(false);
-    const [pendingApproval, setPendingApproval] = useState<any>(null);
+    const [pendingApproval, setPendingApproval] = useState<typeof AI_PROPOSALS[0] | null>(null);
     const [approvedItems, setApprovedItems] = useState<string[]>([]);
 
     const activePage = pages.find(p => p.id === activePageId) || pages[0];

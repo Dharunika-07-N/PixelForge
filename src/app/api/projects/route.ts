@@ -8,16 +8,18 @@ import { handleApiError, AppError } from "@/lib/errors";
 /**
  * GET /api/projects - Get all projects for authenticated user
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
     try {
         const session = await getServerSession(authOptions);
 
+        // @ts-expect-error session.user.id is added in authOptions
         if (!session?.user?.id) {
             throw new AppError("Unauthorized", 401, "UNAUTHORIZED");
         }
 
         const projects = await prisma.project.findMany({
             where: {
+                // @ts-expect-error session.user.id is added in authOptions
                 userId: session.user.id,
             },
             include: {
@@ -56,6 +58,7 @@ export async function POST(request: NextRequest) {
     try {
         const session = await getServerSession(authOptions);
 
+        // @ts-expect-error session.user.id is added in authOptions
         if (!session?.user?.id) {
             throw new AppError("Unauthorized", 401, "UNAUTHORIZED");
         }
@@ -65,6 +68,7 @@ export async function POST(request: NextRequest) {
 
         const project = await prisma.project.create({
             data: {
+                // @ts-expect-error session.user.id is added in authOptions
                 userId: session.user.id,
                 name: validatedData.name,
                 description: validatedData.description,

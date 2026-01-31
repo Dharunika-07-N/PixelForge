@@ -12,14 +12,16 @@ import {
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
-import { cn } from "@/lib/utils";
 
 interface ApprovalModalProps {
     isOpen: boolean;
     onClose: () => void;
     onApprove: () => Promise<void>;
     onReject: () => Promise<void>;
-    optimization: any;
+    optimization: {
+        qualityScore: number;
+        status: string;
+    };
     isProcessing?: boolean;
 }
 
@@ -38,7 +40,7 @@ export function ApprovalModal({
             await onApprove();
             addToast("success", "Design approved and applied!");
             onClose();
-        } catch (error) {
+        } catch {
             addToast("error", "Failed to approve design.");
         }
     };
@@ -48,7 +50,7 @@ export function ApprovalModal({
             await onReject();
             addToast("info", "Design changes rejected.");
             onClose();
-        } catch (error) {
+        } catch {
             addToast("error", "Failed to reject design.");
         }
     };
@@ -93,7 +95,7 @@ export function ApprovalModal({
                             <span className="text-[8px] bg-blue-500 text-white px-1.5 py-0.5 rounded uppercase">Verified</span>
                         </h4>
                         <p className="text-xs text-blue-300 leading-relaxed">
-                            These changes have been cross-referenced with your project requirements and accessibility standards. Approving will update your project's active canvas.
+                            These changes have been cross-referenced with your project requirements and accessibility standards. Approving will update your project&apos;s active canvas.
                         </p>
                     </div>
                 </div>
