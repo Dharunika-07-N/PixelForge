@@ -67,33 +67,21 @@ export function Header({ showDashboardLinks = false }: HeaderProps) {
                             "absolute bottom-0 left-0 w-full h-[2px] bg-blue-500 transform origin-left transition-transform duration-300 ease-out",
                             activeSection === "features" ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
                         )} />
-                        {wobble === "features" && (
-                            <motion.span
-                                layoutId="wobble-features"
-                                className="absolute -right-3 top-0 text-blue-500 text-xs"
-                                initial={{ opacity: 0, y: 5 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0 }}
-                            >
-                                ✓
-                            </motion.span>
-                        )}
                     </a>
 
-                    <a
-                        href="#how-it-works"
-                        onClick={(e) => handleNavClick(e, "how-it-works")}
+                    <Link
+                        href="/how-it-works"
                         className={cn(
-                            "relative px-1 py-2 transition-colors group",
-                            activeSection === "how-it-works" ? "text-blue-500 font-semibold" : "hover:text-white"
+                            "relative px-1 py-2 transition-colors group hover:text-white",
+                            pathname === "/how-it-works" ? "text-blue-500 font-semibold" : "text-gray-400"
                         )}
                     >
                         How it Works
                         <span className={cn(
                             "absolute bottom-0 left-0 w-full h-[2px] bg-blue-500 transform origin-left transition-transform duration-300 ease-out",
-                            activeSection === "how-it-works" ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+                            pathname === "/how-it-works" ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
                         )} />
-                    </a>
+                    </Link>
 
                     <Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link>
                 </div>
