@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import SessionProvider from "@/components/providers/SessionProvider";
+import { NavigationStateProvider } from "@/context/NavigationStateContext";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -29,7 +30,9 @@ export default function RootLayout({
         className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased bg-gray-950 text-gray-50`}
       >
         <SessionProvider>
-          {children}
+          <NavigationStateProvider>
+            {children}
+          </NavigationStateProvider>
         </SessionProvider>
       </body>
     </html>

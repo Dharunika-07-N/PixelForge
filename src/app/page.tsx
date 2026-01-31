@@ -14,6 +14,7 @@ import {
 import { motion } from "framer-motion";
 import Dropzone from "@/components/upload/Dropzone";
 import { Modal } from "@/components/ui/Modal";
+import { Header } from "@/components/layout/Header";
 
 export default function LandingPage() {
   const [activeFeature, setActiveFeature] = useState<number | null>(null);
@@ -130,25 +131,8 @@ export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen bg-gray-950 text-white selection:bg-blue-500/30">
       {/* Navigation */}
-      <nav className="flex items-center justify-between px-8 py-6 max-w-7xl mx-auto w-full border-b border-gray-900/50 backdrop-blur-md sticky top-0 z-50">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20">
-            <Sparkles className="w-6 h-6 text-white" />
-          </div>
-          <span className="text-2xl font-black tracking-tighter">PixelForge <span className="text-blue-500">AI</span></span>
-        </div>
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-400">
-          <Link href="#features" className="hover:text-white transition-colors">Features</Link>
-          <Link href="#how-it-works" className="hover:text-white transition-colors">How it Works</Link>
-          <Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link>
-        </div>
-        <div className="flex items-center gap-4">
-          <Link href="/login" className="text-sm font-bold text-gray-300 hover:text-white px-4">Log in</Link>
-          <Link href="/signup" className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-full text-sm font-bold transition-all shadow-lg shadow-blue-600/20">
-            Join Waitlist
-          </Link>
-        </div>
-      </nav>
+      {/* Navigation */}
+      <Header />
 
       {/* Hero Section */}
       <section className="relative px-8 pt-20 pb-32 max-w-7xl mx-auto w-full text-center overflow-hidden">
