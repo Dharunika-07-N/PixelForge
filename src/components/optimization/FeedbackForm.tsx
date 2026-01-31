@@ -8,8 +8,7 @@ import {
     Type,
     Palette,
     Accessibility,
-    PlusCircle,
-    X
+    PlusCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
@@ -39,7 +38,7 @@ const FEEDBACK_TEMPLATES = [
 ];
 
 
-export function FeedbackForm({ optimizationId, onSubmit, isSubmitting }: FeedbackFormProps) {
+export function FeedbackForm({ onSubmit, isSubmitting }: FeedbackFormProps) {
     const [feedback, setFeedback] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("other");
     const { addToast } = useToast();
@@ -57,7 +56,7 @@ export function FeedbackForm({ optimizationId, onSubmit, isSubmitting }: Feedbac
             setFeedback("");
             setSelectedCategory("other");
             addToast("success", "Feedback sent to AI for refinement!");
-        } catch (error) {
+        } catch {
             addToast("error", "Failed to send feedback. Please try again.");
         }
     };
@@ -72,7 +71,7 @@ export function FeedbackForm({ optimizationId, onSubmit, isSubmitting }: Feedbac
                     <CardTitle className="text-xl font-black">Refine with AI</CardTitle>
                 </div>
                 <CardDescription className="text-gray-400">
-                    Tell the AI what you'd like to change or improve in its proposal.
+                    Tell the AI what you&apos;d like to change or improve in its proposal.
                 </CardDescription>
             </CardHeader>
 
