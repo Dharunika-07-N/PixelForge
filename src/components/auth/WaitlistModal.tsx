@@ -28,9 +28,7 @@ const waitlistSchema = z.object({
         "Internal company tools",
         "Mobile app development",
         "Other"
-    ], {
-        errorMap: () => ({ message: "Please select a use case" })
-    }),
+    ]),
     otherUseCase: z.string().optional(),
 }).refine((data) => {
     if (data.useCase === "Other" && (!data.otherUseCase || data.otherUseCase.length < 2)) {
