@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { cn } from "@/lib/utils";
+import { calculatePasswordStrength } from "@/lib/password-strength";
 import confetti from "canvas-confetti";
 
 // Comprehensive signup validation schema
@@ -50,12 +51,7 @@ interface SignupModalProps {
     onSwitchToLogin?: () => void;
 }
 
-// Common passwords list (abbreviated for performance)
-const COMMON_PASSWORDS = [
-    "password", "password123", "12345678", "qwerty", "abc123",
-    "letmein", "welcome", "monkey", "dragon", "master",
-    "123456789", "football", "iloveyou", "admin", "welcome123"
-];
+// Password strength utility imported from @/lib/password-strength
 
 /**
  * Comprehensive Signup Modal Component
@@ -150,65 +146,11 @@ export function SignupModal({ isOpen, onClose, onSwitchToLogin }: SignupModalPro
         return () => clearTimeout(timer);
     }, [emailValue, errors.email]);
 
-    // Password strength calculator
-    const calculatePasswordStrength = useCallback((password: string) => {
-        if (!password) {
-            return {
-                score: 0,
-                label: "Weak",
-                color: "red",
-                suggestions: ["Use 8+ characters", "Add uppercase letters", "Add numbers"]
-            };
-        }
-
-        let score = 0;
-        const suggestions: string[] = [];
-
-        // Length check
-        if (password.length >= 8) score += 20;
-        else suggestions.push("Use 8+ characters");
-
-        if (password.length >= 12) score += 10;
-
-        // Character variety
-        if (/[a-z]/.test(password)) score += 10;
-        else suggestions.push("Add lowercase letters");
-
-        if (/[A-Z]/.test(password)) score += 20;
-        else suggestions.push("Add uppercase letters");
-
-        if (/[0-9]/.test(password)) score += 20;
-        else suggestions.push("Add numbers");
-
-        if (/[^a-zA-Z0-9]/.test(password)) score += 20;
-        else suggestions.push("Add special characters");
-
-        // Common password check
-        if (COMMON_PASSWORDS.includes(password.toLowerCase())) {
-            score = Math.min(score, 30);
-            suggestions.push("⚠️ This password is too common");
-        }
-
-        // Determine label and color
-        let label = "Weak";
-        let color = "red";
-
-        if (score >= 71) {
-            label = "Strong";
-            color = "green";
-        } else if (score >= 41) {
-            label = "Medium";
-            color = "yellow";
-        }
-
-        return { score, label, color, suggestions };
-    }, []);
-
-    // Update password strength
+    // Update password strength using imported utility
     useEffect(() => {
         const strength = calculatePasswordStrength(passwordValue);
         setPasswordStrength(strength);
-    }, [passwordValue, calculatePasswordStrength]);
+    }, [passwordValue]);
 
     // Smart name capitalization
     useEffect(() => {
