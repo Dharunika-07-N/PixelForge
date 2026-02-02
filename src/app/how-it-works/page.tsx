@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion, useScroll, useSpring } from "framer-motion";
-import { Play, ArrowRight, Upload, Zap, Code2, Smartphone } from "lucide-react";
+import { motion } from "framer-motion";
+import { Play, ArrowRight, Code2 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 
@@ -17,7 +17,6 @@ import { Timeline } from "@/components/how-it-works/Timeline";
 
 export default function HowItWorksPage() {
     const [activeStep, setActiveStep] = useState(1);
-    const { scrollYProgress } = useScroll();
 
     // Update active step based on scroll position could be complex with IntersectionObserver
     // Simplified for now: we will stick to a simpler state or leave it static for the MVP
