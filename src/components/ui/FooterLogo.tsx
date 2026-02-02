@@ -13,10 +13,30 @@ export function FooterLogo() {
         setIsActive(true);
         setTimeout(() => setIsActive(false), 100);
 
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth"
-        });
+        const startPosition = window.scrollY;
+        const duration = Math.max(400, Math.min(1500, startPosition / 2));
+        let startTime: number | null = null;
+
+        const easeInOutCubic = (t: number): number => {
+            return t < 0.5
+                ? 4 * t * t * t
+                : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        };
+
+        const scrollStep = (currentTime: number) => {
+            if (startTime === null) startTime = currentTime;
+            const timeElapsed = currentTime - startTime;
+            const progress = Math.min(timeElapsed / duration, 1);
+
+            const scrollAmount = startPosition * (1 - easeInOutCubic(progress));
+            window.scrollTo(0, scrollAmount);
+
+            if (timeElapsed < duration) {
+                requestAnimationFrame(scrollStep);
+            }
+        };
+
+        requestAnimationFrame(scrollStep);
     };
 
     return (
