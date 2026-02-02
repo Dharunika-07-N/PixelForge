@@ -51,8 +51,6 @@ interface SignupModalProps {
     onSwitchToLogin?: () => void;
 }
 
-// Password strength utility imported from @/lib/password-strength
-
 /**
  * Comprehensive Signup Modal Component
  * 
@@ -62,7 +60,7 @@ interface SignupModalProps {
  * - Smart name capitalization
  * - Terms agreement with inline modal option
  * - Social authentication (Google, GitHub)
- * - Success celebration with confetti
+ * - Success celebration with multi-frame onboarding
  * - Smooth entry/exit animations
  */
 export function SignupModal({ isOpen, onClose, onSwitchToLogin }: SignupModalProps) {
@@ -218,11 +216,11 @@ export function SignupModal({ isOpen, onClose, onSwitchToLogin }: SignupModalPro
                 origin: { y: 0.6 }
             });
 
-            // Wait 2 seconds, then redirect
+            // Wait 4 seconds for celebration sequence to complete before redirect
             setTimeout(() => {
                 router.push("/login?message=Account created successfully! Please log in.");
                 onClose();
-            }, 2000);
+            }, 4000);
 
         } catch (err) {
             setError(err instanceof Error ? err.message : "An unexpected error occurred");
@@ -246,7 +244,7 @@ export function SignupModal({ isOpen, onClose, onSwitchToLogin }: SignupModalPro
         >
             {success ? (
                 // Enhanced Success State & Celebration View (Phase 9 & 10)
-                <div className="flex flex-col items-center justify-center py-12 text-center animate-in zoom-in duration-500">
+                <div className="flex flex-col items-center justify-center py-12 text-center overflow-hidden">
                     <SuccessCelebration name={watch("name")} />
                 </div>
             ) : (
@@ -488,12 +486,14 @@ function PasswordField({
     const barColors = {
         red: "bg-red-500",
         yellow: "bg-yellow-500",
+        orange: "bg-orange-500",
         green: "bg-green-500"
     };
 
     const textColors = {
         red: "text-red-400",
         yellow: "text-yellow-400",
+        orange: "text-orange-400",
         green: "text-green-400"
     };
 
@@ -547,13 +547,6 @@ function PasswordField({
                             {strength.label}
                         </span>
                     </div>
-                    {strength.suggestions.length > 0 && (
-                        <ul className="text-xs text-gray-500 space-y-0.5">
-                            {strength.suggestions.slice(0, 2).map((suggestion, i) => (
-                                <li key={i}>• {suggestion}</li>
-                            ))}
-                        </ul>
-                    )}
                 </div>
             )}
 
@@ -600,14 +593,31 @@ interface SuccessCelebrationProps {
 
 function SuccessCelebration({ name }: SuccessCelebrationProps) {
     const [frame, setFrame] = useState(1);
+    const [progress, setProgress] = useState(0);
     const firstName = name.split(" ")[0] || "there";
 
     useEffect(() => {
-        // Transition to Frame 2 after 1 second
-        const timer = setTimeout(() => {
+        // Transition to Frame 2 after 1.2 seconds
+        const frameTimer = setTimeout(() => {
             setFrame(2);
-        }, 1500);
-        return () => clearTimeout(timer);
+            // Start progress bar animation in frame 2
+            const startTime = Date.now();
+            const duration = 2500; // 2.5 seconds to fill
+
+            const progressInterval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const nextProgress = Math.min((elapsed / duration) * 100, 100);
+                setProgress(nextProgress);
+
+                if (nextProgress >= 100) {
+                    clearInterval(progressInterval);
+                }
+            }, 50);
+
+            return () => clearInterval(progressInterval);
+        }, 1200);
+
+        return () => clearTimeout(frameTimer);
     }, []);
 
     return (
@@ -623,21 +633,24 @@ function SuccessCelebration({ name }: SuccessCelebrationProps) {
             ) : (
                 <div className="animate-in slide-in-from-bottom-4 fade-in duration-700 flex flex-col items-center">
                     <h2 className="text-2xl font-black text-white mb-2">
-                        Welcome to PixelForge, {firstName}! Wave 👋
+                        Welcome to PixelForge, {firstName}! 👋
                     </h2>
-                    <p className="text-gray-400 mb-8">Your account is ready for production.</p>
+                    <p className="text-gray-400 mb-8">Preparing your workspace...</p>
 
-                    <div className="w-full space-y-2">
-                        <div className="flex justify-between text-xs font-medium text-gray-500 mb-1">
-                            <span>Redirecting to dashboard...</span>
-                            <span>80%</span>
+                    <div className="w-full space-y-2 text-left">
+                        <div className="flex justify-between text-xs font-medium text-gray-400 mb-1">
+                            <span>Initializing dashboard...</span>
+                            <span>{Math.round(progress)}%</span>
                         </div>
                         <div className="h-2 w-full bg-gray-800 rounded-full overflow-hidden">
                             <div
-                                className="h-full bg-blue-500 transition-all duration-1000 ease-out"
-                                style={{ width: "85%" }}
+                                className="h-full bg-gradient-to-r from-blue-600 to-blue-400 transition-all duration-100 ease-linear shadow-lg shadow-blue-500/20"
+                                style={{ width: `${progress}%` }}
                             />
                         </div>
+                        <p className="text-[10px] text-gray-500 italic mt-2 animate-pulse text-center">
+                            Securely encrypting your keys...
+                        </p>
                     </div>
                 </div>
             )}
@@ -688,14 +701,13 @@ function TermsAgreement({ register, error, isLoading }: TermsAgreementProps) {
                 </span>
             )}
 
-            {/* Inline Terms Modal (Option A as described in Step 7) */}
             <Modal
                 isOpen={showTerms}
                 onClose={() => setShowTerms(false)}
                 title="Terms of Service"
                 size="lg"
             >
-                <div className="max-h-[60vh] overflow-y-auto pr-4 space-y-4 text-sm text-gray-400 leading-relaxed font-inter">
+                <div className="max-h-[60vh] overflow-y-auto pr-4 space-y-4 text-sm text-gray-400 leading-relaxed font-inter text-left">
                     <p className="text-xs text-gray-500">Last updated: January 15, 2026</p>
                     <h3 className="text-lg font-bold text-white mt-6">1. Acceptable Use</h3>
                     <p>By using PixelForge AI, you agree to only upload designs you own or have permission to use. We do not tolerate illegal or harmful content.</p>
@@ -703,9 +715,9 @@ function TermsAgreement({ register, error, isLoading }: TermsAgreementProps) {
                     <p>Any code generated by PixelForge AI is owned by the user. We do not claim any rights to the generated output.</p>
                     <h3 className="text-lg font-bold text-white mt-6">3. Limitations</h3>
                     <p>PixelForge is provided "as is". While we strive for 100% accuracy, manual review of generated code is always recommended.</p>
-                    <div className="h-20" /> {/* Spacer */}
+                    <div className="h-20" />
                 </div>
-                <div className="mt-8 flex justify-end">
+                <div className="mt-8 flex justify-end gap-4">
                     <button
                         onClick={() => setShowTerms(false)}
                         className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-xl font-bold transition-all"
@@ -717,4 +729,3 @@ function TermsAgreement({ register, error, isLoading }: TermsAgreementProps) {
         </div>
     );
 }
-
