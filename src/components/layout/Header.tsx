@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { Logo } from "@/components/ui/Logo";
 import { LoginModal } from "@/components/auth/LoginModal";
 import { SignupModal } from "@/components/auth/SignupModal";
+import { GitHubStarButton } from "@/components/ui/GitHubStarButton";
 import { useSmoothScroll } from "@/hooks/useSmoothScroll";
 import { useScrollSpy } from "@/hooks/useScrollSpy";
 import { cn } from "@/lib/utils";
@@ -125,6 +126,11 @@ export function Header({ showDashboardLinks = false }: HeaderProps) {
                 )}
 
                 <div className="flex items-center gap-4">
+                    <GitHubStarButton
+                        repo="Dharunika-07-N/PixelForge"
+                        variant="compact"
+                        className="hidden lg:flex"
+                    />
                     {status === "loading" ? (
                         <div className="w-8 h-8 rounded-full bg-gray-800 animate-pulse" />
                     ) : status === "authenticated" ? (
@@ -165,6 +171,10 @@ export function Header({ showDashboardLinks = false }: HeaderProps) {
                 isOpen={isLoginModalOpen}
                 onClose={() => setIsLoginModalOpen(false)}
                 returnUrl={returnUrl}
+                onSwitchToSignup={() => {
+                    setIsLoginModalOpen(false);
+                    setIsSignupModalOpen(true);
+                }}
             />
 
             <SignupModal
