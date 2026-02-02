@@ -30,6 +30,7 @@ import { GitHubStarButton } from "@/components/ui/GitHubStarButton";
 import { FeatureCard } from "@/components/ui/FeatureCard";
 import { SignupModal } from "@/components/auth/SignupModal";
 import { LoginModal } from "@/components/auth/LoginModal";
+import { FAQItem } from "@/components/ui/FAQItem";
 
 export default function LandingPage() {
   const [activeFeature, setActiveFeature] = useState<number | null>(null);
@@ -595,6 +596,81 @@ export default function LandingPage() {
         </div>
       </section>
 
+
+      {/* Module 15 - The Wall of Love (Testimonials) */}
+      <section className="py-32 relative overflow-hidden">
+        {/* Background Mesh */}
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
+
+        <div className="max-w-7xl mx-auto px-8 relative z-10">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-5xl font-black mb-6">Loved by Engineers</h2>
+            <p className="text-gray-400">Join the thousands of developers shipping faster with PixelForge.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                text: "The structural accuracy is insane. It detected my complex CSS Grid layouts perfectly from just a PNG.",
+                author: "Sarah Chen",
+                role: "Senior FE Engineer @ Vercel",
+                image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop"
+              },
+              {
+                text: "Finally, a design-to-code tool that produces clean, semantic HTML. It literally saved me 4 hours yesterday.",
+                author: "Alex Rivera",
+                role: "Tech Lead @ Stripe",
+                image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop"
+              },
+              {
+                text: "The Tailwind classes it generates are exactly how I write them manually. It actually understands design tokens.",
+                author: "Jordan Lee",
+                role: "Product Designer @ Airbnb",
+                image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop"
+              },
+              {
+                text: "I used to spend days on initial scaffoldings. PixelForge does 80% of the grunt work in seconds.",
+                author: "Emily Zhang",
+                role: "Founder @ Startup.io",
+                image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop"
+              },
+              {
+                text: "The 'Confidence' HUD feature is a game changer. I know exactly which parts need manual review.",
+                author: "David Kim",
+                role: "Full Stack Dev @ Amazon",
+                image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop"
+              },
+              {
+                text: "Deep Dive mode enabled. This is the quality bar I expect from modern AI tools. Simply outstanding.",
+                author: "Cortex User",
+                role: "Super Engineer",
+                image: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&h=100&fit=crop"
+              },
+            ].map((testimonial, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="bg-gray-900/40 backdrop-blur-sm border border-gray-800 p-8 rounded-2xl hover:bg-gray-900/60 hover:border-gray-700 transition-all group"
+              >
+                <div className="flex items-center gap-4 mb-6">
+                  <img src={testimonial.image} alt={testimonial.author} className="w-10 h-10 rounded-full bg-gray-800 object-cover" />
+                  <div>
+                    <div className="font-bold text-white text-sm">{testimonial.author}</div>
+                    <div className="text-xs text-blue-400 font-mono">{testimonial.role}</div>
+                  </div>
+                </div>
+                <p className="text-gray-400 text-sm leading-relaxed group-hover:text-gray-300 transition-colors">
+                  &quot;{testimonial.text}&quot;
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Module 13 - Interactive FAQ Section */}
       <section className="py-32 max-w-4xl mx-auto px-8">
         <div className="text-center mb-16">
@@ -714,45 +790,7 @@ export default function LandingPage() {
           setShowSignupModal(true);
         }}
       />
-    </div>
+    </div >
   );
 }
 
-function FAQItem({ question, answer }: { question: string; answer: string }) {
-  const [isOpen, setIsOpen] = useState(false);
-  return (
-    <div
-      className={cn(
-        "border border-gray-900 rounded-2xl overflow-hidden transition-all duration-300 bg-gray-950/20",
-        isOpen ? "border-blue-500/30 bg-gray-900/40" : "hover:border-gray-800"
-      )}
-    >
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-8 py-6 flex items-center justify-between text-left"
-      >
-        <span className="font-bold text-lg text-white/90">{question}</span>
-        <motion.div
-          animate={{ rotate: isOpen ? 45 : 0 }}
-          className="text-gray-500"
-        >
-          <Plus className="w-5 h-5" />
-        </motion.div>
-      </button>
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "circOut" }}
-          >
-            <div className="px-8 pb-6 text-gray-400 leading-relaxed font-medium text-sm border-t border-gray-900/50 pt-4">
-              {answer}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
