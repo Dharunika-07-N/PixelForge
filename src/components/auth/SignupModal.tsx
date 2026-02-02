@@ -245,23 +245,9 @@ export function SignupModal({ isOpen, onClose, onSwitchToLogin }: SignupModalPro
             size="md"
         >
             {success ? (
-                // Success State
+                // Enhanced Success State & Celebration View (Phase 9 & 10)
                 <div className="flex flex-col items-center justify-center py-12 text-center animate-in zoom-in duration-500">
-                    <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mb-6 animate-bounce">
-                        <CheckCircle2 className="w-10 h-10 text-white" />
-                    </div>
-                    <h2 className="text-3xl font-black text-white mb-2">
-                        ✓ Account Created! 🎉
-                    </h2>
-                    <p className="text-gray-400 mb-4">
-                        Welcome to PixelForge, {watch("name").split(" ")[0]}! 👋
-                    </p>
-                    <p className="text-sm text-gray-500">
-                        Redirecting to login...
-                    </p>
-                    <div className="mt-4 w-32 h-1 bg-gray-800 rounded-full overflow-hidden">
-                        <div className="h-full bg-blue-500 animate-pulse" style={{ width: "80%" }} />
-                    </div>
+                    <SuccessCelebration name={watch("name")} />
                 </div>
             ) : (
                 // Signup Form
@@ -608,6 +594,57 @@ function NameField({ register, error, isLoading }: NameFieldProps) {
     );
 }
 
+interface SuccessCelebrationProps {
+    name: string;
+}
+
+function SuccessCelebration({ name }: SuccessCelebrationProps) {
+    const [frame, setFrame] = useState(1);
+    const firstName = name.split(" ")[0] || "there";
+
+    useEffect(() => {
+        // Transition to Frame 2 after 1 second
+        const timer = setTimeout(() => {
+            setFrame(2);
+        }, 1500);
+        return () => clearTimeout(timer);
+    }, []);
+
+    return (
+        <div className="w-full max-w-sm mx-auto">
+            {frame === 1 ? (
+                <div className="animate-in fade-in zoom-in duration-500 flex flex-col items-center">
+                    <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mb-6 shadow-lg shadow-green-500/20">
+                        <CheckCircle2 className="w-10 h-10 text-white animate-bounce" />
+                    </div>
+                    <h2 className="text-3xl font-black text-white mb-2">Success!</h2>
+                    <p className="text-gray-400">Account created successfully</p>
+                </div>
+            ) : (
+                <div className="animate-in slide-in-from-bottom-4 fade-in duration-700 flex flex-col items-center">
+                    <h2 className="text-2xl font-black text-white mb-2">
+                        Welcome to PixelForge, {firstName}! Wave 👋
+                    </h2>
+                    <p className="text-gray-400 mb-8">Your account is ready for production.</p>
+
+                    <div className="w-full space-y-2">
+                        <div className="flex justify-between text-xs font-medium text-gray-500 mb-1">
+                            <span>Redirecting to dashboard...</span>
+                            <span>80%</span>
+                        </div>
+                        <div className="h-2 w-full bg-gray-800 rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-blue-500 transition-all duration-1000 ease-out"
+                                style={{ width: "85%" }}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
 interface TermsAgreementProps {
     register: any;
     error: any;
@@ -615,6 +652,8 @@ interface TermsAgreementProps {
 }
 
 function TermsAgreement({ register, error, isLoading }: TermsAgreementProps) {
+    const [showTerms, setShowTerms] = useState(false);
+
     return (
         <div className="space-y-1">
             <label className="flex items-start gap-3 text-sm text-gray-400 cursor-pointer group">
@@ -629,9 +668,13 @@ function TermsAgreement({ register, error, isLoading }: TermsAgreementProps) {
                 />
                 <span className="group-hover:text-gray-300 transition-colors">
                     I agree to the{" "}
-                    <a href="/terms" target="_blank" className="text-blue-500 hover:text-blue-400 underline">
+                    <button
+                        type="button"
+                        onClick={() => setShowTerms(true)}
+                        className="text-blue-500 hover:text-blue-400 underline"
+                    >
                         Terms of Service
-                    </a>{" "}
+                    </button>{" "}
                     and{" "}
                     <a href="/privacy" target="_blank" className="text-blue-500 hover:text-blue-400 underline">
                         Privacy Policy
@@ -644,6 +687,34 @@ function TermsAgreement({ register, error, isLoading }: TermsAgreementProps) {
                     {error.message}
                 </span>
             )}
+
+            {/* Inline Terms Modal (Option A as described in Step 7) */}
+            <Modal
+                isOpen={showTerms}
+                onClose={() => setShowTerms(false)}
+                title="Terms of Service"
+                size="lg"
+            >
+                <div className="max-h-[60vh] overflow-y-auto pr-4 space-y-4 text-sm text-gray-400 leading-relaxed font-inter">
+                    <p className="text-xs text-gray-500">Last updated: January 15, 2026</p>
+                    <h3 className="text-lg font-bold text-white mt-6">1. Acceptable Use</h3>
+                    <p>By using PixelForge AI, you agree to only upload designs you own or have permission to use. We do not tolerate illegal or harmful content.</p>
+                    <h3 className="text-lg font-bold text-white mt-6">2. Ownership of Code</h3>
+                    <p>Any code generated by PixelForge AI is owned by the user. We do not claim any rights to the generated output.</p>
+                    <h3 className="text-lg font-bold text-white mt-6">3. Limitations</h3>
+                    <p>PixelForge is provided "as is". While we strive for 100% accuracy, manual review of generated code is always recommended.</p>
+                    <div className="h-20" /> {/* Spacer */}
+                </div>
+                <div className="mt-8 flex justify-end">
+                    <button
+                        onClick={() => setShowTerms(false)}
+                        className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-xl font-bold transition-all"
+                    >
+                        Got it, I agree
+                    </button>
+                </div>
+            </Modal>
         </div>
     );
 }
+
