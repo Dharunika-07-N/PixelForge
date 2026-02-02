@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import SessionProvider from "@/components/providers/SessionProvider";
 import { NavigationStateProvider } from "@/context/NavigationStateContext";
+import { SupportWidget } from "@/components/ui/SupportWidget";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -32,6 +33,7 @@ export default function RootLayout({
         <SessionProvider>
           <NavigationStateProvider>
             {children}
+            <SupportWidget />
           </NavigationStateProvider>
         </SessionProvider>
       </body>

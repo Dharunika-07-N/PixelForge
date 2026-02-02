@@ -3,6 +3,7 @@
 import React from "react";
 import { LogOut, User as UserIcon } from "lucide-react";
 import { SkillLevel } from "@prisma/client";
+import { GlobalSearch } from "@/components/ui/GlobalSearch";
 
 interface DashboardHeaderProps {
     user: {
@@ -21,6 +22,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
                 <p className="text-gray-500 text-lg mt-2 font-medium">Ready to transform your designs into production-ready code?</p>
             </div>
             <div className="flex items-center gap-4">
+                <GlobalSearch />
                 <div className="flex items-center gap-3 px-4 py-2 bg-gray-900 border border-gray-800 rounded-2xl">
                     <div className="w-8 h-8 bg-blue-600/20 rounded-lg flex items-center justify-center">
                         <UserIcon className="w-4 h-4 text-blue-500" />

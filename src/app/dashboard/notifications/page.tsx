@@ -4,8 +4,6 @@ import React, { useState } from "react";
 import {
     Bell,
     Check,
-    Trash2,
-    Filter,
     Zap,
     FileCode,
     AlertCircle,
@@ -240,7 +238,7 @@ export default function NotificationsPage() {
                                 </div>
                                 <div>
                                     <h3 className="text-xl font-black text-gray-400">All caught up!</h3>
-                                    <p className="text-sm text-gray-600 font-medium font-mono uppercase tracking-widest mt-1">No {filter !== "all" ? h : ""} notifications found</p>
+                                    <p className="text-sm text-gray-600 font-medium font-mono uppercase tracking-widest mt-1">No {filter !== "all" ? filter : ""} notifications found</p>
                                 </div>
                             </motion.div>
                         )}
