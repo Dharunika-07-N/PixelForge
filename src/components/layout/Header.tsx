@@ -7,7 +7,7 @@ import { useSession, signOut } from "next-auth/react";
 import { motion } from "framer-motion";
 import { Logo } from "@/components/ui/Logo";
 import { LoginModal } from "@/components/auth/LoginModal";
-import { WaitlistModal } from "@/components/auth/WaitlistModal";
+import { SignupModal } from "@/components/auth/SignupModal";
 import { useSmoothScroll } from "@/hooks/useSmoothScroll";
 import { useScrollSpy } from "@/hooks/useScrollSpy";
 import { cn } from "@/lib/utils";
@@ -27,7 +27,7 @@ export function Header({ showDashboardLinks = false }: HeaderProps) {
 
     const [wobble, setWobble] = useState<string | null>(null);
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-    const [isWaitlistModalOpen, setIsWaitlistModalOpen] = useState(false);
+    const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
     const [returnUrl, setReturnUrl] = useState<string | undefined>(undefined);
 
     const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
@@ -151,10 +151,10 @@ export function Header({ showDashboardLinks = false }: HeaderProps) {
                                 Log in
                             </button>
                             <button
-                                onClick={() => setIsWaitlistModalOpen(true)}
+                                onClick={() => setIsSignupModalOpen(true)}
                                 className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-6 py-2.5 rounded-full text-sm font-bold transition-all shadow-lg shadow-blue-600/20 active:scale-95"
                             >
-                                Join Waitlist
+                                Get Started
                             </button>
                         </>
                     )}
@@ -167,9 +167,13 @@ export function Header({ showDashboardLinks = false }: HeaderProps) {
                 returnUrl={returnUrl}
             />
 
-            <WaitlistModal
-                isOpen={isWaitlistModalOpen}
-                onClose={() => setIsWaitlistModalOpen(false)}
+            <SignupModal
+                isOpen={isSignupModalOpen}
+                onClose={() => setIsSignupModalOpen(false)}
+                onSwitchToLogin={() => {
+                    setIsSignupModalOpen(false);
+                    setIsLoginModalOpen(true);
+                }}
             />
         </>
     );
