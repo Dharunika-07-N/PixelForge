@@ -50,7 +50,12 @@ export function Logo() {
 
         e.preventDefault();
 
-        // Frame 1-3: Press Feedback animation trigger
+        // Haptic feedback for touch devices (Scenario 8)
+        if (typeof window !== "undefined" && navigator.vibrate) {
+            navigator.vibrate(10);
+        }
+
+        // Frame 1-3: Press Feedback animation trigger (Module 15.1)
         setIsActive(true);
         setTimeout(() => setIsActive(false), 200);
 
@@ -95,14 +100,14 @@ export function Logo() {
 
             // Frame 5: Check if homepage takes > 200ms (Scenario 7 loading)
             const checkLoading = setInterval(() => {
-                if (Date.now() - startTime > 500) { // 300ms transition + 200ms wait
+                const elapsed = Date.now() - startTime;
+                if (elapsed > 500) { // 300ms transition + 200ms wait
                     setIsLoading(true);
                     clearInterval(checkLoading);
                 }
             }, 100);
 
-            // In a real app we'd clear this interval once the new page mounts
-            // Here we'll just let it run or the component will unmount
+            // Hide loading if we successfully navigate (component will unmount anyway most of the time)
         }, 300);
     };
 
@@ -124,21 +129,23 @@ export function Logo() {
             <motion.a
                 href="/"
                 onClick={handleLogoClick}
-                className="relative flex items-center gap-2 group cursor-pointer select-none min-h-[44px] min-w-[44px]"
+                className="relative flex items-center gap-2 group cursor-pointer select-none min-h-[44px] min-w-[44px] touch-manipulation"
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
                 initial={false}
                 animate={isActive ? { scale: 0.98, opacity: 0.95 } : { scale: 1, opacity: 1 }}
-                transition={{ duration: 0.1 }}
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2, ease: "easeInOut" }}
                 aria-label="PixelForge AI Homepage - Navigate to main page"
                 role="link"
             >
-                <div className="relative">
-                    {/* Icon Container */}
+                <div className="relative flex items-center justify-center">
+                    {/* Icon Container - Brand Presence (Scenario 8 Option A) */}
                     <motion.div
-                        className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-lg transition-all duration-200 ${isHovered ? "bg-blue-500 shadow-blue-500/30" : "bg-blue-600 shadow-blue-600/20"
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-lg transition-all duration-300 ${isHovered ? "bg-blue-500 shadow-blue-500/30 scale-105" : "bg-blue-600 shadow-blue-600/20"
                             }`}
-                        animate={isLoading ? { opacity: 0 } : { opacity: 1, rotate: isHovered ? 5 : 0 }}
+                        animate={isLoading ? { opacity: 0, scale: 0.9 } : { opacity: 1, rotate: isHovered ? [0, -10, 10, 0] : 0 }}
+                        transition={isHovered ? { duration: 0.5, repeat: Infinity } : { duration: 0.3 }}
                     >
                         <Sparkles className="w-6 h-6 text-white" />
                     </motion.div>
@@ -146,28 +153,34 @@ export function Logo() {
                     {/* Loading Spinner */}
                     {isLoading && (
                         <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-10 h-10 border-4 border-blue-600/30 border-t-white rounded-full animate-spin" />
+                            <div className="w-10 h-10 border-[3px] border-blue-600/30 border-t-white rounded-full animate-spin" />
                         </div>
                     )}
                 </div>
 
-                {/* Text - Hidden on mobile Small Screen (< 640px) */}
-                <div className="hidden sm:flex items-center overflow-hidden">
-                    <span className={`text-2xl font-black tracking-tighter transition-colors duration-200 ${isHovered ? "text-white" : "text-gray-100"}`}>
+                {/* Text - Option A: Icon only on very small screens, Text on others */}
+                <div className="hidden min-[450px]:flex items-center overflow-hidden">
+                    <motion.span
+                        className={`text-2xl font-black tracking-tighter transition-colors duration-200 ${isHovered ? "text-white" : "text-gray-100"}`}
+                        animate={{ x: isHovered ? 2 : 0 }}
+                    >
                         PixelForge <span className="text-blue-500">AI</span>
-                    </span>
+                    </motion.span>
                 </div>
 
-                {/* Tooltip */}
+                {/* Tooltip (Desktop Only) */}
                 <AnimatePresence>
                     {isHovered && !isLoading && !isActive && (
                         <motion.div
                             initial={{ opacity: 0, y: 10, scale: 0.95 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.95 }}
-                            className="absolute top-12 left-0 bg-gray-950/90 backdrop-blur-md border border-white/10 text-[10px] font-bold uppercase tracking-widest text-blue-400 px-3 py-1.5 rounded-lg shadow-2xl whitespace-nowrap pointer-events-none z-50"
+                            className="hidden md:block absolute top-[120%] left-0 bg-gray-950/90 backdrop-blur-md border border-white/10 text-[10px] font-black uppercase tracking-widest text-blue-400 px-3 py-1.5 rounded-lg shadow-2xl whitespace-nowrap pointer-events-none z-50"
                         >
-                            Return Home
+                            <span className="flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
+                                Return Home
+                            </span>
                         </motion.div>
                     )}
                 </AnimatePresence>
