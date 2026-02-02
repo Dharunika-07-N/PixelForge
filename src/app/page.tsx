@@ -16,9 +16,14 @@ import Dropzone from "@/components/upload/Dropzone";
 import { Modal } from "@/components/ui/Modal";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { GetStartedButton } from "@/components/ui/GetStartedButton";
+import { SignupModal } from "@/components/auth/SignupModal";
+import { LoginModal } from "@/components/auth/LoginModal";
 
 export default function LandingPage() {
   const [activeFeature, setActiveFeature] = useState<number | null>(null);
+  const [showSignupModal, setShowSignupModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const router = useRouter();
 
   const features = [
@@ -161,10 +166,10 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/signup" className="w-full sm:w-auto px-10 py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black text-lg transition-all shadow-2xl shadow-blue-600/40 flex items-center justify-center gap-3 group">
-              Get Started Free
-              <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
-            </Link>
+            <GetStartedButton
+              onSignupClick={() => setShowSignupModal(true)}
+              className="w-full sm:w-auto"
+            />
             <Link href="https://github.com/Dharunika-07-N/PixelForge" className="w-full sm:w-auto px-10 py-5 bg-gray-900 border border-gray-800 hover:bg-gray-800 text-white rounded-2xl font-black text-lg transition-all flex items-center justify-center gap-3">
               <Github className="w-6 h-6" />
               Star on GitHub
@@ -241,6 +246,22 @@ export default function LandingPage() {
       {/* Footer */}
       {/* Footer */}
       <Footer />
+
+      {/* Authentication Modals */}
+      <SignupModal
+        isOpen={showSignupModal}
+        onClose={() => setShowSignupModal(false)}
+        onSwitchToLogin={() => {
+          setShowSignupModal(false);
+          setShowLoginModal(true);
+        }}
+      />
+
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        returnUrl="/dashboard"
+      />
     </div>
   );
 }
