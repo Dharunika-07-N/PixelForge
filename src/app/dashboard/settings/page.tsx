@@ -8,14 +8,13 @@ import {
     Key,
     CreditCard,
     Camera,
-    Shield,
+    Target,
     Trash2,
     Github,
     Slack,
     Zap,
     ExternalLink,
     CheckCircle2,
-    AlertCircle,
     Copy,
     RefreshCw,
     Download,
@@ -51,7 +50,7 @@ export default function SettingsPage() {
                             {sidebarItems.map((item) => (
                                 <button
                                     key={item.id}
-                                    onClick={() => setActiveSection(item.id as any)}
+                                    onClick={() => setActiveSection(item.id as "account" | "preferences" | "integrations" | "api-keys" | "billing")}
                                     className={cn(
                                         "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all relative group",
                                         activeSection === item.id
@@ -84,7 +83,7 @@ export default function SettingsPage() {
 
 function AccountSection() {
     const [name, setName] = useState("John Doe");
-    const [email, setEmail] = useState("john@example.com");
+    const [email] = useState("john@example.com");
     const [company, setCompany] = useState("Design Labs");
 
     return (
