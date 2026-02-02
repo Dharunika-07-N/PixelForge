@@ -6,14 +6,11 @@ import {
   Layers,
   Code2,
   Zap,
-  CheckCircle2,
-  AlertCircle,
   Laptop,
   Tablet as TabletIcon,
   Smartphone,
   Share2,
-  QrCode,
-  ArrowRight
+  QrCode
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Dropzone from "@/components/upload/Dropzone";
@@ -30,7 +27,16 @@ export default function LandingPage() {
   const [activeFeature, setActiveFeature] = useState<number | null>(null);
   const [showSignupModal, setShowSignupModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const router = useRouter();
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMousePos({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
+  };
 
   const features = [
     {
@@ -50,7 +56,7 @@ export default function LandingPage() {
             <div className="space-y-4">
               <div className="text-xs font-bold text-gray-500 uppercase">Before: Original</div>
               <div className="aspect-video bg-gray-900 rounded-xl relative overflow-hidden group">
-                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop" className="w-full h-full object-cover opacity-50" />
+                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop" alt="Original mockup" className="w-full h-full object-cover opacity-50" />
                 <div className="absolute inset-0 bg-blue-500/10 border-2 border-dashed border-blue-500/50 flex items-center justify-center">
                   <div className="absolute top-4 left-10 w-24 h-8 border border-red-500 bg-red-500/10" />
                   <div className="absolute top-20 left-10 w-64 h-12 border border-blue-500 bg-blue-500/10" />
@@ -266,72 +272,171 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-950 text-white selection:bg-blue-500/30">
+    <div
+      className="flex flex-col min-h-screen bg-gray-950 text-white selection:bg-blue-500/30 overflow-x-hidden"
+      onMouseMove={handleMouseMove}
+    >
       <Header />
 
       {/* Hero Section */}
       <section className="relative px-8 pt-20 pb-32 max-w-7xl mx-auto w-full text-center overflow-hidden">
-        {/* Background Gradients */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-blue-600/10 blur-[120px] rounded-full -z-10 opacity-30" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-600/10 blur-[100px] rounded-full -z-10 opacity-20" />
-
+        {/* Module 5.2 - Interactive Spotlight */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600/10 border border-blue-500/20 rounded-full text-blue-500 text-sm font-medium mb-8">
-            <Zap className="w-4 h-4" />
-            <span>Beta v1.0 is now live</span>
-          </div>
+          className="absolute inset-0 z-0 pointer-events-none opacity-40"
+          animate={{
+            background: `radial-gradient(600px circle at ${mousePos.x}px ${mousePos.y}px, rgba(59, 130, 246, 0.08), transparent 80%)`,
+          }}
+        />
 
-          <h1 className="text-6xl md:text-8xl font-black tracking-tight mb-8 leading-[1.1]">
-            Turn your <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-blue-500 to-purple-600">pixel ideas</span> <br />
-            into production code.
-          </h1>
-
-          <p className="text-xl text-gray-400 max-w-3xl mx-auto mb-12 leading-relaxed">
-            PixelForge AI extracts visual elements from your mockups and generates clean, responsive React & Tailwind CSS code instantly.
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-            <GetStartedButton
-              onSignupClick={() => setShowSignupModal(true)}
-              className="w-full sm:w-auto"
-            />
-            <GitHubStarButton
-              repo="Dharunika-07-N/PixelForge"
-              className="w-full sm:w-auto"
-            />
-          </div>
-        </motion.div>
-
-        {/* Feature Grid Mockup */}
+        {/* Background Decorative Elements - Module 5 */}
         <motion.div
-          className="mt-24 relative max-w-5xl mx-auto"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3, duration: 0.8 }}
-        >
-          <div className="bg-gray-900 rounded-3xl p-4 border border-gray-800 shadow-[0_20px_100px_rgba(0,0,0,0.6)]">
-            <div className="bg-gray-950 rounded-2xl overflow-hidden aspect-video border border-gray-800 relative group cursor-pointer">
-              <img
-                src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=800&fit=crop"
-                alt="PixelForge AI Extraction Demo"
-                className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-1000"
+          animate={{
+            scale: [1, 1.1, 1],
+            opacity: [0.3, 0.4, 0.3],
+          }}
+          transition={{
+            duration: 15,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-blue-600/10 blur-[120px] rounded-full -z-10"
+        />
+        <motion.div
+          animate={{
+            x: [0, 20, 0],
+            y: [0, -10, 0],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          className="absolute bottom-0 left-0 w-64 h-64 bg-purple-600/10 blur-[100px] rounded-full -z-10 opacity-20"
+        />
+
+        {/* Module 5.2 - Mesh Grid Overlay */}
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] pointer-events-none -z-10" />
+
+        <div className="relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600/10 border border-blue-500/20 rounded-full text-blue-500 text-sm font-medium mb-8">
+              <Zap className="w-4 h-4 animate-pulse" />
+              <span>Beta v1.0 is now live</span>
+            </div>
+
+            {/* Module 4 - Hero Headline */}
+            <h1 className="text-6xl md:text-8xl font-black tracking-tight mb-8 leading-[1.1] selection:bg-blue-500/30">
+              Turn your <br className="hidden md:block" />
+              <span className="relative inline-block">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-blue-500 to-purple-600 animate-gradient-x">
+                  pixel ideas
+                </span>
+              </span> <br />
+              into <span className="text-white">production code.</span>
+            </h1>
+
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto mb-12 leading-relaxed font-medium">
+              PixelForge AI extracts visual elements from your mockups and generates <br className="hidden md:block" />
+              clean, responsive React & Tailwind CSS code instantly.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+              <GetStartedButton
+                onSignupClick={() => setShowSignupModal(true)}
+                className="w-full sm:w-auto shadow-2xl shadow-blue-600/20"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-transparent to-transparent" />
+              <GitHubStarButton
+                repo="Dharunika-07-N/PixelForge"
+                className="w-full sm:w-auto"
+              />
+            </div>
+          </motion.div>
 
-              {/* Mock UI Overlay */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-                <div className="w-20 h-20 bg-blue-600/40 backdrop-blur-xl rounded-full flex items-center justify-center border border-white/20 animate-pulse">
-                  <Code2 className="w-10 h-10 text-white" />
+          {/* Module 6 - Extraction Mockup */}
+          <motion.div
+            className="mt-24 relative max-w-5xl mx-auto group"
+            initial={{ opacity: 0, scale: 0.95, y: 40 }}
+            whileInView={{ opacity: 1, scale: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+          >
+            <div className="bg-gray-900 rounded-[2.5rem] p-4 border border-white/10 shadow-[0_20px_100px_rgba(0,0,0,0.6)] backdrop-blur-xl relative overflow-hidden">
+              {/* Scanning Effect - Module 6.1 */}
+              <motion.div
+                animate={{
+                  y: ["-100%", "200%"]
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
+                className="absolute inset-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/50 to-transparent z-20 pointer-events-none"
+              />
+
+              <div className="bg-gray-950 rounded-[2rem] overflow-hidden aspect-video border border-gray-800 relative cursor-crosshair">
+                <img
+                  src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=800&fit=crop"
+                  alt="PixelForge AI Extraction Demo"
+                  className="w-full h-full object-cover opacity-40 grayscale group-hover:grayscale-0 group-hover:opacity-60 transition-all duration-1000"
+                />
+
+                {/* Simulated Extraction Bounding Boxes */}
+                <div className="absolute inset-0 z-10 p-12">
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    className="absolute top-1/4 left-10 w-32 h-10 border border-blue-500/50 bg-blue-500/10 rounded-lg flex items-center justify-center group/box cursor-pointer"
+                  >
+                    <span className="text-[10px] font-black text-blue-500 uppercase opacity-0 group-hover/box:opacity-100 transition-opacity">Button : 99%</span>
+                    <div className="absolute -top-1 -left-1 w-2 h-2 bg-blue-500 rounded-full animate-ping" />
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="absolute top-1/3 right-20 w-64 h-48 border border-purple-500/50 bg-purple-500/10 rounded-2xl flex items-center justify-center group/box cursor-pointer"
+                  >
+                    <span className="text-[10px] font-black text-purple-500 uppercase opacity-0 group-hover/box:opacity-100 transition-opacity">Hero Section : 97%</span>
+                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-purple-500 rounded-full animate-ping" />
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                    className="absolute bottom-20 left-1/4 w-48 h-12 border border-green-500/50 bg-green-500/10 rounded-xl flex items-center justify-center group/box cursor-pointer"
+                  >
+                    <span className="text-[10px] font-black text-green-500 uppercase opacity-0 group-hover/box:opacity-100 transition-opacity">Input Field : 96%</span>
+                    <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-green-500 rounded-full animate-ping" />
+                  </motion.div>
                 </div>
-                <span className="mt-6 text-2xl font-bold">Watch extraction in action</span>
+
+                <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-transparent to-transparent z-10" />
+
+                {/* Center Call to Action */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center z-30">
+                  <motion.div
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    className="w-20 h-20 bg-blue-600/40 backdrop-blur-xl rounded-2xl flex items-center justify-center border border-white/20 shadow-2xl"
+                  >
+                    <Code2 className="w-10 h-10 text-white" />
+                  </motion.div>
+                  <span className="mt-6 text-2xl font-black text-white tracking-tight">Watch extraction in action</span>
+                  <div className="mt-2 flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">AI Active Inference</span>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
       </section>
 
       {/* Features Section */}
