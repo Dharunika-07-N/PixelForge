@@ -671,6 +671,98 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Module 16 - Pricing Section */}
+      <section className="py-32 relative">
+        <div className="max-w-7xl mx-auto px-8">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-5xl font-black mb-6">Simple, Usage-Based Pricing</h2>
+            <p className="text-gray-400">Start for free. Scale as you ship.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+            {/* Hobby Tier */}
+            <div className="bg-gray-950/50 rounded-3xl border border-gray-800 p-8 hover:border-gray-700 transition-all">
+              <h3 className="font-bold text-gray-400 text-sm uppercase tracking-widest mb-4">Hobby</h3>
+              <div className="flex items-baseline gap-1 mb-8">
+                <span className="text-4xl font-black text-white">$0</span>
+                <span className="text-gray-500">/mo</span>
+              </div>
+              <ul className="space-y-4 mb-8 text-sm text-gray-400">
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 className="w-4 h-4 text-blue-500" />
+                  3 Projects
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 className="w-4 h-4 text-blue-500" />
+                  50 Generations
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 className="w-4 h-4 text-blue-500" />
+                  Community Support
+                </li>
+              </ul>
+              <button onClick={() => setShowSignupModal(true)} className="w-full py-4 rounded-xl border border-gray-800 text-white font-bold hover:bg-gray-900 transition-colors">Start Free</button>
+            </div>
+
+            {/* Pro Tier - Featured */}
+            <div className="bg-gray-900/80 rounded-[2rem] border-2 border-blue-600 p-8 shadow-2xl shadow-blue-900/20 relative scale-105 z-10">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-[10px] uppercase font-black tracking-widest px-4 py-1.5 rounded-full shadow-lg">
+                Most Popular
+              </div>
+              <h3 className="font-bold text-blue-400 text-sm uppercase tracking-widest mb-4">Pro</h3>
+              <div className="flex items-baseline gap-1 mb-8">
+                <span className="text-5xl font-black text-white">$29</span>
+                <span className="text-gray-500">/mo</span>
+              </div>
+              <p className="text-gray-400 text-sm mb-8 font-medium">For professional developers shipping weekly.</p>
+              <ul className="space-y-4 mb-8 text-sm text-gray-300 font-medium">
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 className="w-4 h-4 text-blue-500" />
+                  Unlimited Projects
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 className="w-4 h-4 text-blue-500" />
+                  500 Generations / mo
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 className="w-4 h-4 text-blue-500" />
+                  Priority Output Speed
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 className="w-4 h-4 text-blue-500" />
+                  Figma Plugin Access
+                </li>
+              </ul>
+              <button onClick={() => setShowSignupModal(true)} className="w-full py-4 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-500 transition-colors shadow-lg shadow-blue-600/30">Get Started</button>
+            </div>
+
+            {/* Enterprise Tier */}
+            <div className="bg-gray-950/50 rounded-3xl border border-gray-800 p-8 hover:border-gray-700 transition-all">
+              <h3 className="font-bold text-gray-400 text-sm uppercase tracking-widest mb-4">Team</h3>
+              <div className="flex items-baseline gap-1 mb-8">
+                <span className="text-4xl font-black text-white">$99</span>
+                <span className="text-gray-500">/mo</span>
+              </div>
+              <ul className="space-y-4 mb-8 text-sm text-gray-400">
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 className="w-4 h-4 text-blue-500" />
+                  Shared Workspace
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 className="w-4 h-4 text-blue-500" />
+                  SSO & Admin Controls
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 className="w-4 h-4 text-blue-500" />
+                  Custom Design Tokens
+                </li>
+              </ul>
+              <button className="w-full py-4 rounded-xl border border-gray-800 text-white font-bold hover:bg-gray-900 transition-colors">Contact Sales</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Module 13 - Interactive FAQ Section */}
       <section className="py-32 max-w-4xl mx-auto px-8">
         <div className="text-center mb-16">
