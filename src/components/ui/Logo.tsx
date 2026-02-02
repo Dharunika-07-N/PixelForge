@@ -6,11 +6,21 @@ import { Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigationState } from "@/context/NavigationStateContext";
 import { NavigationConfirmationModal } from "@/components/ui/NavigationConfirmationModal";
+import { useSmoothScroll } from "@/hooks/useSmoothScroll";
 
 export function Logo() {
     const router = useRouter();
     const pathname = usePathname();
-    const { hasUnsavedChanges, isProcessing, processingProgress } = useNavigationState();
+    const {
+        hasUnsavedChanges,
+        isProcessing,
+        processingProgress,
+        isWizardActive,
+        wizardStep,
+        totalWizardSteps
+    } = useNavigationState();
+
+    const { scrollToTop } = useSmoothScroll();
 
     const [isHovered, setIsHovered] = useState(false);
     const [isActive, setIsActive] = useState(false);
@@ -32,15 +42,22 @@ export function Logo() {
     }, [isHovered, router]);
 
     const handleLogoClick = (e: React.MouseEvent) => {
+        // Support for middle click / ctrl click
+        if (e.button === 1 || e.ctrlKey || e.metaKey) {
+            return;
+        }
+
         e.preventDefault();
+
+        // Frame 1-3: Press Feedback animation trigger
         setIsActive(true);
-        setTimeout(() => setIsActive(false), 200); // Reset active state after click animation
+        setTimeout(() => setIsActive(false), 200);
 
         const isHomepage = pathname === "/";
 
         if (isHomepage) {
             // Scenario 1: Already on Homepage -> Scroll to top
-            window.scrollTo({ top: 0, behavior: "smooth" });
+            scrollToTop();
             return;
         }
 
@@ -51,61 +68,63 @@ export function Logo() {
             return;
         }
 
+        if (isWizardActive) {
+            setModalType("wizard_draft");
+            setModalOpen(true);
+            return;
+        }
+
         if (hasUnsavedChanges) {
-            // Could be wizard draft or general unsaved
-            // For now, mapping to unsaved_changes, but logic can be extended
             setModalType("unsaved_changes");
             setModalOpen(true);
             return;
         }
 
-        // Scenario 2: Deep in Dashboard / Standard Navigation
+        // Scenario 2: Standard Navigation
         initiateNavigation();
     };
 
     const initiateNavigation = () => {
         setIsLoading(true);
-        // Simulate loading delay for transition effect if needed, or just navigate
-        // Next.js navigation is usually fast, but we can add a small delay for the "Loading" state visualization if requested.
-        // The prompt mentions "Quick fade transition... Duration 300-500ms"
+        // Frame 4-5: Navigation transition
         setTimeout(() => {
             router.push("/");
-            // Loading state will be effectively reset when the new page loads or component unmounts
         }, 300);
     };
 
     const handleConfirmDiscard = () => {
         setModalOpen(false);
-        // If stopping process
         if (modalType === "active_process") {
-            // In a real app, we would emit an event to cancel the process here
-            console.log("Cancelling process...");
+            // Emit cancellation if needed
+            console.log("Extraction cancelled");
         }
         initiateNavigation();
     };
 
     const handleSaveAndExit = () => {
         setModalOpen(false);
-        // In a real app, logic to save would go here
-        // Then navigate
+        // Scenario 3/5: Save & Go or Save as Draft
+        setIsLoading(true);
         setTimeout(() => {
-            console.log("Saving..."); // Show "Saved!" toast
+            // Simulated save success
+            console.log(modalType === "wizard_draft" ? "Draft saved!" : "Saved!");
             initiateNavigation();
         }, 800);
     };
 
     return (
-        <>
+        <div className="relative inline-block h-[44px] sm:h-auto">
             <motion.a
                 href="/"
                 onClick={handleLogoClick}
-                className="relative flex items-center gap-2 group cursor-pointer select-none"
+                className="relative flex items-center gap-2 group cursor-pointer select-none min-h-[44px] min-w-[44px]"
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
                 initial={false}
-                animate={isActive ? { scale: 0.98 } : { scale: 1 }}
+                animate={isActive ? { scale: 0.98, opacity: 0.95 } : { scale: 1, opacity: 1 }}
                 transition={{ duration: 0.1 }}
-                aria-label="PixelForge AI Homepage"
+                aria-label="PixelForge AI Homepage - Navigate to main page"
+                role="link"
             >
                 <div className="relative">
                     {/* Icon Container */}
@@ -120,33 +139,28 @@ export function Logo() {
                     {/* Loading Spinner */}
                     {isLoading && (
                         <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-10 h-10 border-4 border-blue-600/30 border-t-blue-500 rounded-full animate-spin" />
+                            <div className="w-10 h-10 border-4 border-blue-600/30 border-t-white rounded-full animate-spin" />
                         </div>
                     )}
                 </div>
 
-                {/* Text */}
-                <AnimatePresence>
-                    <motion.div
-                        className="flex items-center"
-                        animate={{ x: isActive ? 2 : 0 }}
-                    >
-                        <span className={`text-2xl font-black tracking-tighter transition-colors duration-200 ${isHovered ? "text-white" : "text-gray-100"}`}>
-                            PixelForge <span className="text-blue-500">AI</span>
-                        </span>
-                    </motion.div>
-                </AnimatePresence>
+                {/* Text - Hidden on mobile Small Screen (< 640px) as per Scenario 6 Option A */}
+                <div className="hidden sm:flex items-center overflow-hidden">
+                    <span className={`text-2xl font-black tracking-tighter transition-colors duration-200 ${isHovered ? "text-white" : "text-gray-100"}`}>
+                        PixelForge <span className="text-blue-500">AI</span>
+                    </span>
+                </div>
 
-                {/* Hover Tooltip - Simplified implementation directly here or could be a separate component */}
+                {/* Tooltip */}
                 <AnimatePresence>
                     {isHovered && !isLoading && !isActive && (
                         <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0 }}
-                            className="absolute top-12 left-0 bg-gray-900 border border-gray-800 text-xs text-gray-300 px-2 py-1 rounded shadow-xl whitespace-nowrap pointer-events-none z-50"
+                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="absolute top-12 left-0 bg-gray-950/90 backdrop-blur-md border border-white/10 text-[10px] font-bold uppercase tracking-widest text-blue-400 px-3 py-1.5 rounded-lg shadow-2xl whitespace-nowrap pointer-events-none z-50"
                         >
-                            Back to home
+                            Return Home
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -156,11 +170,13 @@ export function Logo() {
                 isOpen={modalOpen}
                 type={modalType}
                 progress={processingProgress}
+                step={wizardStep}
+                totalSteps={totalWizardSteps}
                 onCancel={() => setModalOpen(false)}
                 onDiscard={handleConfirmDiscard}
                 onSaveAndExit={handleSaveAndExit}
-                onConfirm={() => { }} // Not used directly, specific handlers above
+                onConfirm={() => { }}
             />
-        </>
+        </div>
     );
 }

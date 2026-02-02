@@ -63,5 +63,32 @@ export function useSmoothScroll() {
         requestAnimationFrame(animation);
     }, []);
 
-    return { scrollToId };
+    const scrollToTop = useCallback(() => {
+        const startPosition = window.pageYOffset;
+        const duration = 500;
+        let startTime: number | null = null;
+
+        const easeInOutQuad = (t: number) => {
+            return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+        };
+
+        const animation = (currentTime: number) => {
+            if (startTime === null) startTime = currentTime;
+            const timeElapsed = currentTime - startTime;
+            const progress = Math.min(timeElapsed / duration, 1);
+            const ease = easeInOutQuad(progress);
+
+            window.scrollTo(0, startPosition * (1 - ease));
+
+            if (timeElapsed < duration) {
+                requestAnimationFrame(animation);
+            } else {
+                window.scrollTo(0, 0);
+            }
+        };
+
+        requestAnimationFrame(animation);
+    }, []);
+
+    return { scrollToId, scrollToTop };
 }
