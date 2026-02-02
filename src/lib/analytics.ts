@@ -1,47 +1,25 @@
 "use client";
 
-export type AnalyticsEvent = {
-    event: string;
-    context?: Record<string, any>;
-    scroll_behavior?: {
-        initiated_at: string;
-        duration_ms: number;
-        interrupted: boolean;
-        completed: boolean;
-    };
-    device?: {
-        type: string;
-        browser: string;
-        viewport: string;
-    };
+type AnalyticsEvent = {
+    event_name: string;
+    properties: Record<string, any>;
 };
 
-export const trackEvent = (data: AnalyticsEvent) => {
-    // In a production app, this would send data to a service like Mixpanel, GA4, or Segment.
-    // For now, we'll log it to the console with premium formatting.
-    console.group(`📊 Analytics Event: ${data.event}`);
-    console.log("Context:", data.context);
-    if (data.scroll_behavior) console.log("Scroll Behavior:", data.scroll_behavior);
-    if (data.device) console.log("Device Info:", data.device);
-    console.groupEnd();
-};
-
-export const getSessionStats = () => {
-    if (typeof window === "undefined") return {};
-
-    const pageHeight = document.documentElement.scrollHeight;
-    const scrollPosition = window.scrollY;
-    const viewportHeight = window.innerHeight;
-    const scrollPercentage = Math.round((scrollPosition / (pageHeight - viewportHeight)) * 100);
-
-    return {
-        scroll_position: scrollPosition,
-        scroll_percentage: scrollPercentage,
-        page_height: pageHeight,
-        viewport_height: viewportHeight,
-        time_on_page: Math.round(performance.now() / 1000),
-        viewport: `${window.innerWidth}x${window.innerHeight}`,
-        browser: navigator.userAgent.includes("Chrome") ? "chrome" : "other",
-        device_type: window.innerWidth < 768 ? "mobile" : "desktop"
+export const trackEvent = (name: string, properties: Record<string, any> = {}) => {
+    const event: AnalyticsEvent = {
+        event_name: name,
+        properties: {
+            ...properties,
+            timestamp: new Date().toISOString(),
+            url: typeof window !== "undefined" ? window.location.href : "",
+        },
     };
+
+    // In a real app, this would send to Mixpanel, Segment, or a custom API
+    console.log(`[Analytics] ${name}:`, event.properties);
+
+    // Simulate API call
+    if (typeof window !== "undefined" && (window as any).PF_DEBUG) {
+        // Persistent log for debugging if needed
+    }
 };

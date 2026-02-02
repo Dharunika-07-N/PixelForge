@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigationState } from "@/context/NavigationStateContext";
 import { NavigationConfirmationModal } from "@/components/ui/NavigationConfirmationModal";
 import { useSmoothScroll } from "@/hooks/useSmoothScroll";
+import { trackEvent } from "@/lib/analytics";
 
 export function Logo() {
     const router = useRouter();
@@ -37,6 +38,7 @@ export function Logo() {
             preloadTimer = setTimeout(() => {
                 // Signal strong intent - Preload HTML, CSS, and Above-fold content
                 router.prefetch("/");
+                trackEvent("logo_hover_intent", { duration_ms: 500 });
             }, 500);
         }
         return () => clearTimeout(preloadTimer);
@@ -45,6 +47,7 @@ export function Logo() {
     const handleLogoClick = (e: React.MouseEvent) => {
         // Support for middle click / ctrl click
         if (e.button === 1 || e.ctrlKey || e.metaKey) {
+            trackEvent("logo_click_ext", { button: e.button, ctrl: e.ctrlKey, meta: e.metaKey });
             return;
         }
 
@@ -61,26 +64,37 @@ export function Logo() {
 
         const isHomepage = pathname === "/";
 
+        trackEvent("logo_click", {
+            source: pathname,
+            is_homepage: isHomepage,
+            has_unsaved_changes: hasUnsavedChanges,
+            is_processing: isProcessing,
+            is_wizard_active: isWizardActive
+        });
+
         if (isHomepage) {
-            // Scenario 1: Already on Homepage -> Scroll to top
+            trackEvent("logo_action", { action: "scroll_to_top" });
             scrollToTop();
             return;
         }
 
         // Check for blocking states
         if (isProcessing) {
+            trackEvent("logo_modal_trigger", { type: "active_process" });
             setModalType("active_process");
             setModalOpen(true);
             return;
         }
 
         if (isWizardActive) {
+            trackEvent("logo_modal_trigger", { type: "wizard_draft" });
             setModalType("wizard_draft");
             setModalOpen(true);
             return;
         }
 
         if (hasUnsavedChanges) {
+            trackEvent("logo_modal_trigger", { type: "unsaved_changes" });
             setModalType("unsaved_changes");
             setModalOpen(true);
             return;
@@ -93,6 +107,7 @@ export function Logo() {
     const initiateNavigation = () => {
         // Frame 4: Navigation begins
         const startTime = Date.now();
+        trackEvent("logo_navigation_start", { target: "/" });
 
         // Use a small delay for the "fade out" transition (300ms)
         setTimeout(() => {
@@ -103,20 +118,21 @@ export function Logo() {
                 const elapsed = Date.now() - startTime;
                 if (elapsed > 500) { // 300ms transition + 200ms wait
                     setIsLoading(true);
+                    trackEvent("logo_slow_load", { elapsed_ms: elapsed });
                     clearInterval(checkLoading);
                 }
             }, 100);
-
-            // Hide loading if we successfully navigate (component will unmount anyway most of the time)
         }, 300);
     };
 
     const handleConfirmDiscard = () => {
+        trackEvent("logo_modal_action", { type: modalType, action: "discard" });
         setModalOpen(false);
         initiateNavigation();
     };
 
     const handleSaveAndExit = () => {
+        trackEvent("logo_modal_action", { type: modalType, action: "save_and_exit" });
         setModalOpen(false);
         setIsLoading(true);
         setTimeout(() => {
@@ -192,7 +208,10 @@ export function Logo() {
                 progress={processingProgress}
                 step={wizardStep}
                 totalSteps={totalWizardSteps}
-                onCancel={() => setModalOpen(false)}
+                onCancel={() => {
+                    trackEvent("logo_modal_action", { type: modalType, action: "cancel" });
+                    setModalOpen(false);
+                }}
                 onDiscard={handleConfirmDiscard}
                 onSaveAndExit={handleSaveAndExit}
                 onConfirm={() => { }}
