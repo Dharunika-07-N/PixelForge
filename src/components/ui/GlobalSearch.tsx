@@ -23,6 +23,18 @@ export function GlobalSearch() {
     const inputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
 
+    // Persist search query
+    useEffect(() => {
+        const savedQuery = sessionStorage.getItem("pf_search_query");
+        if (savedQuery) {
+            setQuery(savedQuery);
+        }
+    }, []);
+
+    useEffect(() => {
+        sessionStorage.setItem("pf_search_query", query);
+    }, [query]);
+
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if ((e.metaKey || e.ctrlKey) && e.key === "k") {

@@ -21,6 +21,7 @@ import {
 import { Modal } from "@/components/ui/Modal";
 import { cn } from "@/lib/utils";
 import { calculatePasswordStrength } from "@/lib/password-strength";
+import { useNavigationState } from "@/context/NavigationStateContext";
 import confetti from "canvas-confetti";
 
 // Comprehensive signup validation schema
@@ -109,6 +110,36 @@ export function SignupModal({ isOpen, onClose, onSwitchToLogin }: SignupModalPro
     const emailValue = watch("email");
     const passwordValue = watch("password");
     const nameValue = watch("name");
+
+    const { setHasUnsavedChanges } = useNavigationState();
+
+    // Persist form data to sessionStorage
+    useEffect(() => {
+        if (!isOpen) return;
+        const saved = sessionStorage.getItem("pf_signup_draft");
+        if (saved) {
+            const data = JSON.parse(saved);
+            Object.keys(data).forEach(key => {
+                setValue(key as any, data[key]);
+            });
+        }
+    }, [isOpen, setValue]);
+
+    useEffect(() => {
+        const data = { email: emailValue, name: nameValue }; // Don't persist password for security
+        sessionStorage.setItem("pf_signup_draft", JSON.stringify(data));
+
+        // Track unsaved changes
+        const hasContent = !!(emailValue || nameValue || passwordValue);
+        setHasUnsavedChanges(hasContent);
+    }, [emailValue, nameValue, passwordValue, setHasUnsavedChanges]);
+
+    // Cleanup on unmount or success
+    useEffect(() => {
+        return () => {
+            setHasUnsavedChanges(false);
+        };
+    }, [setHasUnsavedChanges]);
 
     // Email validation with debounce
     useEffect(() => {
