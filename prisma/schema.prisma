@@ -20,6 +20,7 @@ enum ProjectStatus {
   DRAFT
   ANALYZED
   COMPLETED
+  FAILED
 }
 
 enum OptimizationStatus {

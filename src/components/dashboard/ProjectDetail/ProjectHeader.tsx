@@ -11,11 +11,15 @@ import {
     Clock,
     Loader2,
     Download,
-    Check
+    Check,
+    Zap,
+    AlertCircle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ProjectStatus } from "@prisma/client";
+import { ShareModal } from "../ShareModal";
+import { UpgradeModal } from "@/components/pricing/UpgradeModal";
 
 interface ProjectHeaderProps {
     id: string;
@@ -30,6 +34,8 @@ export function ProjectHeader({ id, name: initialName, status, updatedAt }: Proj
     const [name, setName] = useState(initialName);
     const [isSaving, setIsSaving] = useState(false);
     const [showSaveFeedback, setShowSaveFeedback] = useState(false);
+    const [showShareModal, setShowShareModal] = useState(false);
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -79,7 +85,7 @@ export function ProjectHeader({ id, name: initialName, status, updatedAt }: Proj
         }
     };
 
-    const getStatusConfig = (status: ProjectStatus) => {
+    const getStatusConfig = (status: any) => {
         switch (status) {
             case "COMPLETED":
                 return {
@@ -99,6 +105,15 @@ export function ProjectHeader({ id, name: initialName, status, updatedAt }: Proj
                     label: "Processing",
                     tooltip: "AI is working...",
                     animate: "animate-spin"
+                };
+            case "FAILED":
+                return {
+                    color: "text-red-500",
+                    bg: "bg-red-500/10",
+                    border: "border-red-500/20",
+                    icon: AlertCircle,
+                    label: "Failed",
+                    tooltip: "Extraction failed"
                 };
             case "DRAFT":
             default:
@@ -195,9 +210,19 @@ export function ProjectHeader({ id, name: initialName, status, updatedAt }: Proj
             </div>
 
             <div className="flex items-center gap-3">
-                <button className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold text-white transition-all active:scale-[0.98]">
+                <button
+                    onClick={() => setShowShareModal(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold text-white transition-all active:scale-[0.98]"
+                >
                     <Share2 className="w-4 h-4" />
                     Share
+                </button>
+                <button
+                    onClick={() => setShowUpgradeModal(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white border border-white/10 rounded-xl text-xs font-bold transition-all shadow-lg shadow-blue-600/20 active:scale-[0.98]"
+                >
+                    <Zap className="w-4 h-4" />
+                    Upgrade
                 </button>
                 <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white border border-blue-500/50 rounded-xl text-xs font-bold transition-all shadow-lg shadow-blue-600/20 active:scale-[0.98]">
                     <Download className="w-4 h-4" />
@@ -224,6 +249,17 @@ export function ProjectHeader({ id, name: initialName, status, updatedAt }: Proj
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            <ShareModal
+                isOpen={showShareModal}
+                onClose={() => setShowShareModal(false)}
+                projectTitle={name}
+            />
+
+            <UpgradeModal
+                isOpen={showUpgradeModal}
+                onClose={() => setShowUpgradeModal(false)}
+            />
         </header>
     );
 }

@@ -7,6 +7,7 @@ import { PreviewPanel } from "./PreviewPanel";
 import { ElementsPanel } from "./ElementsPanel";
 import { ColorPanel } from "./ColorPanel";
 import { TypographyPanel } from "./TypographyPanel";
+import { CommentsPanel } from "./CommentsPanel";
 import {
   Layers,
   Image as ImageIcon,
@@ -14,9 +15,11 @@ import {
   Monitor,
   Palette,
   Type,
-  MousePointer2
+  MousePointer2,
+  MessageCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ErrorState } from "@/components/ui/ErrorState";
 
 interface ProjectWorkspaceProps {
   project: any;
@@ -24,7 +27,20 @@ interface ProjectWorkspaceProps {
 
 export function ProjectWorkspace({ project }: ProjectWorkspaceProps) {
   const [leftTab, setLeftTab] = useState<"screenshot" | "elements">("screenshot");
-  const [rightTab, setRightTab] = useState<"preview" | "colors" | "typography">("preview");
+  const [rightTab, setRightTab] = useState<"preview" | "colors" | "typography" | "comments">("preview");
+
+  if (project.status === "FAILED") {
+    return (
+      <div className="flex-1 bg-gray-950 flex items-center justify-center">
+        <ErrorState
+          type="extraction"
+          onRetry={() => window.location.reload()}
+          onContactSupport={() => window.open('/support')}
+          onUploadDifferent={() => window.location.href = '/dashboard/new'}
+        />
+      </div>
+    );
+  }
 
   // Mock code data
   const mockCode = {
@@ -74,7 +90,7 @@ export default function LandingPage({
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-center: center;
   min-height: 100vh;
   background: linear-gradient(to bottom right, #3B82F6, #9333EA);
 }
@@ -188,11 +204,24 @@ test('renders welcome message', () => {
             <Type className="w-3.5 h-3.5" />
             Type
           </button>
+          <button
+            onClick={() => setRightTab("comments")}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all",
+              rightTab === "comments"
+                ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
+                : "text-gray-500 hover:text-white hover:bg-white/5"
+            )}
+          >
+            <MessageCircle className="w-3.5 h-3.5" />
+            Chat
+          </button>
         </div>
         <div className="flex-1 overflow-hidden relative">
           {rightTab === "preview" && <PreviewPanel />}
           {rightTab === "colors" && <ColorPanel />}
           {rightTab === "typography" && <TypographyPanel />}
+          {rightTab === "comments" && <CommentsPanel />}
         </div>
       </div>
     </main>
