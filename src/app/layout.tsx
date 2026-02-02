@@ -4,6 +4,7 @@ import "./globals.css";
 import SessionProvider from "@/components/providers/SessionProvider";
 import { NavigationStateProvider } from "@/context/NavigationStateContext";
 import { SupportWidget } from "@/components/ui/SupportWidget";
+import { CommandMenu } from "@/components/ui/CommandMenu";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -34,6 +35,7 @@ export default function RootLayout({
           <NavigationStateProvider>
             {children}
             <SupportWidget />
+            <CommandMenu />
           </NavigationStateProvider>
         </SessionProvider>
       </body>

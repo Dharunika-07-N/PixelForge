@@ -6,6 +6,7 @@ import { ProjectCard } from "@/components/dashboard/ProjectCard";
 import { Plus, LayoutGrid, List as ListIcon } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
+import Link from "next/link";
 
 export default async function DashboardPage() {
     const session = await getServerSession(authOptions);
@@ -46,10 +47,10 @@ export default async function DashboardPage() {
                                     <ListIcon className="w-4 h-4" />
                                 </button>
                             </div>
-                            <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold transition-all shadow-lg shadow-blue-600/20 active:scale-95">
+                            <Link href="/dashboard/new" className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold transition-all shadow-lg shadow-blue-600/20 active:scale-95">
                                 <Plus className="w-4 h-4" />
                                 <span>New Project</span>
-                            </button>
+                            </Link>
                         </div>
                     </div>
 
@@ -62,9 +63,9 @@ export default async function DashboardPage() {
                             <p className="text-gray-500 max-w-sm mx-auto mb-8">
                                 Upload a screenshot or design file to start the AI extraction process and get production-ready code.
                             </p>
-                            <button className="bg-white text-black hover:bg-gray-100 px-8 py-3 rounded-xl font-black transition-all">
+                            <Link href="/dashboard/new" className="inline-block bg-white text-black hover:bg-gray-100 px-8 py-3 rounded-xl font-black transition-all">
                                 Get Started Now
-                            </button>
+                            </Link>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
