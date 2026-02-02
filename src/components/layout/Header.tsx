@@ -61,69 +61,79 @@ export function Header({ showDashboardLinks = false }: HeaderProps) {
 
     return (
         <>
-            <nav className="flex items-center justify-between px-8 py-6 max-w-7xl mx-auto w-full border-b border-gray-900/50 backdrop-blur-md sticky top-0 z-50">
+            <nav className="flex items-center justify-between px-8 py-6 max-w-7xl mx-auto w-full border-b border-gray-900/50 backdrop-blur-md sticky top-0 z-[60]">
                 <Logo />
 
-                {showDashboardLinks ? (
-                    <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-400">
-                        <Link href="/dashboard" className="hover:text-white transition-colors">Overview</Link>
-                        <Link href="/dashboard/projects" className="hover:text-white transition-colors">Projects</Link>
-                        <Link href="/dashboard/settings" className="hover:text-white transition-colors">Settings</Link>
-                    </div>
-                ) : (
-                    <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-400">
-                        <a
-                            href="#features"
-                            onClick={(e) => handleNavClick(e, "features")}
-                            className={cn(
-                                "relative px-1 py-2 transition-colors group",
-                                activeSection === "features" ? "text-blue-500 font-semibold" : "hover:text-white"
-                            )}
-                        >
-                            Features
-                            <span className={cn(
-                                "absolute bottom-0 left-0 w-full h-[2px] bg-blue-500 transform origin-left transition-transform duration-300 ease-out",
-                                activeSection === "features" ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
-                            )} />
-                            {wobble === "features" && (
-                                <motion.span
-                                    layoutId="wobble-features"
-                                    className="absolute -right-3 top-0 text-blue-500 text-xs"
-                                    initial={{ opacity: 0, y: 5 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0 }}
+                <div className="hidden md:flex items-center gap-8 relative px-4 py-2 bg-white/5 border border-white/5 rounded-2xl">
+                    {showDashboardLinks ? (
+                        <>
+                            {[
+                                { name: "Overview", href: "/dashboard" },
+                                { name: "Projects", href: "/dashboard/projects" },
+                                { name: "Settings", href: "/dashboard/settings" },
+                            ].map((item) => (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className={cn(
+                                        "relative px-1 py-1 text-sm font-bold transition-all duration-300",
+                                        pathname === item.href ? "text-white" : "text-gray-500 hover:text-gray-300"
+                                    )}
                                 >
-                                    ✓
-                                </motion.span>
-                            )}
-                        </a>
+                                    {item.name}
+                                    {pathname === item.href && (
+                                        <motion.span
+                                            layoutId="nav-ink"
+                                            className="absolute -bottom-1 left-0 w-full h-[2px] bg-blue-500 rounded-full"
+                                            transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
+                                        />
+                                    )}
+                                </Link>
+                            ))}
+                        </>
+                    ) : (
+                        <>
+                            {[
+                                { name: "Features", href: "#features", id: "features" },
+                                { name: "How it Works", href: "/how-it-works", id: "how-it-works" },
+                                { name: "Dashboard", href: "/dashboard", id: "dashboard", action: handleDashboardClick },
+                            ].map((item) => (
+                                <a
+                                    key={item.name}
+                                    href={item.href}
+                                    onClick={item.action ? (e) => item.action!(e as any) : (e) => handleNavClick(e, item.id)}
+                                    className={cn(
+                                        "relative px-2 py-1 text-sm font-bold transition-all duration-300 group",
+                                        activeSection === item.id || (pathname === item.href && !item.id.includes("#"))
+                                            ? "text-white"
+                                            : "text-gray-500 hover:text-white"
+                                    )}
+                                >
+                                    <span className="relative z-10">{item.name}</span>
 
-                        <Link
-                            href="/how-it-works"
-                            className={cn(
-                                "relative px-1 py-2 transition-colors group hover:text-white",
-                                pathname === "/how-it-works" ? "text-blue-500 font-semibold" : "text-gray-400"
-                            )}
-                        >
-                            How it Works
-                            <span className={cn(
-                                "absolute bottom-0 left-0 w-full h-[2px] bg-blue-500 transform origin-left transition-transform duration-300 ease-out",
-                                pathname === "/how-it-works" ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
-                            )} />
-                        </Link>
+                                    {/* Magnetic Glow Effect - Module 2.3 */}
+                                    <div className="absolute inset-0 bg-blue-500/0 group-hover:bg-blue-500/5 rounded-lg transition-colors duration-300 -z-10" />
 
-                        <a
-                            href="/dashboard"
-                            onClick={handleDashboardClick}
-                            className="hover:text-white transition-colors relative group"
-                        >
-                            Dashboard
-                            {status === "unauthenticated" && (
-                                <span className="absolute -top-1 -right-2 w-2 h-2 bg-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                            )}
-                        </a>
-                    </div>
-                )}
+                                    {(activeSection === item.id || (pathname === item.href && item.href.startsWith("/"))) && (
+                                        <motion.span
+                                            layoutId="nav-ink-visitor"
+                                            className="absolute -bottom-1 left-0 w-full h-[2px] bg-blue-500 rounded-full"
+                                            transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
+                                        />
+                                    )}
+
+                                    {wobble === item.id && (
+                                        <motion.span
+                                            animate={{ x: [0, -2, 2, -2, 2, 0] }}
+                                            transition={{ duration: 0.4 }}
+                                            className="absolute -top-1 -right-1 w-1 h-1 bg-blue-500 rounded-full"
+                                        />
+                                    )}
+                                </a>
+                            ))}
+                        </>
+                    )}
+                </div>
 
                 <div className="flex items-center gap-4">
                     <GitHubStarButton
@@ -135,15 +145,26 @@ export function Header({ showDashboardLinks = false }: HeaderProps) {
                         <div className="w-8 h-8 rounded-full bg-gray-800 animate-pulse" />
                     ) : status === "authenticated" ? (
                         <div className="flex items-center gap-4">
-                            <Link href="/dashboard" className="flex items-center gap-2 text-sm font-medium text-gray-300 hover:text-white transition-colors">
+                            <Link
+                                href="/dashboard"
+                                className="group relative p-1 rounded-full border border-white/5 hover:border-blue-500/50 transition-all duration-500"
+                            >
                                 {session.user?.image ? (
-                                    <img src={session.user.image} alt={session.user.name || "User"} className="w-8 h-8 rounded-full bg-gray-800" />
+                                    <img src={session.user.image} alt={session.user.name || "User"} className="w-8 h-8 rounded-full bg-gray-800 group-hover:scale-110 transition-transform" />
                                 ) : (
-                                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white">
+                                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
                                         <UserIcon className="w-4 h-4" />
                                     </div>
                                 )}
+                                <div className="absolute inset-0 bg-blue-600/20 blur-md rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
                             </Link>
+                            <button
+                                onClick={() => signOut()}
+                                className="p-2 text-gray-500 hover:text-red-500 transition-colors"
+                                title="Sign Out"
+                            >
+                                <LogOut className="w-4 h-4" />
+                            </button>
                         </div>
                     ) : (
                         <>
@@ -152,15 +173,18 @@ export function Header({ showDashboardLinks = false }: HeaderProps) {
                                     setReturnUrl(pathname);
                                     setIsLoginModalOpen(true);
                                 }}
-                                className="text-sm font-bold text-gray-300 hover:text-white px-4 transition-colors"
+                                className="text-sm font-black uppercase tracking-widest text-gray-500 hover:text-white px-4 transition-colors"
                             >
                                 Log in
                             </button>
                             <button
                                 onClick={() => setIsSignupModalOpen(true)}
-                                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-6 py-2.5 rounded-full text-sm font-bold transition-all shadow-lg shadow-blue-600/20 active:scale-95"
+                                className="relative overflow-hidden bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-xl shadow-blue-600/20 active:scale-95 group"
                             >
-                                Get Started
+                                <span className="relative z-10">Get Started</span>
+                                <motion.div
+                                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"
+                                />
                             </button>
                         </>
                     )}
