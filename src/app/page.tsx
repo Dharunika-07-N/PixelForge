@@ -17,9 +17,9 @@ import {
   UploadCloud,
   Cpu,
   HelpCircle,
-  Plus
+  CheckCircle2
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import Dropzone from "@/components/upload/Dropzone";
 import { Modal } from "@/components/ui/Modal";
