@@ -39,8 +39,10 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
     return (
         <div className="h-screen flex flex-col bg-gray-950 selection:bg-blue-500/30">
             <ProjectHeader
+                id={project.id}
                 name={project.name}
                 status={project.status}
+                updatedAt={project.updatedAt}
             />
             <ProjectWorkspace project={project} />
         </div>

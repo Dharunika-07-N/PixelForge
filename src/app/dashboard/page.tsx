@@ -73,7 +73,7 @@ export default async function DashboardPage() {
                                     key={project.id}
                                     id={project.id}
                                     name={project.name}
-                                    status={project.status as any}
+                                    status={project.status}
                                     createdAt={new Date(project.createdAt).toLocaleDateString('en-US', {
                                         month: 'short',
                                         day: 'numeric',

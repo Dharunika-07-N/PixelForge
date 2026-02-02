@@ -16,8 +16,9 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
+import { ProjectStatus as PrismaStatus } from "@prisma/client";
 
-export type ProjectStatus = "DRAFT" | "ANALYZED" | "COMPLETED" | "PROCESSING";
+export type ProjectStatus = PrismaStatus | "PROCESSING";
 
 interface ProjectCardProps {
     id: string;
