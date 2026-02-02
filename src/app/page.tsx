@@ -592,6 +592,71 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Module 12 - The Conversion Peak (Final CTA) */}
+      <section className="relative py-40 overflow-hidden">
+        {/* Decorative Gravity Background */}
+        <div className="absolute inset-0 bg-blue-600/5 -z-10" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-500/10 blur-[150px] rounded-full -z-10 animate-pulse" />
+
+        <div className="max-w-5xl mx-auto px-8">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="bg-gray-900/50 backdrop-blur-3xl border border-white/10 rounded-[3rem] p-12 md:p-24 text-center relative overflow-hidden group"
+          >
+            {/* Inner Glow */}
+            <div className="absolute inset-0 bg-gradient-to-b from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <h2 className="text-4xl md:text-7xl font-black mb-8 leading-tight tracking-tighter">
+                Ready to turn pixels <br />
+                into <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">production code?</span>
+              </h2>
+
+              <p className="text-xl text-gray-400 mb-12 max-w-2xl mx-auto font-medium">
+                Join 1,240+ developers accelerating their workflow with PixelForge.
+                Start for free, no credit card required.
+              </p>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+                <GetStartedButton
+                  onSignupClick={() => setShowSignupModal(true)}
+                  className="w-full sm:w-auto h-16 px-10 text-lg shadow-2xl shadow-blue-600/40"
+                />
+                <button
+                  onClick={() => router.push('/how-it-works')}
+                  className="w-full sm:w-auto px-10 py-5 bg-gray-950 border border-gray-800 rounded-2xl font-black hover:bg-gray-900 hover:border-gray-700 transition-all flex items-center justify-center gap-3 group/btn"
+                >
+                  <Box className="w-5 h-5 text-gray-500 group-hover/btn:text-blue-500 transition-colors" />
+                  Technical Docs
+                </button>
+              </div>
+
+              {/* Social Proof Badges */}
+              <div className="mt-16 flex flex-wrap justify-center items-center gap-8 opacity-40 grayscale group-hover:opacity-60 transition-opacity duration-700">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-green-500" />
+                  <span className="text-[10px] font-black tracking-widest uppercase">98% Accuracy</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-blue-500" />
+                  <span className="text-[10px] font-black tracking-widest uppercase">Type-Safe Output</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-purple-500" />
+                  <span className="text-[10px] font-black tracking-widest uppercase">React + Tailwind</span>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Footer */}
       <Footer />
 
