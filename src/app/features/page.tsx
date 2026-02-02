@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Copy, Code2, Zap, Layers, Play, CheckCircle2 } from "lucide-react";
+import { Code2, Zap, Layers, Play, CheckCircle2 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { motion } from "framer-motion";
