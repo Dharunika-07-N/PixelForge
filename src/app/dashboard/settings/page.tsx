@@ -20,7 +20,6 @@ import {
     Download,
     Eye,
     EyeOff,
-    X,
     Code,
     Smartphone,
     Monitor,
@@ -56,7 +55,7 @@ export default function SettingsPage() {
                             {sidebarItems.map((item) => (
                                 <button
                                     key={item.id}
-                                    onClick={() => setActiveSection(item.id as any)}
+                                    onClick={() => setActiveSection(item.id as typeof activeSection)}
                                     className={cn(
                                         "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all relative group w-full text-left",
                                         activeSection === item.id

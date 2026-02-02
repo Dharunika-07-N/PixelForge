@@ -20,7 +20,6 @@ import {
   CheckCircle2
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
 import Dropzone from "@/components/upload/Dropzone";
 import { Modal } from "@/components/ui/Modal";
 import { Header } from "@/components/layout/Header";
@@ -36,8 +35,8 @@ export default function LandingPage() {
   const [activeFeature, setActiveFeature] = useState<number | null>(null);
   const [showSignupModal, setShowSignupModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const router = useRouter();
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   const handleMouseMove = (e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect();
