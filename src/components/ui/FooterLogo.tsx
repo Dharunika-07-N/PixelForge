@@ -4,17 +4,39 @@ import React, { useState, useRef, useEffect } from "react";
 import { Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+import { trackEvent, getSessionStats } from "@/lib/analytics";
+
 export function FooterLogo() {
     const [isHovered, setIsHovered] = useState(false);
     const [isActive, setIsActive] = useState(false);
     const [srMessage, setSrMessage] = useState("");
     const animationFrameRef = useRef<number | null>(null);
+    const scrollMetadata = useRef<{ startTime: string; duration: number; stats: any } | null>(null);
 
-    const stopScroll = () => {
+    const stopScroll = (interrupted = false) => {
         if (animationFrameRef.current !== null) {
             cancelAnimationFrame(animationFrameRef.current);
             animationFrameRef.current = null;
             document.body.style.overscrollBehavior = "";
+
+            if (interrupted && scrollMetadata.current) {
+                trackEvent({
+                    event: "footer_logo_clicked",
+                    context: scrollMetadata.current.stats,
+                    scroll_behavior: {
+                        initiated_at: scrollMetadata.current.startTime,
+                        duration_ms: scrollMetadata.current.duration,
+                        interrupted: true,
+                        completed: false
+                    },
+                    device: {
+                        type: scrollMetadata.current.stats.device_type,
+                        browser: scrollMetadata.current.stats.browser,
+                        viewport: scrollMetadata.current.stats.viewport
+                    }
+                });
+                scrollMetadata.current = null;
+            }
         }
     };
 
@@ -32,12 +54,18 @@ export function FooterLogo() {
         // Cancel any existing momentum or auto-scroll
         const startPosition = window.scrollY;
         window.scrollTo(0, startPosition);
-        stopScroll();
+        stopScroll(true);
 
-        // Mobile vs Desktop duration
+        const stats = getSessionStats();
         const isMobile = window.innerWidth <= 768;
         const maxDuration = isMobile ? 800 : 1500;
         const duration = Math.max(400, Math.min(maxDuration, startPosition / 2));
+
+        scrollMetadata.current = {
+            startTime: new Date().toISOString(),
+            duration: duration,
+            stats: stats
+        };
 
         let startTime: number | null = null;
         setSrMessage("Scrolling to top of page");
@@ -70,6 +98,25 @@ export function FooterLogo() {
                 setSrMessage("Top of page reached");
                 document.body.style.overscrollBehavior = "";
                 animationFrameRef.current = null;
+
+                if (scrollMetadata.current) {
+                    trackEvent({
+                        event: "footer_logo_clicked",
+                        context: scrollMetadata.current.stats,
+                        scroll_behavior: {
+                            initiated_at: scrollMetadata.current.startTime,
+                            duration_ms: duration,
+                            interrupted: false,
+                            completed: true
+                        },
+                        device: {
+                            type: scrollMetadata.current.stats.device_type,
+                            browser: scrollMetadata.current.stats.browser,
+                            viewport: scrollMetadata.current.stats.viewport
+                        }
+                    });
+                    scrollMetadata.current = null;
+                }
             }
         };
 
@@ -78,7 +125,7 @@ export function FooterLogo() {
 
     // Listen for user interaction to cancel auto-scroll
     useEffect(() => {
-        const handleInteraction = () => stopScroll();
+        const handleInteraction = () => stopScroll(true);
 
         window.addEventListener("wheel", handleInteraction, { passive: true });
         window.addEventListener("touchmove", handleInteraction, { passive: true });

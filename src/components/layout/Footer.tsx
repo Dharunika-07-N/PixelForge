@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { FooterLogo } from "@/components/ui/FooterLogo";
+import { FooterLink } from "@/components/ui/FooterLink";
 
 export function Footer() {
     return (
@@ -15,19 +15,19 @@ export function Footer() {
                         </p>
                     </div>
                     <div>
-                        <h4 className="font-bold mb-6">Product</h4>
-                        <ul className="space-y-4 text-sm font-medium text-gray-400">
-                            <li><Link href="/#features" className="hover:text-white transition-colors">Features</Link></li>
-                            <li><Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link></li>
-                            <li><Link href="/signup" className="hover:text-white transition-colors">Join Beta</Link></li>
+                        <h4 className="font-bold mb-6 text-white">Product</h4>
+                        <ul className="space-y-4">
+                            <li><FooterLink href="/#features">Features</FooterLink></li>
+                            <li><FooterLink href="/dashboard">Dashboard</FooterLink></li>
+                            <li><FooterLink href="/signup">Join Beta</FooterLink></li>
                         </ul>
                     </div>
                     <div>
-                        <h4 className="font-bold mb-6">Social</h4>
-                        <ul className="space-y-4 text-sm font-medium text-gray-400">
-                            <li><Link href="#" className="hover:text-white transition-colors">Twitter</Link></li>
-                            <li><Link href="#" className="hover:text-white transition-colors">LinkedIn</Link></li>
-                            <li><Link href="https://github.com/Dharunika-07-N/PixelForge" className="hover:text-white transition-colors">GitHub</Link></li>
+                        <h4 className="font-bold mb-6 text-white">Social</h4>
+                        <ul className="space-y-4">
+                            <li><FooterLink href="https://twitter.com/pixelforge">Twitter</FooterLink></li>
+                            <li><FooterLink href="https://linkedin.com/company/pixelforge">LinkedIn</FooterLink></li>
+                            <li><FooterLink href="https://github.com/Dharunika-07-N/PixelForge">GitHub</FooterLink></li>
                         </ul>
                     </div>
                 </div>
