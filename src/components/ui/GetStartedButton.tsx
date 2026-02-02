@@ -137,12 +137,20 @@ export function GetStartedButton({
                 ) : (
                     <>
                         Get Started Free
-                        <ArrowRight
-                            className={cn(
-                                "w-6 h-6 transition-transform duration-200",
-                                isHovered && "translate-x-1"
-                            )}
-                        />
+                        <div className="relative w-6 h-6 overflow-hidden">
+                            <ArrowRight
+                                className={cn(
+                                    "w-6 h-6 transition-all duration-300 ease-out absolute inset-0",
+                                    isHovered ? "translate-x-full opacity-0" : "translate-x-0 opacity-100"
+                                )}
+                            />
+                            <ArrowRight
+                                className={cn(
+                                    "w-6 h-6 transition-all duration-300 ease-out absolute inset-0 -translate-x-full opacity-0",
+                                    isHovered && "translate-x-0 opacity-100"
+                                )}
+                            />
+                        </div>
                     </>
                 )}
             </span>
