@@ -10,7 +10,12 @@ import {
   Tablet as TabletIcon,
   Smartphone,
   Share2,
-  QrCode
+  QrCode,
+  Globe,
+  RefreshCw,
+  Box,
+  UploadCloud,
+  Cpu
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Dropzone from "@/components/upload/Dropzone";
@@ -439,6 +444,53 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Module 9 - The Trust Bar */}
+      <section className="relative py-20 border-y border-gray-900 overflow-hidden bg-gray-950/50">
+        <div className="max-w-7xl mx-auto px-8 mb-8 text-center">
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">Trusted by modern engineering teams</p>
+        </div>
+
+        <div className="flex relative items-center">
+          {/* Gradient Overlays for smooth edges */}
+          <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-gray-950 to-transparent z-10" />
+          <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-gray-950 to-transparent z-10" />
+
+          {/* Infinite Marquee - Module 9.3 */}
+          <motion.div
+            animate={{ x: ["0%", "-50%"] }}
+            transition={{
+              duration: 30,
+              repeat: Infinity,
+              ease: "linear"
+            }}
+            className="flex gap-20 items-center whitespace-nowrap"
+          >
+            {[...Array(2)].map((_, i) => (
+              <div key={i} className="flex gap-20 items-center pr-20">
+                {[
+                  { name: "Frontend.io", icon: <Globe className="w-5 h-5" /> },
+                  { name: "DevFlow", icon: <Zap className="w-5 h-5" /> },
+                  { name: "DesignLabs", icon: <Layers className="w-5 h-5" /> },
+                  { name: "StackSync", icon: <RefreshCw className="w-5 h-5" /> },
+                  { name: "UI.Forge", icon: <Box className="w-5 h-5" /> },
+                  { name: "PixelScale", icon: <Code2 className="w-5 h-5" /> },
+                ].map((partner, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-3 grayscale opacity-30 hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-pointer group"
+                  >
+                    <div className="p-2 bg-gray-900 rounded-lg border border-transparent group-hover:border-blue-500/30 group-hover:bg-blue-500/10 transition-all">
+                      {partner.icon}
+                    </div>
+                    <span className="text-xl font-bold tracking-tight text-white">{partner.name}</span>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section id="features" className="px-8 py-32 max-w-7xl mx-auto w-full outline-none" tabIndex={-1}>
         <div className="text-center mb-20 px-8">
@@ -468,6 +520,76 @@ export default function LandingPage() {
         >
           {activeFeature !== null && features[activeFeature].content}
         </Modal>
+      </section>
+
+      {/* Module 10 - The Flow Section */}
+      <section className="relative py-32 max-w-7xl mx-auto w-full border-t border-gray-900">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
+
+        <div className="text-center mb-24">
+          <h2 className="text-3xl font-black mb-4 uppercase tracking-tighter">Under the hood</h2>
+          <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">How PixelForge transforms design into production-ready code.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative px-8">
+          {/* Animated Connecting Lines (Desktop) - Module 10.2 */}
+          <div className="hidden md:block absolute top-[48px] left-[15%] right-[15%] h-[2px] bg-gray-900 -z-10 overflow-hidden">
+            <motion.div
+              animate={{ left: ["-20%", "120%"] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+              className="absolute top-0 w-40 h-full bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50"
+            />
+          </div>
+
+          {[
+            {
+              step: "01",
+              title: "Visual Ingest",
+              desc: "Screenshots are vectorized into semantic layers with pixel-perfect resolution.",
+              icon: <UploadCloud className="w-8 h-8 text-blue-500" />,
+              hud: "INGESTING_PNG: 14.2MB"
+            },
+            {
+              step: "02",
+              title: "AI Inference",
+              desc: "Deep learning models predict component hierarchy and style tokens.",
+              icon: <Cpu className="w-8 h-8 text-purple-500" />,
+              hud: "CONFIDENCE: 99.82%"
+            },
+            {
+              step: "03",
+              title: "Code Synthesis",
+              desc: "Clean, responsive React components are generated using production standards.",
+              icon: <Code2 className="w-8 h-8 text-green-500" />,
+              hud: "GEN_SIZE: 2.4KB"
+            }
+          ].map((item, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.2 }}
+              className="flex flex-col items-center text-center group"
+            >
+              <div className="w-24 h-24 bg-gray-950 rounded-3xl border border-gray-800 flex items-center justify-center mb-8 relative group-hover:border-blue-500/30 transition-all shadow-[0_0_50px_rgba(0,0,0,0.5)] bg-gradient-to-br from-gray-900 to-gray-950">
+                <div className="relative z-10">{item.icon}</div>
+                <div className="absolute -top-3 -right-3 w-8 h-8 bg-gray-950 border border-gray-800 rounded-full flex items-center justify-center text-[10px] font-black text-gray-500 group-hover:text-blue-500 transition-colors shadow-xl">
+                  {item.step}
+                </div>
+                <div className="absolute inset-0 bg-blue-500/5 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+
+              <h3 className="text-xl font-black mb-4 text-white group-hover:text-blue-400 transition-colors uppercase tracking-tight">{item.title}</h3>
+              <p className="text-sm text-gray-500 font-bold leading-relaxed mb-6 max-w-[240px]">{item.desc}</p>
+
+              {/* Technical HUD element - Module 10.3 */}
+              <div className="px-3 py-1.5 bg-black/40 border border-gray-900 rounded-lg font-mono text-[9px] text-gray-700 uppercase tracking-widest group-hover:text-blue-500 group-hover:border-blue-500/20 transition-all">
+                {item.hud}
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </section>
 
       {/* Footer */}
