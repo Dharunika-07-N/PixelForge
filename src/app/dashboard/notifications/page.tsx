@@ -133,7 +133,7 @@ export default function NotificationsPage() {
                         {["all", "extraction", "code", "system", "collaboration", "error"].map((t) => (
                             <button
                                 key={t}
-                                onClick={() => setFilter(t as any)}
+                                onClick={() => setFilter(t as NotificationType | "all")}
                                 className={cn(
                                     "px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all",
                                     filter === t ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" : "text-gray-500 hover:text-white"
