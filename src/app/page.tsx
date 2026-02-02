@@ -15,9 +15,12 @@ import {
   RefreshCw,
   Box,
   UploadCloud,
-  Cpu
+  Cpu,
+  HelpCircle,
+  Plus
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 import Dropzone from "@/components/upload/Dropzone";
 import { Modal } from "@/components/ui/Modal";
 import { Header } from "@/components/layout/Header";
@@ -592,6 +595,38 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Module 13 - Interactive FAQ Section */}
+      <section className="py-32 max-w-4xl mx-auto px-8">
+        <div className="text-center mb-16">
+          <HelpCircle className="w-12 h-12 text-blue-500 mx-auto mb-6 opacity-50" />
+          <h2 className="text-3xl md:text-5xl font-black mb-4 uppercase tracking-tighter">Frequently Asked</h2>
+          <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Everything you need to know about the forge.</p>
+        </div>
+
+        <div className="space-y-4">
+          {[
+            {
+              q: "How accurate is the React code generation?",
+              a: "Our current vision models achieve 98% structural accuracy. This means layouts, spacing, and Tailwind classes are near-perfect, though we always recommend a quick engineer review for complex state logic."
+            },
+            {
+              q: "Which design formats do you support?",
+              a: "PixelForge currently handles high-res PNG, JPG, and WebP screenshots. Direct Figma URL integration is coming in Beta v1.2."
+            },
+            {
+              q: "Is the generated code accessible?",
+              a: "Yes. By default, our synthesis engine applies ARIA labels to interactive elements and ensures proper semantic HTML hierarchy (nav, main, section, etc)."
+            },
+            {
+              q: "Can I use it with my existing design system?",
+              a: "You can upload a custom `tailwind.config.js` to our workspace to ensure generated code strictly follows your team's color palettes and spacing tokens."
+            }
+          ].map((faq, i) => (
+            <FAQItem key={i} question={faq.q} answer={faq.a} />
+          ))}
+        </div>
+      </section>
+
       {/* Module 12 - The Conversion Peak (Final CTA) */}
       <section className="relative py-40 overflow-hidden">
         {/* Decorative Gravity Background */}
@@ -679,6 +714,45 @@ export default function LandingPage() {
           setShowSignupModal(true);
         }}
       />
+    </div>
+  );
+}
+
+function FAQItem({ question, answer }: { question: string; answer: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <div
+      className={cn(
+        "border border-gray-900 rounded-2xl overflow-hidden transition-all duration-300 bg-gray-950/20",
+        isOpen ? "border-blue-500/30 bg-gray-900/40" : "hover:border-gray-800"
+      )}
+    >
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-8 py-6 flex items-center justify-between text-left"
+      >
+        <span className="font-bold text-lg text-white/90">{question}</span>
+        <motion.div
+          animate={{ rotate: isOpen ? 45 : 0 }}
+          className="text-gray-500"
+        >
+          <Plus className="w-5 h-5" />
+        </motion.div>
+      </button>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "circOut" }}
+          >
+            <div className="px-8 pb-6 text-gray-400 leading-relaxed font-medium text-sm border-t border-gray-900/50 pt-4">
+              {answer}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
