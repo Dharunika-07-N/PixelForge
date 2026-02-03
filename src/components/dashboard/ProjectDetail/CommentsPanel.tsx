@@ -1,124 +1,112 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
     MessageCircle,
-    X,
-    Send,
-    AtSign,
     CheckCircle2,
-    MoreHorizontal,
     Reply,
-    Trash2,
     Filter,
     Sparkles,
-    Zap
+    Send,
+    RefreshCw,
+    User as UserIcon
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface Comment {
     id: string;
-    author: {
+    user: {
+        id: string;
         name: string;
-        avatar: string;
-        role: string;
-        isAI?: boolean;
+        avatarUrl?: string;
     };
     content: string;
-    timestamp: string;
-    resolved: boolean;
-    replies: {
-        id: string;
-        author: string;
-        content: string;
-        timestamp: string;
-    }[];
+    createdAt: string;
+    isResolved: boolean;
+    replies: Comment[];
+    positionX?: number;
+    positionY?: number;
 }
 
-export function CommentsPanel() {
-    const [comments, setComments] = useState<Comment[]>([
-        {
-            id: "1",
-            author: {
-                name: "Sarah Chen",
-                avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
-                role: "Senior FE Engineer"
-            },
-            content: "Can we check the contrast ratio on this button? It looks a bit light for WCAG AA standards. @john please review.",
-            timestamp: "12m ago",
-            resolved: false,
-            replies: [
-                {
-                    id: "r1",
-                    author: "John Doe",
-                    content: "On it. I'll bump the contrast in the next generation.",
-                    timestamp: "5m ago"
-                }
-            ]
-        },
-        {
-            id: "ai-1",
-            author: {
-                name: "PixelForge AI",
-                avatar: "",
-                role: "Design Agent",
-                isAI: true
-            },
-            content: "I have analyzed the accessibility issues. Would you like me to automatically adjust the primary color for better contrast?",
-            timestamp: "Just now",
-            resolved: false,
-            replies: []
-        }
-    ]);
+interface CommentsPanelProps {
+    projectId: string;
+    pageId?: string;
+}
 
+export function CommentsPanel({ projectId, pageId }: CommentsPanelProps) {
+    const [comments, setComments] = useState<Comment[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [newComment, setNewComment] = useState("");
     const [filter, setFilter] = useState<"all" | "unresolved">("all");
     const [isAIMode, setIsAIMode] = useState(true);
     const [isSending, setIsSending] = useState(false);
 
-    const filteredComments = filter === "all" ? comments : comments.filter(c => !c.resolved);
+    const fetchComments = async () => {
+        try {
+            const res = await fetch(`/api/comments?projectId=${projectId}${pageId ? `&pageId=${pageId}` : ""}`);
+            const data = await res.json();
+            setComments(data.comments || []);
+        } catch (e) {
+            console.error("Failed to fetch comments", e);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchComments();
+    }, [projectId, pageId]);
+
+    const filteredComments = filter === "all" ? comments : comments.filter(c => !c.isResolved);
 
     const handleSendMessage = async () => {
         if (!newComment.trim()) return;
+        setIsSending(true);
 
-        const userComment: Comment = {
-            id: Date.now().toString(),
-            author: {
-                name: "You",
-                avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop",
-                role: "Developer"
-            },
-            content: newComment,
-            timestamp: "Just now",
-            resolved: false,
-            replies: []
-        };
+        try {
+            const res = await fetch("/api/comments", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    projectId,
+                    pageId,
+                    content: newComment,
+                })
+            });
 
-        setComments(prev => [...prev, userComment]);
-        setNewComment("");
-
-        if (isAIMode) {
-            setIsSending(true);
-            // Simulate AI response for now
-            setTimeout(() => {
-                const aiResponse: Comment = {
-                    id: (Date.now() + 1).toString(),
-                    author: {
-                        name: "PixelForge AI",
-                        avatar: "",
-                        role: "Design Agent",
-                        isAI: true
-                    },
-                    content: "Processing your request... I'm adjusting the design elements as requested. You'll see the updates in the preview panel shortly.",
-                    timestamp: "Just now",
-                    resolved: false,
-                    replies: []
-                };
-                setComments(prev => [...prev, aiResponse]);
-                setIsSending(false);
-            }, 1500);
+            if (res.ok) {
+                await fetchComments();
+                setNewComment("");
+            }
+        } catch (e) {
+            console.error("Comment send failed", e);
+        } finally {
+            setIsSending(false);
         }
+    };
+
+    const handleResolve = async (id: string, currentStatus: boolean) => {
+        try {
+            await fetch(`/api/comments/${id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ isResolved: !currentStatus })
+            });
+            await fetchComments();
+        } catch (e) {
+            console.error("Failed to resolve comment", e);
+        }
+    };
+
+    const timeAgo = (dateStr: string) => {
+        const seconds = Math.floor((new Date().getTime() - new Date(dateStr).getTime()) / 1000);
+        if (seconds < 60) return "just now";
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `${minutes}m ago`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours}h ago`;
+        return new Date(dateStr).toLocaleDateString();
     };
 
     return (
@@ -146,82 +134,86 @@ export function CommentsPanel() {
             </div>
 
             <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8">
-                <AnimatePresence initial={false}>
-                    {filteredComments.map((comment) => (
-                        <motion.div
-                            key={comment.id}
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: 20 }}
-                            className={cn(
-                                "group relative flex flex-col gap-3",
-                                comment.resolved && "opacity-50"
-                            )}
-                        >
-                            <div className="flex items-start gap-3">
-                                {comment.author.isAI ? (
-                                    <div className="w-8 h-8 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center mt-1">
-                                        <Sparkles className="w-4 h-4 text-blue-500" />
-                                    </div>
-                                ) : (
-                                    <img src={comment.author.avatar} alt={comment.author.name} className="w-8 h-8 rounded-full border-2 border-gray-900 mt-1" />
+                {isLoading ? (
+                    <div className="flex items-center justify-center h-40">
+                        <RefreshCw className="w-6 h-6 text-blue-500 animate-spin" />
+                    </div>
+                ) : filteredComments.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-40 text-center space-y-2 opacity-50">
+                        <MessageCircle className="w-8 h-8 text-gray-600" />
+                        <p className="text-xs font-medium text-gray-500 uppercase tracking-widest">No comments yet</p>
+                    </div>
+                ) : (
+                    <AnimatePresence initial={false}>
+                        {filteredComments.map((comment) => (
+                            <motion.div
+                                key={comment.id}
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 20 }}
+                                className={cn(
+                                    "group relative flex flex-col gap-3",
+                                    comment.isResolved && "opacity-50"
                                 )}
-                                <div className="flex-1">
-                                    <div className="flex items-center justify-between mb-1">
-                                        <div className="flex flex-col">
-                                            <span className={cn(
-                                                "text-sm font-bold uppercase tracking-tight",
-                                                comment.author.isAI ? "text-blue-400" : "text-white group-hover:text-blue-400 transition-colors"
-                                            )}>
-                                                {comment.author.name}
-                                            </span>
-                                            <span className="text-[10px] text-gray-600 font-bold uppercase tracking-widest">{comment.author.role}</span>
-                                        </div>
-                                        <span className="text-[10px] text-gray-600 font-mono">{comment.timestamp}</span>
+                            >
+                                <div className="flex items-start gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-gray-900 border border-gray-800 flex items-center justify-center mt-1 overflow-hidden">
+                                        {comment.user.avatarUrl ? (
+                                            <img src={comment.user.avatarUrl} alt={comment.user.name} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <UserIcon className="w-4 h-4 text-gray-600" />
+                                        )}
                                     </div>
-                                    <div className={cn(
-                                        "p-3 rounded-2xl text-sm leading-relaxed",
-                                        comment.author.isAI ? "bg-blue-600/5 border border-blue-500/20 text-blue-200" : "text-gray-400"
-                                    )}>
-                                        {comment.content.split(" ").map((word, i) => (
-                                            word.startsWith("@") ? <span key={i} className="text-blue-500 font-bold cursor-pointer hover:underline">{word} </span> : word + " "
-                                        ))}
+                                    <div className="flex-1">
+                                        <div className="flex items-center justify-between mb-1">
+                                            <div className="flex flex-col">
+                                                <span className="text-sm font-bold uppercase tracking-tight text-white group-hover:text-blue-400 transition-colors">
+                                                    {comment.user.name}
+                                                </span>
+                                            </div>
+                                            <span className="text-[10px] text-gray-600 font-mono">{timeAgo(comment.createdAt)}</span>
+                                        </div>
+                                        <div className="p-3 rounded-2xl text-sm leading-relaxed text-gray-400 bg-gray-900/50 border border-transparent group-hover:border-gray-800 transition-all">
+                                            {comment.content}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div className="flex items-center gap-4 ml-11">
-                                <button className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-blue-400 transition-colors">
-                                    <Reply className="w-3 h-3" />
-                                    Reply
-                                </button>
-                                <button
-                                    className={cn(
-                                        "flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest transition-colors",
-                                        comment.resolved ? "text-green-500" : "text-gray-600 hover:text-green-400"
-                                    )}
-                                >
-                                    <CheckCircle2 className="w-3 h-3" />
-                                    {comment.resolved ? "Resolved" : "Mark Resolved"}
-                                </button>
-                            </div>
-                        </motion.div>
-                    ))}
-                    {isSending && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="flex items-center gap-3 ml-11"
-                        >
-                            <div className="flex gap-1">
-                                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                            </div>
-                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">AI reflects...</span>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                                <div className="flex items-center gap-4 ml-11">
+                                    <button className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-blue-400 transition-colors">
+                                        <Reply className="w-3 h-3" />
+                                        Reply
+                                    </button>
+                                    <button
+                                        onClick={() => handleResolve(comment.id, comment.isResolved)}
+                                        className={cn(
+                                            "flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest transition-colors",
+                                            comment.isResolved ? "text-green-500" : "text-gray-600 hover:text-green-400"
+                                        )}
+                                    >
+                                        <CheckCircle2 className="w-3 h-3" />
+                                        {comment.isResolved ? "Resolved" : "Mark Resolved"}
+                                    </button>
+                                </div>
+
+                                {/* Replies */}
+                                {comment.replies?.length > 0 && (
+                                    <div className="ml-11 flex flex-col gap-4 border-l border-gray-900 pl-4 py-2">
+                                        {comment.replies.map((reply: any) => (
+                                            <div key={reply.id} className="flex flex-col gap-2">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[10px] font-bold text-gray-400 uppercase">{reply.user.name}</span>
+                                                    <span className="text-[8px] text-gray-600 font-mono">{timeAgo(reply.createdAt)}</span>
+                                                </div>
+                                                <p className="text-xs text-gray-500">{reply.content}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </motion.div>
+                        ))}
+                    </AnimatePresence>
+                )}
             </div>
 
             {/* Input Area */}
@@ -287,5 +279,3 @@ export function CommentsPanel() {
         </div>
     );
 }
-
-import { RefreshCw } from "lucide-react";

@@ -416,7 +416,7 @@ test('renders welcome message', () => {
           )}
           {rightTab === "colors" && <ColorPanel />}
           {rightTab === "typography" && <TypographyPanel />}
-          {rightTab === "comments" && <CommentsPanel />}
+          {rightTab === "comments" && <CommentsPanel projectId={project.id} pageId={activePageId} />}
           {rightTab === "system" && <DesignSystemPanel />}
           {rightTab === "history" && <VersionHistory />}
           {rightTab === "export" && <ExportPanel />}
