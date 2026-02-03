@@ -2,77 +2,78 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { handleApiError, AppError } from "@/lib/errors";
 import { generateFullStackCode } from "@/lib/code-generator";
-import { z } from "zod";
-
-const generateSchema = z.object({
-    optimizationId: z.string().cuid(),
-});
+import { handleApiError, AppError } from "@/lib/errors";
 
 /**
- * POST /api/optimize/generate-code - Generate code from a design
+ * POST /api/optimize/generate-code - Generate full-stack code for a design
  */
 export async function POST(request: NextRequest) {
     try {
         const session = await getServerSession(authOptions);
 
-        // @ts-expect-error session.user.id is added in authOptions
         if (!session?.user?.id) {
             throw new AppError("Unauthorized", 401, "UNAUTHORIZED");
         }
 
         const body = await request.json();
-        const { optimizationId } = generateSchema.parse(body);
+        const { pageId, options } = body;
 
-        // 1. Fetch optimization and check ownership
-        const optimization = await prisma.optimization.findUnique({
-            where: { id: optimizationId },
+        if (!pageId) {
+            throw new AppError("pageId is required", 400, "BAD_REQUEST");
+        }
+
+        // 1. Fetch the page and optimized design
+        const page = await prisma.page.findUnique({
+            where: { id: pageId },
             include: {
-                page: {
-                    include: {
-                        project: { select: { name: true, userId: true } }
-                    }
+                project: {
+                    select: { name: true, userId: true }
+                },
+                optimizations: {
+                    orderBy: { createdAt: "desc" },
+                    take: 1
                 }
             }
         });
 
-        if (!optimization) {
-            throw new AppError("Optimization record not found", 404, "NOT_FOUND");
+        if (!page) {
+            throw new AppError("Page not found", 404, "NOT_FOUND");
         }
 
-        // @ts-expect-error - session.user.id is added in authOptions
-        if (optimization.page.project.userId !== session.user.id) {
+        if (page.project.userId !== session.user.id) {
             throw new AppError("Forbidden", 403, "FORBIDDEN");
         }
 
-        if (!optimization.optimizedDesign) {
-            throw new AppError("Design has not been optimized yet", 400, "DESIGN_NOT_READY");
+        // Use optimized design if available, otherwise original
+        const canvasDataJSON = page.optimizations[0]?.optimizedDesign || page.canvasData;
+
+        if (!canvasDataJSON) {
+            throw new AppError("No design data found to generate code from", 400, "NO_DATA");
         }
 
-        // 2. Run Code Generation AI
-        const codeResponse = await generateFullStackCode(
-            JSON.parse(optimization.optimizedDesign),
-            optimization.page.project.name,
-            optimization.page.name
+        const canvasData = JSON.parse(canvasDataJSON);
+
+        // 2. Run Code Generation Engine
+        const generatedCode = await generateFullStackCode(
+            canvasData,
+            page.project.name,
+            page.name,
+            options
         );
 
-        // 3. Save generated code to database
-        const updatedOptimization = await prisma.optimization.update({
-            where: { id: optimizationId },
-            data: {
-                generatedCode: JSON.stringify(codeResponse),
-                status: "APPROVED" // Mark as approved once code is generated
-            }
+        // 3. Update project status
+        await prisma.project.update({
+            where: { id: page.projectId },
+            data: { status: "COMPLETED" }
         });
 
         return NextResponse.json({
-            optimization: updatedOptimization,
-            code: codeResponse
+            code: generatedCode
         }, { status: 200 });
 
     } catch (error) {
-        const err = handleApiError(error);
-        return NextResponse.json({ error: err.error }, { status: err.statusCode });
+        const { error: message, statusCode } = handleApiError(error);
+        return NextResponse.json({ error: message }, { status: statusCode });
     }
 }

@@ -23,6 +23,13 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
     const project = await prisma.project.findUnique({
         where: { id },
+        include: {
+            pages: {
+                orderBy: {
+                    order: "asc"
+                }
+            }
+        }
     });
 
     if (!project) {

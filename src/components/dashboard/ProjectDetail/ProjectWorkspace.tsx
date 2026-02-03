@@ -8,6 +8,7 @@ import { ElementsPanel } from "./ElementsPanel";
 import { ColorPanel } from "./ColorPanel";
 import { TypographyPanel } from "./TypographyPanel";
 import { CommentsPanel } from "./CommentsPanel";
+import { OptimizationPanel } from "./OptimizationPanel";
 import {
   Layers,
   Image as ImageIcon,
@@ -16,7 +17,8 @@ import {
   Palette,
   Type,
   MousePointer2,
-  MessageCircle
+  MessageCircle,
+  Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ErrorState } from "@/components/ui/ErrorState";
@@ -27,20 +29,7 @@ interface ProjectWorkspaceProps {
 
 export function ProjectWorkspace({ project }: ProjectWorkspaceProps) {
   const [leftTab, setLeftTab] = useState<"screenshot" | "elements">("screenshot");
-  const [rightTab, setRightTab] = useState<"preview" | "colors" | "typography" | "comments">("preview");
-
-  if (project.status === "FAILED") {
-    return (
-      <div className="flex-1 bg-gray-950 flex items-center justify-center">
-        <ErrorState
-          type="extraction"
-          onRetry={() => window.location.reload()}
-          onContactSupport={() => window.open('/support')}
-          onUploadDifferent={() => window.location.href = '/dashboard/new'}
-        />
-      </div>
-    );
-  }
+  const [rightTab, setRightTab] = useState<"preview" | "colors" | "typography" | "comments" | "optimize">("preview");
 
   // Mock code data
   const mockCode = {
@@ -121,6 +110,33 @@ test('renders welcome message', () => {
 });`
   };
 
+  const [codeData, setCodeData] = useState(mockCode);
+
+  const handleUpdateCode = (newCode: any) => {
+    if (!newCode || !newCode.components) return;
+
+    setCodeData({
+      component: newCode.components.find((c: any) => c.name.endsWith('.tsx'))?.content || "",
+      styles: newCode.components.find((c: any) => c.name.endsWith('.css'))?.content || "",
+      config: JSON.stringify(newCode.database || {}, null, 2),
+      tests: newCode.instructions || ""
+    });
+    setRightTab("preview");
+  };
+
+  if (project.status === "FAILED") {
+    return (
+      <div className="flex-1 bg-gray-950 flex items-center justify-center">
+        <ErrorState
+          type="extraction"
+          onRetry={() => window.location.reload()}
+          onContactSupport={() => window.open('/support')}
+          onUploadDifferent={() => window.location.href = '/dashboard/new'}
+        />
+      </div>
+    );
+  }
+
   return (
     <main className="flex-1 flex overflow-hidden">
       {/* Left Panel - 20% */}
@@ -162,16 +178,16 @@ test('renders welcome message', () => {
 
       {/* Center Panel - 50% */}
       <div className="flex-1 flex-shrink-0 h-full bg-gray-950 flex flex-col min-w-0">
-        <CodePanel code={mockCode} />
+        <CodePanel code={codeData} />
       </div>
 
       {/* Right Panel - 30% */}
       <div className="w-[30%] min-w-[360px] flex-shrink-0 h-full flex flex-col border-l border-gray-900 bg-gray-950/50 backdrop-blur-sm">
-        <div className="flex items-center px-4 pt-4 pb-2 gap-1 border-b border-gray-900/50">
+        <div className="flex items-center px-4 pt-4 pb-2 gap-1 border-b border-gray-900/50 overflow-x-auto no-scrollbar">
           <button
             onClick={() => setRightTab("preview")}
             className={cn(
-              "flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all",
+              "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
               rightTab === "preview"
                 ? "bg-green-600 text-white shadow-lg shadow-green-600/20"
                 : "text-gray-500 hover:text-white hover:bg-white/5"
@@ -181,9 +197,21 @@ test('renders welcome message', () => {
             Preview
           </button>
           <button
+            onClick={() => setRightTab("optimize")}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
+              rightTab === "optimize"
+                ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
+                : "text-gray-500 hover:text-white hover:bg-white/5"
+            )}
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            Optimize
+          </button>
+          <button
             onClick={() => setRightTab("colors")}
             className={cn(
-              "flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all",
+              "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
               rightTab === "colors"
                 ? "bg-purple-600 text-white shadow-lg shadow-purple-600/20"
                 : "text-gray-500 hover:text-white hover:bg-white/5"
@@ -195,7 +223,7 @@ test('renders welcome message', () => {
           <button
             onClick={() => setRightTab("typography")}
             className={cn(
-              "flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all",
+              "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
               rightTab === "typography"
                 ? "bg-orange-600 text-white shadow-lg shadow-orange-600/20"
                 : "text-gray-500 hover:text-white hover:bg-white/5"
@@ -207,7 +235,7 @@ test('renders welcome message', () => {
           <button
             onClick={() => setRightTab("comments")}
             className={cn(
-              "flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all",
+              "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
               rightTab === "comments"
                 ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
                 : "text-gray-500 hover:text-white hover:bg-white/5"
@@ -219,6 +247,13 @@ test('renders welcome message', () => {
         </div>
         <div className="flex-1 overflow-hidden relative">
           {rightTab === "preview" && <PreviewPanel />}
+          {rightTab === "optimize" && (
+            <OptimizationPanel
+              pageId={project.pages?.[0]?.id || "mock-page-id"}
+              onStatusChange={(status) => console.log("New Status:", status)}
+              onCodeGenerated={handleUpdateCode}
+            />
+          )}
           {rightTab === "colors" && <ColorPanel />}
           {rightTab === "typography" && <TypographyPanel />}
           {rightTab === "comments" && <CommentsPanel />}

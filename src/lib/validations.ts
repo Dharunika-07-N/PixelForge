@@ -90,3 +90,11 @@ export const generateCodeSchema = z.object({
     includeBackend: z.boolean().default(true),
     includeDatabase: z.boolean().default(true),
 });
+
+// Extraction validation
+export const extractSchema = z.object({
+    image: z.string().min(1, "Image data is required"), // Base64
+    mediaType: z.string().default("image/png"),
+    projectId: z.string().cuid().optional(),
+    pageName: z.string().optional().default("New Page"),
+});

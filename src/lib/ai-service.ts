@@ -69,7 +69,7 @@ export function getAnthropicClient(): Anthropic {
 }
 
 /**
- * Call Anthropic API with error handling
+ * Call Anthropic API for text-only prompts
  */
 export async function callAnthropic(
     prompt: string,
@@ -80,13 +80,69 @@ export async function callAnthropic(
         const client = getAnthropicClient();
 
         const response = await client.messages.create({
-            model: "claude-sonnet-4-20250514",
+            model: "claude-3-5-sonnet-20240620",
             max_tokens: maxTokens,
             system: systemPrompt,
             messages: [
                 {
                     role: "user",
                     content: prompt,
+                },
+            ],
+        });
+
+        const content = response.content[0];
+        if (content.type === "text") {
+            return content.text;
+        }
+
+        throw new AppError("Unexpected response format from AI", 500, "AI_ERROR");
+    } catch (error) {
+        if (error instanceof Anthropic.APIError) {
+            throw new AppError(
+                `AI API Error: ${error.message}`,
+                error.status || 500,
+                "AI_API_ERROR"
+            );
+        }
+        throw error;
+    }
+}
+
+/**
+ * Call Anthropic API with vision support
+ */
+export async function callAnthropicVision(
+    prompt: string,
+    base64Image: string,
+    mediaType: string = "image/png",
+    systemPrompt?: string,
+    maxTokens: number = 4000
+): Promise<string> {
+    try {
+        const client = getAnthropicClient();
+
+        const response = await client.messages.create({
+            model: "claude-3-5-sonnet-20240620", // Use vision-capable model
+            max_tokens: maxTokens,
+            system: systemPrompt,
+            messages: [
+                {
+                    role: "user",
+                    content: [
+                        {
+                            type: "image",
+                            source: {
+                                type: "base64",
+                                media_type: mediaType as any,
+                                data: base64Image,
+                            },
+                        },
+                        {
+                            type: "text",
+                            text: prompt,
+                        },
+                    ],
                 },
             ],
         });
