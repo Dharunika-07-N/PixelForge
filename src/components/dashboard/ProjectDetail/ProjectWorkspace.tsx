@@ -22,18 +22,23 @@ import {
   MessageCircle,
   Sparkles,
   Zap,
-  Settings
+  Settings,
+  Box,
+  Wind
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { ComponentLibrary } from "./ComponentLibrary";
+import { DesignSystemPanel } from "./DesignSystemPanel";
 
 interface ProjectWorkspaceProps {
   project: any;
+  activePageId: string;
 }
 
-export function ProjectWorkspace({ project }: ProjectWorkspaceProps) {
-  const [leftTab, setLeftTab] = useState<"screenshot" | "elements">("screenshot");
-  const [rightTab, setRightTab] = useState<"preview" | "colors" | "typography" | "comments" | "optimize" | "refine" | "config">("preview");
+export function ProjectWorkspace({ project, activePageId }: ProjectWorkspaceProps) {
+  const [leftTab, setLeftTab] = useState<"screenshot" | "elements" | "library">("screenshot");
+  const [rightTab, setRightTab] = useState<"preview" | "colors" | "typography" | "comments" | "optimize" | "refine" | "config" | "system">("preview");
   const [codeConfig, setCodeConfig] = useState<any>({
     framework: "nextjs",
     language: "typescript",
@@ -176,13 +181,25 @@ test('renders welcome message', () => {
             <Layers className="w-3.5 h-3.5" />
             Elements
           </button>
+          <button
+            onClick={() => setLeftTab("library")}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all",
+              leftTab === "library"
+                ? "bg-purple-600 text-white shadow-lg shadow-purple-600/20"
+                : "text-gray-500 hover:text-white hover:bg-white/5"
+            )}
+          >
+            <Box className="w-3.5 h-3.5" />
+            Library
+          </button>
         </div>
         <div className="flex-1 overflow-hidden relative">
-          {leftTab === "screenshot" ? (
+          {leftTab === "screenshot" && (
             <ScreenshotPanel imageUrl={project?.thumbnailUrl || "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop"} />
-          ) : (
-            <ElementsPanel />
           )}
+          {leftTab === "elements" && <ElementsPanel />}
+          {leftTab === "library" && <ComponentLibrary />}
         </div>
       </div>
 
@@ -278,12 +295,24 @@ test('renders welcome message', () => {
             <Settings className="w-3.5 h-3.5" />
             Config
           </button>
+          <button
+            onClick={() => setRightTab("system")}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
+              rightTab === "system"
+                ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
+                : "text-gray-500 hover:text-white hover:bg-white/5"
+            )}
+          >
+            <Wind className="w-3.5 h-3.5" />
+            System
+          </button>
         </div>
         <div className="flex-1 overflow-hidden relative">
           {rightTab === "preview" && <PreviewPanel />}
           {rightTab === "optimize" && (
             <OptimizationPanel
-              pageId={project.pages?.[0]?.id || "mock-page-id"}
+              pageId={activePageId}
               onStatusChange={(status) => console.log("New Status:", status)}
               onCodeGenerated={handleUpdateCode}
               config={codeConfig}
@@ -291,7 +320,7 @@ test('renders welcome message', () => {
           )}
           {rightTab === "refine" && (
             <RefinementWorkflow
-              pageId={project.pages?.[0]?.id || "mock-page-id"}
+              pageId={activePageId}
               onApprove={(id) => console.log("Approved", id)}
               onReject={(id) => console.log("Rejected", id)}
             />
@@ -304,6 +333,7 @@ test('renders welcome message', () => {
           {rightTab === "colors" && <ColorPanel />}
           {rightTab === "typography" && <TypographyPanel />}
           {rightTab === "comments" && <CommentsPanel />}
+          {rightTab === "system" && <DesignSystemPanel />}
         </div>
       </div>
     </main>

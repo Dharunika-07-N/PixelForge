@@ -18,6 +18,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ProjectStatus } from "@prisma/client";
+import { PageSwitcher } from "./PageSwitcher";
 import { ShareModal } from "./ShareModal";
 import { UpgradeModal } from "@/components/pricing/UpgradeModal";
 
@@ -26,9 +27,22 @@ interface ProjectHeaderProps {
     name: string;
     status: ProjectStatus;
     updatedAt: Date;
+    pages: any[];
+    activePageId: string;
+    onPageChange: (id: string) => void;
+    onAddPage: () => void;
 }
 
-export function ProjectHeader({ id, name: initialName, status, updatedAt }: ProjectHeaderProps) {
+export function ProjectHeader({
+    id,
+    name: initialName,
+    status,
+    updatedAt,
+    pages,
+    activePageId,
+    onPageChange,
+    onAddPage
+}: ProjectHeaderProps) {
     const router = useRouter();
     const [isEditing, setIsEditing] = useState(false);
     const [name, setName] = useState(initialName);
@@ -154,6 +168,17 @@ export function ProjectHeader({ id, name: initialName, status, updatedAt }: Proj
                 >
                     <ArrowLeft className="w-5 h-5" />
                 </button>
+
+                <PageSwitcher
+                    pages={pages}
+                    activePageId={activePageId}
+                    onPageSelect={onPageChange}
+                    onAddPage={onAddPage}
+                    onDeletePage={(id) => console.log("Delete page", id)}
+                    onRenamePage={(id, name) => console.log("Rename page", id, name)}
+                />
+
+                <div className="w-px h-8 bg-gray-900 mx-1" />
 
                 <div className="flex flex-col">
                     <div className="flex items-center gap-3">

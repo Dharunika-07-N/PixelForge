@@ -3,8 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
-import { ProjectHeader } from "@/components/dashboard/ProjectDetail/ProjectHeader";
-import { ProjectWorkspace } from "@/components/dashboard/ProjectDetail/ProjectWorkspace";
+import { ProjectClientLayout } from "@/components/dashboard/ProjectDetail/ProjectClientLayout";
 
 interface ProjectDetailPageProps {
     params: {
@@ -44,14 +43,6 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
     }
 
     return (
-        <div className="h-screen flex flex-col bg-gray-950 selection:bg-blue-500/30">
-            <ProjectHeader
-                id={project.id}
-                name={project.name}
-                status={project.status}
-                updatedAt={project.updatedAt}
-            />
-            <ProjectWorkspace project={project} />
-        </div>
+        <ProjectClientLayout project={project} />
     );
 }
