@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Dropzone from "@/components/upload/Dropzone";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -10,16 +10,18 @@ import {
     Code2,
     Palette,
     Layers,
-    ArrowRight
+    ArrowRight,
+    AlertCircle
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 export function UploadFlow() {
     const router = useRouter();
-    const [status, setStatus] = useState<"idle" | "uploading" | "processing" | "complete">("idle");
+    const [status, setStatus] = useState<"idle" | "uploading" | "processing" | "complete" | "error">("idle");
     const [progress, setProgress] = useState(0);
     const [activeStep, setActiveStep] = useState(0);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const processingSteps = [
         { icon: Scan, label: "Analyzing Layout Structure", detail: "Identifying containers and grids..." },
@@ -28,39 +30,78 @@ export function UploadFlow() {
         { icon: Code2, label: "Generating React Code", detail: "Compiling JSX and Tailwind classes..." },
     ];
 
+    const convertFileToBase64 = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = error => reject(error);
+        });
+    };
+
     const handleUpload = async (file: File) => {
         setStatus("uploading");
+        setProgress(10);
 
-        // Simulate upload
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-        setStatus("processing");
-
-        // Simulate processing steps
-        for (let i = 0; i < processingSteps.length; i++) {
-            setActiveStep(i);
-            const stepDuration = 1500 + Math.random() * 1000;
-            const increment = 100 / (processingSteps.length * (stepDuration / 100));
-
-            await new Promise<void>(resolve => {
-                let currentProgress = i * 25;
-                const interval = setInterval(() => {
-                    currentProgress += increment;
-                    if (currentProgress >= (i + 1) * 25) {
-                        currentProgress = (i + 1) * 25;
-                        clearInterval(interval);
-                        resolve();
-                    }
-                    setProgress(currentProgress);
-                }, 100);
+        try {
+            // 1. Create a Project first
+            const projectRes = await fetch("/api/projects", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: `Project - ${new Date().toLocaleDateString()}`,
+                    description: "AI-generated project from screenshot extraction."
+                })
             });
-        }
 
-        setStatus("complete");
-        setTimeout(() => {
-            // Redirect to a mock project
-            router.push("/dashboard/project/new-project-id");
-        }, 1000);
+            if (!projectRes.ok) throw new Error("Failed to create project");
+            const { project } = await projectRes.json();
+
+            setProgress(30);
+            setStatus("processing");
+            setActiveStep(0);
+
+            // 2. Convert image to base64
+            const base64 = await convertFileToBase64(file);
+
+            // 3. Extract and save
+            setActiveStep(1);
+            setProgress(50);
+
+            const extractRes = await fetch("/api/extract", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    image: base64,
+                    projectId: project.id,
+                    pageName: "Home Page"
+                })
+            });
+
+            if (!extractRes.ok) {
+                const error = await extractRes.json();
+                throw new Error(error.error || "Extraction failed");
+            }
+
+            setActiveStep(2);
+            setProgress(75);
+
+            // Simulate slow "code generation" phase for UX
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            setActiveStep(3);
+            setProgress(100);
+            setStatus("complete");
+
+            setTimeout(() => {
+                router.push(`/dashboard/project/${project.id}`);
+            }, 1000);
+
+        } catch (err: any) {
+            console.error(err);
+            setErrorMessage(err.message);
+            setStatus("error");
+        }
     };
 
     return (
@@ -123,15 +164,15 @@ export function UploadFlow() {
                                     </div>
                                 </div>
                                 <h3 className="text-2xl font-black text-white mb-2">
-                                    {status === "uploading" ? "Uploading Asset..." : "Analyzing Design"}
+                                    {status === "uploading" ? "Creating Project..." : "Analyzing Design"}
                                 </h3>
-                                <p className="text-gray-500 font-medium">Please wait while our AI models get to work.</p>
+                                <p className="text-gray-500 font-medium">Our AI is modeling your layout in real-time.</p>
                             </div>
 
                             <div className="space-y-4 max-w-md mx-auto">
                                 {processingSteps.map((step, index) => {
                                     const isActive = status === "processing" && index === activeStep;
-                                    const isCompleted = status === "processing" && index < activeStep;
+                                    const isCompleted = status === "processing" && index < activeStep || (status === "complete");
                                     const isPending = status === "processing" && index > activeStep;
 
                                     return (
@@ -181,21 +222,35 @@ export function UploadFlow() {
                         <div className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mb-8 shadow-[0_0_50px_rgba(34,197,94,0.3)] animate-bounce">
                             <CheckCircle2 className="w-12 h-12 text-white" />
                         </div>
-                        <h2 className="text-4xl font-black text-white mb-4">Extraction Complete!</h2>
-                        <p className="text-gray-400 text-lg mb-8">Redirecting you to the project dashboard...</p>
-                        <LinkButton href="/dashboard/project/new-project-id" />
+                        <h2 className="text-4xl font-black text-white mb-4">Success!</h2>
+                        <p className="text-gray-400 text-lg mb-8">Your production-ready workspace is ready.</p>
+                        <div className="flex items-center gap-2 text-blue-500 font-bold">
+                            Redirecting now <Loader2 className="w-4 h-4 animate-spin" />
+                        </div>
+                    </motion.div>
+                )}
+
+                {status === "error" && (
+                    <motion.div
+                        key="error"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="flex flex-col items-center justify-center text-center py-12"
+                    >
+                        <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mb-6 text-red-500">
+                            <AlertCircle className="w-10 h-10" />
+                        </div>
+                        <h2 className="text-2xl font-black text-white mb-4">Extraction Error</h2>
+                        <p className="text-gray-400 mb-8 max-w-sm">{errorMessage}</p>
+                        <button
+                            onClick={() => setStatus("idle")}
+                            className="px-8 py-3 bg-white text-black rounded-xl font-black uppercase tracking-widest text-xs hover:bg-gray-100 transition-all"
+                        >
+                            Try Again
+                        </button>
                     </motion.div>
                 )}
             </AnimatePresence>
         </div>
     );
-}
-
-function LinkButton({ href }: { href: string }) {
-    // Just for visual completeness if auto-redirect fails/delays
-    return (
-        <a href={href} className="flex items-center gap-2 text-blue-500 font-bold hover:text-blue-400 transition-colors">
-            Go directly <ArrowRight className="w-4 h-4" />
-        </a>
-    )
 }

@@ -10,7 +10,7 @@ export default function NewProjectPage() {
             <div className="p-8">
                 <Link href="/dashboard" className="inline-flex items-center gap-2 text-gray-500 hover:text-white transition-colors text-sm font-bold uppercase tracking-widest">
                     <ArrowLeft className="w-4 h-4" />
-                    Back either Dashboard
+                    Back to Dashboard
                 </Link>
             </div>
 
