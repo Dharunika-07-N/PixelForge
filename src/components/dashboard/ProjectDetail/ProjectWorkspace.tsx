@@ -421,9 +421,9 @@ test('renders welcome message', () => {
           {rightTab === "history" && <VersionHistory />}
           {rightTab === "export" && <ExportPanel />}
           {rightTab === "analytics" && <AnalyticsPanel projectId={project.id} />}
-          {rightTab === "testing" && <TestingPanel />}
-          {rightTab === "docs" && <DocumentationPanel />}
-          {rightTab === "deployment" && <DeploymentPanel />}
+          {rightTab === "testing" && <TestingPanel pageId={activePageId} />}
+          {rightTab === "docs" && <DocumentationPanel pageId={activePageId} />}
+          {rightTab === "deployment" && <DeploymentPanel projectId={project.id} />}
         </div>
       </div>
     </main>

@@ -28,52 +28,70 @@ interface Environment {
     type: "production" | "staging" | "preview";
 }
 
-const ENVIRONMENTS: Environment[] = [
-    {
-        id: "prod",
-        name: "Production",
-        url: "pixelforge-demo.vercel.app",
-        status: "online",
-        lastDeploy: "2 days ago",
-        type: "production"
-    },
-    {
-        id: "staging",
-        name: "Staging (v1.0.4)",
-        url: "pixelforge-demo-staging.vercel.app",
-        status: "online",
-        lastDeploy: "12 mins ago",
-        type: "staging"
-    },
-    {
-        id: "preview",
-        name: "PR #42 Refactor",
-        url: "pixelforge-demo-git-feat.apps.io",
-        status: "building",
-        lastDeploy: "In progress",
-        type: "preview"
-    }
-];
+interface DeploymentPanelProps {
+    projectId: string;
+}
 
-export function DeploymentPanel() {
+export function DeploymentPanel({ projectId }: DeploymentPanelProps) {
     const [isDeploying, setIsDeploying] = useState(false);
     const [deployStep, setDeployStep] = useState(0);
+    const [environments, setEnvironments] = useState<Environment[]>([
+        {
+            id: "staging",
+            name: "Staging (v1.0.4)",
+            url: "pixelforge-demo-staging.vercel.app",
+            status: "online",
+            lastDeploy: "12 mins ago",
+            type: "staging"
+        }
+    ]);
 
-    const handleDeploy = () => {
+    const handleDeploy = async () => {
         setIsDeploying(true);
         setDeployStep(0);
 
         const steps = ["Bundling assets", "Generating dynamic routes", "Optimizing media", "Finalizing cloud edge sync"];
-        let currentStep = 0;
+        let currentIter = 0;
 
         const interval = setInterval(() => {
-            if (currentStep >= steps.length - 1) {
-                clearInterval(interval);
-                setTimeout(() => setIsDeploying(false), 2000);
+            if (currentIter < steps.length) {
+                setDeployStep(currentIter);
+                currentIter++;
             }
-            setDeployStep(currentStep);
-            currentStep++;
-        }, 1500);
+        }, 1200);
+
+        try {
+            const res = await fetch("/api/optimize/deploy", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ projectId })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                clearInterval(interval);
+                setDeployStep(steps.length - 1);
+
+                // Add to environments
+                const newEnv: Environment = {
+                    id: `deploy-${Date.now()}`,
+                    name: "Full Stack Deployment",
+                    url: data.url.replace("https://", ""),
+                    status: "online",
+                    lastDeploy: "Just now",
+                    type: "production"
+                };
+
+                setTimeout(() => {
+                    setEnvironments(prev => [newEnv, ...prev]);
+                    setIsDeploying(false);
+                }, 1000);
+            }
+        } catch (e) {
+            console.error(e);
+            clearInterval(interval);
+            setIsDeploying(false);
+        }
     };
 
     return (
@@ -97,8 +115,19 @@ export function DeploymentPanel() {
                     </div>
 
                     <div className="space-y-3">
-                        {ENVIRONMENTS.map((env) => (
-                            <div key={env.id} className="p-4 bg-gray-900 border border-gray-800 rounded-2xl group hover:border-gray-700 transition-all">
+                        {environments.length === 0 && !isDeploying && (
+                            <div className="p-12 text-center border-2 border-dashed border-gray-900 rounded-3xl">
+                                <Globe className="w-8 h-8 text-gray-700 mx-auto mb-4" />
+                                <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest">No active deployments</p>
+                            </div>
+                        )}
+                        {environments.map((env) => (
+                            <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                key={env.id}
+                                className="p-4 bg-gray-900 border border-gray-800 rounded-2xl group hover:border-gray-700 transition-all"
+                            >
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center gap-2">
                                         <div className={cn(
@@ -120,12 +149,12 @@ export function DeploymentPanel() {
                                     </a>
                                     <span className="text-[10px] font-bold text-gray-700 uppercase tracking-tight">{env.lastDeploy}</span>
                                 </div>
-                            </div>
+                            </motion.div>
                         ))}
                     </div>
                 </section>
 
-                {/* Deploy Progress (Optional) */}
+                {/* Deploy Progress */}
                 <AnimatePresence>
                     {isDeploying && (
                         <motion.div
@@ -153,24 +182,9 @@ export function DeploymentPanel() {
                         </motion.div>
                     )}
                 </AnimatePresence>
-
-                {/* Cloud Providers */}
-                <section className="space-y-4">
-                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Connect Provider</label>
-                    <div className="grid grid-cols-2 gap-3">
-                        <button className="flex items-center gap-3 p-4 bg-gray-900 border border-gray-800 rounded-2xl hover:border-blue-500/30 transition-all group">
-                            <Triangle className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
-                            <span className="text-[10px] font-black text-white uppercase tracking-widest">Vercel</span>
-                        </button>
-                        <button className="flex items-center gap-3 p-4 bg-gray-900 border border-gray-800 rounded-2xl hover:border-blue-500/30 transition-all group">
-                            <Cloud className="w-5 h-5 text-blue-400 group-hover:scale-110 transition-transform" />
-                            <span className="text-[10px] font-black text-white uppercase tracking-widest">Netlify</span>
-                        </button>
-                    </div>
-                </section>
             </div>
 
-            <div className="p-6 border-t border-gray-900">
+            <div className="p-6 border-t border-gray-900 bg-gray-900/50">
                 <button
                     onClick={handleDeploy}
                     disabled={isDeploying}

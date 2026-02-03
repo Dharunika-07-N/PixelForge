@@ -24,56 +24,82 @@ interface TestCase {
     description: string;
     status: "passed" | "failed" | "pending";
     type: "accessibility" | "visual" | "interactive";
+    errorLog?: string;
 }
 
-const TEST_CASES: TestCase[] = [
-    {
-        id: "t1",
-        name: "Color Contrast Ratio",
-        description: "Verify all text elements meet WCAG AA standards",
-        status: "passed",
-        type: "accessibility"
-    },
-    {
-        id: "t2",
-        name: "Interactive Target Size",
-        description: "Checking if buttons have at least 44x44px hit area",
-        status: "passed",
-        type: "interactive"
-    },
-    {
-        id: "t3",
-        name: "Font Weight Consistency",
-        description: "Checking for irregular font weights in headings",
-        status: "failed",
-        type: "visual"
-    },
-    {
-        id: "t4",
-        name: "Edge Case: Long Text Overflow",
-        description: "Simulating 500-character strings in inputs",
-        status: "pending",
-        type: "interactive"
-    }
-];
+interface TestingPanelProps {
+    pageId: string;
+}
 
-export function TestingPanel() {
+export function TestingPanel({ pageId }: TestingPanelProps) {
     const [isRunning, setIsRunning] = useState(false);
     const [progress, setProgress] = useState(0);
+    const [testCases, setTestCases] = useState<TestCase[]>([
+        {
+            id: "t1",
+            name: "Color Contrast Ratio",
+            description: "Verify all text elements meet WCAG AA standards",
+            status: "pending",
+            type: "accessibility"
+        },
+        {
+            id: "t2",
+            name: "Interactive Target Size",
+            description: "Checking if buttons have at least 44x44px hit area",
+            status: "pending",
+            type: "interactive"
+        },
+        {
+            id: "t3",
+            name: "Font Weight Consistency",
+            description: "Checking for irregular font weights in headings",
+            status: "pending",
+            type: "visual"
+        }
+    ]);
+    const [logs, setLogs] = useState<{ time: string, msg: string, type: 'info' | 'warn' | 'error' | 'success' }[]>([]);
 
-    const runTests = () => {
+    const addLog = (msg: string, type: 'info' | 'warn' | 'error' | 'success' = 'info') => {
+        const time = new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        setLogs(prev => [...prev, { time, msg, type }].slice(-5));
+    };
+
+    const runTests = async () => {
         setIsRunning(true);
         setProgress(0);
-        const interval = setInterval(() => {
-            setProgress(prev => {
-                if (prev >= 100) {
-                    clearInterval(interval);
-                    setIsRunning(false);
-                    return 100;
-                }
-                return prev + 2;
+        setLogs([]);
+        addLog("Initializing AI Testing Suite...", "info");
+
+        try {
+            // Simulate progression
+            const interval = setInterval(() => {
+                setProgress(prev => Math.min(prev + Math.random() * 10, 90));
+            }, 300);
+
+            addLog("Scanning DOM elements and styles...", "info");
+
+            const res = await fetch("/api/optimize/test", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ pageId })
             });
-        }, 50);
+
+            clearInterval(interval);
+            setProgress(100);
+
+            if (res.ok) {
+                const data = await res.json();
+                setTestCases(data.tests || []);
+                addLog("Validation complete. Reports generated.", "success");
+            } else {
+                addLog("API Error occurred during validation.", "error");
+            }
+        } catch (e) {
+            addLog("Critical failure in test runner.", "error");
+            console.error(e);
+        } finally {
+            setIsRunning(false);
+        }
     };
 
     return (
@@ -104,8 +130,8 @@ export function TestingPanel() {
                             className="bg-gray-900 border border-gray-800 rounded-2xl p-4 space-y-2"
                         >
                             <div className="flex items-center justify-between text-[10px] font-black text-gray-500 uppercase tracking-widest">
-                                <span>Simulating Interactions...</span>
-                                <span>{progress}%</span>
+                                <span>Verifying Design Tokens...</span>
+                                <span>{Math.round(progress)}%</span>
                             </div>
                             <div className="h-1.5 w-full bg-gray-800 rounded-full overflow-hidden">
                                 <motion.div
@@ -119,7 +145,7 @@ export function TestingPanel() {
                 </AnimatePresence>
 
                 <div className="space-y-4">
-                    {TEST_CASES.map((test) => (
+                    {testCases.map((test) => (
                         <div key={test.id} className="p-4 bg-gray-900 border border-gray-800 rounded-2xl hover:border-gray-700 transition-all group">
                             <div className="flex items-start justify-between">
                                 <div className="space-y-1">
@@ -132,35 +158,37 @@ export function TestingPanel() {
                                 <div className="flex items-center gap-2">
                                     {test.status === "passed" && <CheckCircle2 className="w-4 h-4 text-green-500" />}
                                     {test.status === "failed" && <AlertTriangle className="w-4 h-4 text-orange-500" />}
-                                    {test.status === "pending" && <Activity className="w-4 h-4 text-blue-500/50" />}
+                                    {test.status === "pending" && <Activity className="w-4 h-4 text-gray-700" />}
                                 </div>
                             </div>
 
-                            {test.status === "failed" && (
+                            {test.status === "failed" && test.errorLog && (
                                 <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
                                     <div className="flex items-center gap-2 text-[10px] font-black text-red-400 uppercase tracking-widest mb-1">
                                         <Bug className="w-3 h-3" />
                                         Error Log
                                     </div>
-                                    <p className="text-[10px] font-mono text-red-300/80 leading-relaxed italic">Heading font weight '950' is not in the design token set. Recommended: '900'.</p>
+                                    <p className="text-[10px] font-mono text-red-300/80 leading-relaxed italic">{test.errorLog}</p>
                                 </div>
                             )}
                         </div>
                     ))}
                 </div>
 
-                <div className="p-6 bg-gradient-to-br from-green-600 to-emerald-600 rounded-[2rem] text-white shadow-2xl shadow-green-600/20 relative overflow-hidden group">
-                    <ShieldCheck className="absolute -right-4 -bottom-4 w-32 h-32 opacity-10 rotate-12 group-hover:rotate-0 transition-transform duration-700" />
-                    <h4 className="text-lg font-black mb-1 relative z-10 flex items-center gap-2">
-                        Compliance Check
-                    </h4>
-                    <p className="text-xs font-bold text-green-100/80 mb-6 relative z-10">
-                        Your design is currently 92% accessible. Fixed 2 issues in the last scan.
-                    </p>
-                    <button className="w-full py-4 bg-white text-green-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all relative z-10 shadow-xl">
-                        Download Report (.CSV)
-                    </button>
-                </div>
+                {!isRunning && testCases.length > 0 && testCases.every(t => t.status === 'passed') && (
+                    <div className="p-6 bg-gradient-to-br from-green-600 to-emerald-600 rounded-[2rem] text-white shadow-2xl shadow-green-600/20 relative overflow-hidden group">
+                        <ShieldCheck className="absolute -right-4 -bottom-4 w-32 h-32 opacity-10 rotate-12 group-hover:rotate-0 transition-transform duration-700" />
+                        <h4 className="text-lg font-black mb-1 relative z-10 flex items-center gap-2">
+                            Clean Build
+                        </h4>
+                        <p className="text-xs font-bold text-green-100/80 mb-6 relative z-10">
+                            Your design meets all brand and accessibility guidelines. Ready for code export.
+                        </p>
+                        <button className="w-full py-4 bg-white text-green-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all relative z-10 shadow-xl">
+                            Download Compliance Report
+                        </button>
+                    </div>
+                )}
             </div>
 
             <div className="p-4 bg-black border-t border-gray-900">
@@ -169,9 +197,20 @@ export function TestingPanel() {
                     <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest">Test Terminal</span>
                 </div>
                 <div className="font-mono text-[9px] text-gray-500 space-y-1">
-                    <div>[09:42:15] Initializing headless renderer...</div>
-                    <div className="text-blue-400">[09:42:16] Scanning DOM for interactive elements...</div>
-                    <div className="text-green-400">[09:42:18] Accessibility scan complete. (0 errors)</div>
+                    {logs.length === 0 ? (
+                        <div className="opacity-30">Terminal idle... waiting for run</div>
+                    ) : (
+                        logs.map((log, i) => (
+                            <div key={i} className={cn(
+                                log.type === 'error' && "text-red-400",
+                                log.type === 'success' && "text-green-400",
+                                log.type === 'warn' && "text-yellow-400",
+                                log.type === 'info' && "text-blue-400"
+                            )}>
+                                [{log.time}] {log.msg}
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
         </div>
