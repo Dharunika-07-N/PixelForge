@@ -9,6 +9,7 @@ import { ColorPanel } from "./ColorPanel";
 import { TypographyPanel } from "./TypographyPanel";
 import { CommentsPanel } from "./CommentsPanel";
 import { OptimizationPanel } from "./OptimizationPanel";
+import { RefinementWorkflow } from "./RefinementWorkflow";
 import {
   Layers,
   Image as ImageIcon,
@@ -18,7 +19,8 @@ import {
   Type,
   MousePointer2,
   MessageCircle,
-  Sparkles
+  Sparkles,
+  Zap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ErrorState } from "@/components/ui/ErrorState";
@@ -29,7 +31,7 @@ interface ProjectWorkspaceProps {
 
 export function ProjectWorkspace({ project }: ProjectWorkspaceProps) {
   const [leftTab, setLeftTab] = useState<"screenshot" | "elements">("screenshot");
-  const [rightTab, setRightTab] = useState<"preview" | "colors" | "typography" | "comments" | "optimize">("preview");
+  const [rightTab, setRightTab] = useState<"preview" | "colors" | "typography" | "comments" | "optimize" | "refine">("preview");
 
   // Mock code data
   const mockCode = {
@@ -206,7 +208,19 @@ test('renders welcome message', () => {
             )}
           >
             <Sparkles className="w-3.5 h-3.5" />
-            Optimize
+            Report
+          </button>
+          <button
+            onClick={() => setRightTab("refine")}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
+              rightTab === "refine"
+                ? "bg-purple-600 text-white shadow-lg shadow-purple-600/20"
+                : "text-gray-500 hover:text-white hover:bg-white/5"
+            )}
+          >
+            <Zap className="w-3.5 h-3.5" />
+            Refine
           </button>
           <button
             onClick={() => setRightTab("colors")}
@@ -252,6 +266,13 @@ test('renders welcome message', () => {
               pageId={project.pages?.[0]?.id || "mock-page-id"}
               onStatusChange={(status) => console.log("New Status:", status)}
               onCodeGenerated={handleUpdateCode}
+            />
+          )}
+          {rightTab === "refine" && (
+            <RefinementWorkflow
+              pageId={project.pages?.[0]?.id || "mock-page-id"}
+              onApprove={(id) => console.log("Approved", id)}
+              onReject={(id) => console.log("Rejected", id)}
             />
           )}
           {rightTab === "colors" && <ColorPanel />}

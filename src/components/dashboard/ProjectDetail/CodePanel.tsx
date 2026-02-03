@@ -15,6 +15,8 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
+import { downloadCodeAsZip } from "@/lib/code-export";
+
 interface CodePanelProps {
     code: {
         component: string;
@@ -22,11 +24,13 @@ interface CodePanelProps {
         config: string;
         tests: string;
     };
+    projectName?: string;
 }
 
-export function CodePanel({ code }: CodePanelProps) {
+export function CodePanel({ code, projectName = "PixelForge Project" }: CodePanelProps) {
     const [activeTab, setActiveTab] = useState<keyof typeof code>("component");
     const [copied, setCopied] = useState(false);
+    const [isDownloading, setIsDownloading] = useState(false);
 
     const tabs = [
         { id: "component", label: "Component", icon: FileCode, lang: "typescript" },
@@ -39,6 +43,22 @@ export function CodePanel({ code }: CodePanelProps) {
         navigator.clipboard.writeText(code[activeTab]);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+    };
+
+    const handleDownload = async () => {
+        setIsDownloading(true);
+        try {
+            await downloadCodeAsZip(
+                projectName,
+                [{ name: "Component.tsx", content: code.component }, { name: "Styles.css", content: code.styles }],
+                [], // API routes could be added here
+                code.config // Conceptual mapping
+            );
+        } catch (error) {
+            console.error("Download failed:", error);
+        } finally {
+            setIsDownloading(false);
+        }
     };
 
     return (
@@ -111,9 +131,13 @@ export function CodePanel({ code }: CodePanelProps) {
                         {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                         {copied ? "Copied!" : "Copy Code"}
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-blue-600/20 active:scale-[0.98]">
-                        <Download className="w-4 h-4" />
-                        Download
+                    <button
+                        onClick={handleDownload}
+                        disabled={isDownloading}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-blue-600/20 active:scale-[0.98] disabled:opacity-50"
+                    >
+                        {isDownloading ? <RotateCcw className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                        {isDownloading ? "Zipping..." : "Download"}
                     </button>
                 </div>
             </div>

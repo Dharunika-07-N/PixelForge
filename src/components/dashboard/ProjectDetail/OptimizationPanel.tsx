@@ -20,12 +20,34 @@ import { cn } from "@/lib/utils";
 interface OptimizationPanelProps {
     pageId: string;
     onStatusChange?: (status: string) => void;
+    onCodeGenerated?: (newCode: any) => void;
 }
 
-export function OptimizationPanel({ pageId, onStatusChange }: OptimizationPanelProps) {
+export function OptimizationPanel({ pageId, onStatusChange, onCodeGenerated }: OptimizationPanelProps) {
     const [optimization, setOptimization] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [view, setView] = useState<"results" | "comparison" | "history">("results");
+
+    const [isGeneratingCode, setIsGeneratingCode] = useState(false);
+
+    const handleGenerateCode = async () => {
+        setIsGeneratingCode(true);
+        try {
+            const response = await fetch("/api/optimize/generate-code", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ pageId })
+            });
+            const data = await response.json();
+            if (data.code) {
+                onCodeGenerated?.(data.code);
+            }
+        } catch (error) {
+            console.error("Code generation failed:", error);
+        } finally {
+            setIsGeneratingCode(false);
+        }
+    };
 
     const fetchLatestOptimization = async () => {
         setIsLoading(true);
@@ -267,9 +289,13 @@ export function OptimizationPanel({ pageId, onStatusChange }: OptimizationPanelP
 
             {/* Global CTA */}
             <div className="absolute bottom-6 inset-x-6 z-30">
-                <button className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black transition-all shadow-2xl shadow-blue-600/40 active:scale-[0.98] flex items-center justify-center gap-2">
-                    <CheckCircle2 className="w-5 h-5" />
-                    Approve & Generate Code
+                <button
+                    onClick={handleGenerateCode}
+                    disabled={isGeneratingCode || !optimization}
+                    className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black transition-all shadow-2xl shadow-blue-600/40 active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                    {isGeneratingCode ? <RefreshCw className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
+                    {isGeneratingCode ? "Generating Code..." : "Approve & Generate Code"}
                 </button>
             </div>
         </div>
