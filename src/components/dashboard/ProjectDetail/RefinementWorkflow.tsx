@@ -17,6 +17,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { FeedbackForm } from "./FeedbackForm";
+import { DesignDiffViewer } from "./DesignDiffViewer";
 
 interface RefinementIteration {
     id: string;
@@ -157,21 +158,35 @@ export function RefinementWorkflow({ pageId, onApprove, onReject, className }: R
 
                                         {/* Actions for Pending */}
                                         {it.status === "PENDING" && (
-                                            <div className="flex items-center gap-3 pt-2">
-                                                <button
-                                                    onClick={() => onApprove(it.id)}
-                                                    className="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2"
-                                                >
-                                                    <Check className="w-3 h-3" />
-                                                    Approve Changes
-                                                </button>
-                                                <button
-                                                    onClick={() => onReject(it.id)}
-                                                    className="flex-1 py-3 bg-gray-900 hover:bg-gray-800 text-gray-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border border-gray-800 flex items-center justify-center gap-2"
-                                                >
-                                                    <X className="w-3 h-3" />
-                                                    Reject
-                                                </button>
+                                            <div className="space-y-4">
+                                                <div className="space-y-2">
+                                                    <div className="text-[10px] font-black text-gray-600 uppercase tracking-widest px-1">Visual Adjustments</div>
+                                                    <DesignDiffViewer
+                                                        diffs={[
+                                                            { id: "d1", type: "modified", elementName: "Hero Title", property: "FontSize", oldValue: "48px", newValue: "64px", category: "typography" },
+                                                            { id: "d2", type: "modified", elementName: "CTA Button", property: "Background", oldValue: "#3B82F6", newValue: "#2563EB", category: "color" },
+                                                            { id: "d3", type: "added", elementName: "Trust Badge", property: "Visibility", oldValue: "", newValue: "Visible", category: "layout" },
+                                                        ] as any}
+                                                        className="border-none bg-gray-900/10 shadow-none !rounded-2xl"
+                                                    />
+                                                </div>
+
+                                                <div className="flex items-center gap-3 pt-2">
+                                                    <button
+                                                        onClick={() => onApprove(it.id)}
+                                                        className="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2"
+                                                    >
+                                                        <Check className="w-3 h-3" />
+                                                        Approve Changes
+                                                    </button>
+                                                    <button
+                                                        onClick={() => onReject(it.id)}
+                                                        className="flex-1 py-3 bg-gray-900 hover:bg-gray-800 text-gray-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border border-gray-800 flex items-center justify-center gap-2"
+                                                    >
+                                                        <X className="w-3 h-3" />
+                                                        Reject
+                                                    </button>
+                                                </div>
                                             </div>
                                         )}
                                     </div>

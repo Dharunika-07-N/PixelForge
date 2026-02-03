@@ -21,9 +21,10 @@ interface OptimizationPanelProps {
     pageId: string;
     onStatusChange?: (status: string) => void;
     onCodeGenerated?: (newCode: any) => void;
+    config?: any;
 }
 
-export function OptimizationPanel({ pageId, onStatusChange, onCodeGenerated }: OptimizationPanelProps) {
+export function OptimizationPanel({ pageId, onStatusChange, onCodeGenerated, config }: OptimizationPanelProps) {
     const [optimization, setOptimization] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [view, setView] = useState<"results" | "comparison" | "history">("results");
@@ -36,7 +37,7 @@ export function OptimizationPanel({ pageId, onStatusChange, onCodeGenerated }: O
             const response = await fetch("/api/optimize/generate-code", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ pageId })
+                body: JSON.stringify({ pageId, config })
             });
             const data = await response.json();
             if (data.code) {

@@ -10,6 +10,7 @@ import { TypographyPanel } from "./TypographyPanel";
 import { CommentsPanel } from "./CommentsPanel";
 import { OptimizationPanel } from "./OptimizationPanel";
 import { RefinementWorkflow } from "./RefinementWorkflow";
+import { CodeCustomization } from "./CodeCustomization";
 import {
   Layers,
   Image as ImageIcon,
@@ -20,7 +21,8 @@ import {
   MousePointer2,
   MessageCircle,
   Sparkles,
-  Zap
+  Zap,
+  Settings
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ErrorState } from "@/components/ui/ErrorState";
@@ -31,7 +33,13 @@ interface ProjectWorkspaceProps {
 
 export function ProjectWorkspace({ project }: ProjectWorkspaceProps) {
   const [leftTab, setLeftTab] = useState<"screenshot" | "elements">("screenshot");
-  const [rightTab, setRightTab] = useState<"preview" | "colors" | "typography" | "comments" | "optimize" | "refine">("preview");
+  const [rightTab, setRightTab] = useState<"preview" | "colors" | "typography" | "comments" | "optimize" | "refine" | "config">("preview");
+  const [codeConfig, setCodeConfig] = useState<any>({
+    framework: "nextjs",
+    language: "typescript",
+    styling: "tailwind",
+    database: "prisma",
+  });
 
   // Mock code data
   const mockCode = {
@@ -258,6 +266,18 @@ test('renders welcome message', () => {
             <MessageCircle className="w-3.5 h-3.5" />
             Chat
           </button>
+          <button
+            onClick={() => setRightTab("config")}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
+              rightTab === "config"
+                ? "bg-gray-800 text-white shadow-lg shadow-white/5"
+                : "text-gray-500 hover:text-white hover:bg-white/5"
+            )}
+          >
+            <Settings className="w-3.5 h-3.5" />
+            Config
+          </button>
         </div>
         <div className="flex-1 overflow-hidden relative">
           {rightTab === "preview" && <PreviewPanel />}
@@ -266,6 +286,7 @@ test('renders welcome message', () => {
               pageId={project.pages?.[0]?.id || "mock-page-id"}
               onStatusChange={(status) => console.log("New Status:", status)}
               onCodeGenerated={handleUpdateCode}
+              config={codeConfig}
             />
           )}
           {rightTab === "refine" && (
@@ -273,6 +294,11 @@ test('renders welcome message', () => {
               pageId={project.pages?.[0]?.id || "mock-page-id"}
               onApprove={(id) => console.log("Approved", id)}
               onReject={(id) => console.log("Rejected", id)}
+            />
+          )}
+          {rightTab === "config" && (
+            <CodeCustomization
+              onConfigChange={setCodeConfig}
             />
           )}
           {rightTab === "colors" && <ColorPanel />}
