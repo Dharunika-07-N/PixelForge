@@ -18,7 +18,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ProjectStatus } from "@prisma/client";
-import { ShareModal } from "../ShareModal";
+import { ShareModal } from "./ShareModal";
 import { UpgradeModal } from "@/components/pricing/UpgradeModal";
 
 interface ProjectHeaderProps {
@@ -253,7 +253,8 @@ export function ProjectHeader({ id, name: initialName, status, updatedAt }: Proj
             <ShareModal
                 isOpen={showShareModal}
                 onClose={() => setShowShareModal(false)}
-                projectTitle={name}
+                projectId={id}
+                projectName={name}
             />
 
             <UpgradeModal
