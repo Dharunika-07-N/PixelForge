@@ -43,6 +43,6 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
     }
 
     return (
-        <ProjectClientLayout project={project} />
+        <ProjectClientLayout project={project} userId={session.user.id as string} />
     );
 }

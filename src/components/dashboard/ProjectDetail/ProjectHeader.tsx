@@ -21,6 +21,7 @@ import { ProjectStatus } from "@prisma/client";
 import { PageSwitcher } from "./PageSwitcher";
 import { ShareModal } from "./ShareModal";
 import { UpgradeModal } from "@/components/pricing/UpgradeModal";
+import { PresenceIndicators } from "./PresenceIndicators";
 
 interface ProjectHeaderProps {
     id: string;
@@ -31,6 +32,7 @@ interface ProjectHeaderProps {
     activePageId: string;
     onPageChange: (id: string) => void;
     onAddPage: () => void;
+    collaborators?: Record<string, any>;
 }
 
 export function ProjectHeader({
@@ -41,7 +43,8 @@ export function ProjectHeader({
     pages,
     activePageId,
     onPageChange,
-    onAddPage
+    onAddPage,
+    collaborators = {}
 }: ProjectHeaderProps) {
     const router = useRouter();
     const [isEditing, setIsEditing] = useState(false);
@@ -232,6 +235,10 @@ export function ProjectHeader({
                         </span>
                     </div>
                 </div>
+
+                <div className="w-px h-8 bg-gray-900 mx-4" />
+
+                <PresenceIndicators collaborators={collaborators} />
             </div>
 
             <div className="flex items-center gap-3">

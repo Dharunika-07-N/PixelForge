@@ -420,7 +420,7 @@ test('renders welcome message', () => {
           {rightTab === "system" && <DesignSystemPanel />}
           {rightTab === "history" && <VersionHistory />}
           {rightTab === "export" && <ExportPanel />}
-          {rightTab === "analytics" && <AnalyticsPanel />}
+          {rightTab === "analytics" && <AnalyticsPanel projectId={project.id} />}
           {rightTab === "testing" && <TestingPanel />}
           {rightTab === "docs" && <DocumentationPanel />}
           {rightTab === "deployment" && <DeploymentPanel />}
