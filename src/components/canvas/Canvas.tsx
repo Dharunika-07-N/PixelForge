@@ -20,7 +20,10 @@ import {
     AlignVerticalJustifyEnd,
     Undo2,
     Redo2,
+    Download,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { PropertyInspector } from "./PropertyInspector";
 
 interface CanvasProps {
     initialData?: unknown;
@@ -75,7 +78,7 @@ export default function EnhancedCanvas({ initialData, onSave }: CanvasProps) {
         historyIndexRef.current--;
         const state = historyRef.current[historyIndexRef.current];
 
-        // @ts-expect-error loadFromJSON returns a promise in v6
+        // @ts-expect-error loadFromJSON returns a promise in fabric v6
         fabricRef.current.loadFromJSON(JSON.parse(state)).then(() => {
             if (!fabricRef.current) return;
             fabricRef.current.renderAll();
@@ -91,7 +94,7 @@ export default function EnhancedCanvas({ initialData, onSave }: CanvasProps) {
         historyIndexRef.current++;
         const state = historyRef.current[historyIndexRef.current];
 
-        // @ts-expect-error loadFromJSON returns a promise in v6
+        // @ts-expect-error loadFromJSON returns a promise in fabric v6
         fabricRef.current.loadFromJSON(JSON.parse(state)).then(() => {
             if (!fabricRef.current) return;
             fabricRef.current.renderAll();
@@ -99,6 +102,21 @@ export default function EnhancedCanvas({ initialData, onSave }: CanvasProps) {
             setCanRedo(historyIndexRef.current < historyRef.current.length - 1);
         });
     }, []);
+
+    const handleUpdateObject = useCallback((props: Partial<fabric.Object>) => {
+        if (!fabricRef.current) return;
+        const activeObjects = fabricRef.current.getActiveObjects();
+        if (activeObjects.length === 0) return;
+
+        activeObjects.forEach(obj => {
+            obj.set(props);
+            if (props.scaleX || props.scaleY) {
+                obj.setCoords();
+            }
+        });
+        fabricRef.current.renderAll();
+        saveHistory();
+    }, [saveHistory]);
 
     // Initialize canvas
     const initCanvas = useCallback(() => {
@@ -116,7 +134,7 @@ export default function EnhancedCanvas({ initialData, onSave }: CanvasProps) {
 
         // Load initial data or create default
         if (initialData) {
-            // @ts-expect-error loadFromJSON returns a promise in v6
+            // @ts-expect-error loadFromJSON returns a promise in fabric v6
             canvas.loadFromJSON(initialData).then(() => {
                 canvas.renderAll();
                 saveHistory();
@@ -148,10 +166,9 @@ export default function EnhancedCanvas({ initialData, onSave }: CanvasProps) {
 
             // Copy (Ctrl+C)
             if ((e.ctrlKey || e.metaKey) && e.key === "c") {
-                e.preventDefault();
                 const activeObject = fabricRef.current.getActiveObject();
                 if (activeObject) {
-                    // @ts-expect-error clone returns a promise in v6
+                    // @ts-expect-error clone returns a promise in fabric v6
                     activeObject.clone().then((cloned: fabric.Object) => {
                         clipboardRef.current = cloned;
                     });
@@ -160,10 +177,9 @@ export default function EnhancedCanvas({ initialData, onSave }: CanvasProps) {
 
             // Paste (Ctrl+V)
             if ((e.ctrlKey || e.metaKey) && e.key === "v") {
-                e.preventDefault();
                 if (!clipboardRef.current || !fabricRef.current) return;
 
-                // @ts-expect-error clone returns a promise in v6
+                // @ts-expect-error clone returns a promise in fabric v6
                 clipboardRef.current.clone().then((clonedObj: any) => {
                     if (!fabricRef.current) return;
                     fabricRef.current.discardActiveObject();
@@ -175,9 +191,8 @@ export default function EnhancedCanvas({ initialData, onSave }: CanvasProps) {
 
                     if (clonedObj.type === "activeSelection") {
                         clonedObj.canvas = fabricRef.current;
-                        (clonedObj as fabric.ActiveSelection).forEachObject((obj) => {
-                            if (!fabricRef.current) return;
-                            fabricRef.current.add(obj);
+                        clonedObj.forEachObject((obj: any) => {
+                            fabricRef.current?.add(obj);
                         });
                         clonedObj.setCoords();
                     } else {
@@ -194,8 +209,7 @@ export default function EnhancedCanvas({ initialData, onSave }: CanvasProps) {
             }
 
             // Delete (Delete/Backspace)
-            if (e.key === "Delete" || e.key === "Backspace") {
-                e.preventDefault();
+            if (e.key === "Delete" || (e.key === "Backspace" && !activeObjectIsTyping())) {
                 const activeObjects = fabricRef.current.getActiveObjects();
                 if (activeObjects.length > 0) {
                     fabricRef.current.remove(...activeObjects);
@@ -216,6 +230,11 @@ export default function EnhancedCanvas({ initialData, onSave }: CanvasProps) {
                 e.preventDefault();
                 handleRedo();
             }
+        };
+
+        const activeObjectIsTyping = () => {
+            const active = fabricRef.current?.getActiveObject();
+            return active instanceof fabric.IText && (active as any).isEditing;
         };
 
         window.addEventListener("keydown", handleKeyDown);
@@ -262,18 +281,20 @@ export default function EnhancedCanvas({ initialData, onSave }: CanvasProps) {
                 left: 100,
             });
         } else {
-            obj = new fabric.Textbox("Text", {
+            obj = new fabric.IText("Text", {
                 width: 200,
-                fontSize: 20,
+                fontSize: 24,
                 fill: "#ffffff",
                 top: 100,
                 left: 100,
+                fontFamily: 'Inter',
             });
         }
 
         fabricRef.current.add(obj);
         fabricRef.current.setActiveObject(obj);
         fabricRef.current.requestRenderAll();
+        saveHistory();
     };
 
     // Alignment functions
@@ -316,7 +337,7 @@ export default function EnhancedCanvas({ initialData, onSave }: CanvasProps) {
         if (!fabricRef.current) return;
         const activeObject = fabricRef.current.getActiveObject();
         if (activeObject) {
-            // @ts-expect-error bringToFront exists on objects in v6 but typing is complex
+            // @ts-expect-error fabric types for bringToFront are complex
             activeObject.bringToFront();
             fabricRef.current.requestRenderAll();
             saveHistory();
@@ -327,7 +348,7 @@ export default function EnhancedCanvas({ initialData, onSave }: CanvasProps) {
         if (!fabricRef.current) return;
         const activeObject = fabricRef.current.getActiveObject();
         if (activeObject) {
-            // @ts-expect-error sendToBack exists on objects in v6 but typing is complex
+            // @ts-expect-error fabric types for sendToBack are complex
             activeObject.sendToBack();
             fabricRef.current.requestRenderAll();
             saveHistory();
@@ -342,11 +363,35 @@ export default function EnhancedCanvas({ initialData, onSave }: CanvasProps) {
             fabricRef.current.remove(...activeObjects);
             fabricRef.current.discardActiveObject();
             fabricRef.current.requestRenderAll();
+            saveHistory();
         }
     };
 
+    const exportAsPNG = () => {
+        if (!fabricRef.current) return;
+        const dataURL = fabricRef.current.toDataURL({
+            format: 'png',
+            quality: 1,
+        });
+        const link = document.createElement('a');
+        link.download = `design-${Date.now()}.png`;
+        link.href = dataURL;
+        link.click();
+    };
+
+    const exportAsJSON = () => {
+        if (!fabricRef.current) return;
+        const json = JSON.stringify(fabricRef.current.toJSON());
+        const blob = new Blob([json], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = `design-${Date.now()}.json`;
+        link.href = url;
+        link.click();
+    };
+
     return (
-        <div className="flex flex-col h-full w-full">
+        <div className="flex flex-col h-full w-full bg-gray-950 overflow-hidden relative group">
             {/* Toolbar */}
             <div className="h-14 bg-gray-900 border-b border-gray-800 flex items-center justify-between px-4 backdrop-blur-md shrink-0">
                 {/* Left: Tools */}
@@ -428,14 +473,43 @@ export default function EnhancedCanvas({ initialData, onSave }: CanvasProps) {
                     <button onClick={deleteSelected} className="p-2 hover:bg-red-500/10 text-gray-400 hover:text-red-500 transition-colors" title="Delete (Del)">
                         <Trash2 className="w-4 h-4" />
                     </button>
+
+                    <div className="w-px h-6 bg-gray-800 mx-2" />
+
+                    <div className="relative group/export">
+                        <button className="p-2 hover:bg-gray-800 rounded-lg text-gray-400 transition-colors">
+                            <Download className="w-4 h-4" />
+                        </button>
+                        <div className="absolute right-0 top-full mt-2 w-32 bg-gray-900 border border-gray-800 rounded-xl shadow-2xl opacity-0 invisible group-hover/export:opacity-100 group-hover/export:visible transition-all z-50 overflow-hidden">
+                            <button onClick={exportAsPNG} className="w-full px-4 py-2 text-left text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-white hover:bg-gray-800 transition-colors">
+                                PNG Image
+                            </button>
+                            <button onClick={exportAsJSON} className="w-full px-4 py-2 text-left text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-white hover:bg-gray-800 transition-colors">
+                                JSON Data
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            {/* Canvas Area */}
-            <div className="flex-1 overflow-auto bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:32px_32px] flex items-center justify-center p-20 custom-scrollbar">
-                <div className="shadow-[0_0_100px_rgba(0,0,0,0.8)] ring-1 ring-white/10 rounded-[2rem] overflow-hidden bg-[#0a0a0a]">
-                    <canvas ref={canvasRef} />
+            {/* Main Content Area */}
+            <div className="flex-1 flex overflow-hidden">
+                {/* Canvas Area */}
+                <div className="flex-1 overflow-auto bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:32px_32px] flex items-center justify-center p-20 custom-scrollbar relative">
+                    <div className="shadow-[0_0_100px_rgba(0,0,0,0.8)] ring-1 ring-white/10 rounded-[2rem] overflow-hidden bg-[#0a0a0a]">
+                        <canvas ref={canvasRef} />
+                    </div>
                 </div>
+
+                {/* Property Inspector */}
+                <AnimatePresence>
+                    {selectedObjects.length > 0 && (
+                        <PropertyInspector
+                            objects={selectedObjects}
+                            onUpdate={handleUpdateObject}
+                        />
+                    )}
+                </AnimatePresence>
             </div>
         </div>
     );
