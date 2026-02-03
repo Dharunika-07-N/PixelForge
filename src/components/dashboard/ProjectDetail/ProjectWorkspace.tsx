@@ -24,12 +24,24 @@ import {
   Zap,
   Settings,
   Box,
-  Wind
+  Wind,
+  History,
+  Download,
+  Activity,
+  TestTube2,
+  BookOpen,
+  Rocket
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { ComponentLibrary } from "./ComponentLibrary";
 import { DesignSystemPanel } from "./DesignSystemPanel";
+import { VersionHistory } from "./VersionHistory";
+import { ExportPanel } from "./ExportPanel";
+import { AnalyticsPanel } from "./AnalyticsPanel";
+import { TestingPanel } from "./TestingPanel";
+import { DocumentationPanel } from "./DocumentationPanel";
+import { DeploymentPanel } from "./DeploymentPanel";
 
 interface ProjectWorkspaceProps {
   project: any;
@@ -38,7 +50,7 @@ interface ProjectWorkspaceProps {
 
 export function ProjectWorkspace({ project, activePageId }: ProjectWorkspaceProps) {
   const [leftTab, setLeftTab] = useState<"screenshot" | "elements" | "library">("screenshot");
-  const [rightTab, setRightTab] = useState<"preview" | "colors" | "typography" | "comments" | "optimize" | "refine" | "config" | "system">("preview");
+  const [rightTab, setRightTab] = useState<"preview" | "colors" | "typography" | "comments" | "optimize" | "refine" | "config" | "system" | "history" | "export" | "analytics" | "testing" | "docs" | "deployment">("preview");
   const [codeConfig, setCodeConfig] = useState<any>({
     framework: "nextjs",
     language: "typescript",
@@ -307,6 +319,78 @@ test('renders welcome message', () => {
             <Wind className="w-3.5 h-3.5" />
             System
           </button>
+          <button
+            onClick={() => setRightTab("history")}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
+              rightTab === "history"
+                ? "bg-amber-600 text-white shadow-lg shadow-amber-600/20"
+                : "text-gray-500 hover:text-white hover:bg-white/5"
+            )}
+          >
+            <History className="w-3.5 h-3.5" />
+            History
+          </button>
+          <button
+            onClick={() => setRightTab("export")}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
+              rightTab === "export"
+                ? "bg-green-600 text-white shadow-lg shadow-green-600/20"
+                : "text-gray-500 hover:text-white hover:bg-white/5"
+            )}
+          >
+            <Download className="w-3.5 h-3.5" />
+            Export
+          </button>
+          <button
+            onClick={() => setRightTab("analytics")}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
+              rightTab === "analytics"
+                ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
+                : "text-gray-500 hover:text-white hover:bg-white/5"
+            )}
+          >
+            <Activity className="w-3.5 h-3.5" />
+            Insights
+          </button>
+          <button
+            onClick={() => setRightTab("testing")}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
+              rightTab === "testing"
+                ? "bg-red-600 text-white shadow-lg shadow-red-600/20"
+                : "text-gray-500 hover:text-white hover:bg-white/5"
+            )}
+          >
+            <TestTube2 className="w-3.5 h-3.5" />
+            Testing
+          </button>
+          <button
+            onClick={() => setRightTab("docs")}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
+              rightTab === "docs"
+                ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20"
+                : "text-gray-500 hover:text-white hover:bg-white/5"
+            )}
+          >
+            <BookOpen className="w-3.5 h-3.5" />
+            Docs
+          </button>
+          <button
+            onClick={() => setRightTab("deployment")}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
+              rightTab === "deployment"
+                ? "bg-orange-600 text-white shadow-lg shadow-orange-600/20"
+                : "text-gray-500 hover:text-white hover:bg-white/5"
+            )}
+          >
+            <Rocket className="w-3.5 h-3.5" />
+            Deploy
+          </button>
         </div>
         <div className="flex-1 overflow-hidden relative">
           {rightTab === "preview" && <PreviewPanel />}
@@ -334,6 +418,12 @@ test('renders welcome message', () => {
           {rightTab === "typography" && <TypographyPanel />}
           {rightTab === "comments" && <CommentsPanel />}
           {rightTab === "system" && <DesignSystemPanel />}
+          {rightTab === "history" && <VersionHistory />}
+          {rightTab === "export" && <ExportPanel />}
+          {rightTab === "analytics" && <AnalyticsPanel />}
+          {rightTab === "testing" && <TestingPanel />}
+          {rightTab === "docs" && <DocumentationPanel />}
+          {rightTab === "deployment" && <DeploymentPanel />}
         </div>
       </div>
     </main>
