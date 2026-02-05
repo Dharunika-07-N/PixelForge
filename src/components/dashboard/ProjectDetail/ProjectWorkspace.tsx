@@ -49,8 +49,11 @@ interface ProjectWorkspaceProps {
 }
 
 export function ProjectWorkspace({ project, activePageId }: ProjectWorkspaceProps) {
-  const [leftTab, setLeftTab] = useState<"screenshot" | "elements" | "library">("screenshot");
-  const [rightTab, setRightTab] = useState<"preview" | "colors" | "typography" | "comments" | "optimize" | "refine" | "config" | "system" | "history" | "export" | "analytics" | "testing" | "docs" | "deployment">("preview");
+  const activePage = project.pages?.find((p: any) => p.id === activePageId) || project.pages?.[0];
+  const latestOpt = activePage?.optimizations?.[0];
+
+  const [leftTab, setLeftTab] = useState<"screenshot" | "elements" | "library">("elements");
+  const [rightTab, setRightTab] = useState<"preview" | "colors" | "typography" | "comments" | "optimize" | "refine" | "config" | "system" | "history" | "export" | "analytics" | "testing" | "docs" | "deployment">("optimize");
   const [codeConfig, setCodeConfig] = useState<any>({
     framework: "nextjs",
     language: "typescript",
@@ -59,97 +62,63 @@ export function ProjectWorkspace({ project, activePageId }: ProjectWorkspaceProp
   });
 
   // Mock code data
-  const mockCode = {
-    component: `"use client";
+  const mockFiles = [
+    {
+      path: "app/page.tsx",
+      language: "tsx",
+      content: `"use client";
 
 import React from 'react';
 
-interface LandingPageProps {
-  className?: string;
-}
-
-export default function LandingPage({
-  className = ''
-}: LandingPageProps) {
+export default function LandingPage() {
   return (
-    <div className={\`
-      flex flex-col
-      items-center
-      justify-center
-      min-h-screen
-      bg-gradient-to-br
-      from-blue-500
-      to-purple-600
-      \${className}
-    \`}>
-      <h1 className="
-        text-6xl
-        md:text-8xl
-        font-black
-        text-white
-        tracking-tight
-        animate-in
-        fade-in
-        slide-in-from-bottom-10
-        duration-1000
-      ">
-        Welcome to<br />
-        <span className="text-blue-200">PixelForge</span>
-      </h1>
-      <button className="mt-12 px-12 py-5 bg-white text-blue-600 rounded-2xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-2xl">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+      <h1 className="text-6xl font-black tracking-tight">Welcome to PixelForge</h1>
+      <button className="mt-12 px-12 py-5 bg-white text-blue-600 rounded-2xl font-black text-xl shadow-2xl">
         Get Started
       </button>
     </div>
   );
-}`,
-    styles: `.landing-page {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-center: center;
-  min-height: 100vh;
-  background: linear-gradient(to bottom right, #3B82F6, #9333EA);
-}
+}`
+    },
+    {
+      path: "package.json",
+      language: "json",
+      content: `{\n  "name": "pixelforge-export",\n  "version": "1.0.0",\n  "dependencies": {\n    "next": "latest",\n    "react": "latest",\n    "react-dom": "latest"\n  }\n}`
+    }
+  ];
 
-.hero-title {
-  font-size: 5rem;
-  font-weight: 900;
-  color: white;
-  letter-spacing: -0.05em;
-} `,
-    config: `{
-  "name": "pixelforge-component",
-  "version": "1.0.0",
-  "dependencies": {
-    "react": "^18.2.0",
-    "framer-motion": "^10.12.0",
-    "lucide-react": "^0.244.0",
-    "tailwind-merge": "^1.13.0"
-  }
-}`,
-    tests: `import { render, screen } from '@testing-library/react';
-import LandingPage from './LandingPage';
-
-test('renders welcome message', () => {
-  render(<LandingPage />);
-  const linkElement = screen.getByText(/Welcome to/i);
-  expect(linkElement).toBeInTheDocument();
-});`
-  };
-
-  const [codeData, setCodeData] = useState(mockCode);
+  const [codeData, setCodeData] = useState<{ files: any[], instructions?: string }>(
+    latestOpt?.generatedCode ? JSON.parse(latestOpt.generatedCode) : { files: mockFiles, instructions: "" }
+  );
 
   const handleUpdateCode = (newCode: any) => {
-    if (!newCode || !newCode.components) return;
+    if (!newCode || !newCode.files) return;
 
     setCodeData({
-      component: newCode.components.find((c: any) => c.name.endsWith('.tsx'))?.content || "",
-      styles: newCode.components.find((c: any) => c.name.endsWith('.css'))?.content || "",
-      config: JSON.stringify(newCode.database || {}, null, 2),
-      tests: newCode.instructions || ""
+      files: newCode.files,
+      instructions: newCode.instructions
     });
     setRightTab("preview");
   };
+
+  // Map canvas data to ElementsPanel structure
+  const pageElements = activePage?.canvasData ? JSON.parse(activePage.canvasData).objects?.map((obj: any, idx: number) => ({
+    id: obj.id || `el-${idx}`,
+    type: obj.type === 'textbox' ? 'Heading' : (obj.type === 'rect' ? 'Button' : (obj.type === 'image' ? 'Image' : 'Container')),
+    label: obj.text || obj.type,
+    confidence: 1.0,
+    properties: {
+      x: obj.left,
+      y: obj.top,
+      w: obj.width,
+      h: obj.height,
+      text: obj.text,
+      color: obj.fill
+    }
+  })) : undefined;
+
+
 
   if (project.status === "FAILED") {
     return (
@@ -210,14 +179,14 @@ test('renders welcome message', () => {
           {leftTab === "screenshot" && (
             <ScreenshotPanel imageUrl={project?.thumbnailUrl || "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop"} />
           )}
-          {leftTab === "elements" && <ElementsPanel />}
+          {leftTab === "elements" && <ElementsPanel elements={pageElements} />}
           {leftTab === "library" && <ComponentLibrary />}
         </div>
       </div>
 
       {/* Center Panel - 50% */}
       <div className="flex-1 flex-shrink-0 h-full bg-gray-950 flex flex-col min-w-0">
-        <CodePanel code={codeData} />
+        <CodePanel files={codeData.files} instructions={codeData.instructions} />
       </div>
 
       {/* Right Panel - 30% */}
@@ -393,7 +362,7 @@ test('renders welcome message', () => {
           </button>
         </div>
         <div className="flex-1 overflow-hidden relative">
-          {rightTab === "preview" && <PreviewPanel />}
+          {rightTab === "preview" && <PreviewPanel elements={pageElements} />}
           {rightTab === "optimize" && (
             <OptimizationPanel
               pageId={activePageId}
