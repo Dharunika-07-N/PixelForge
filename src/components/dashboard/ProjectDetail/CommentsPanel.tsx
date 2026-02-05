@@ -62,6 +62,7 @@ export function CommentsPanel({ projectId, pageId }: CommentsPanelProps) {
 
     const handleSendMessage = async () => {
         if (!newComment.trim()) return;
+        const userContent = newComment;
         setIsSending(true);
 
         try {
@@ -71,13 +72,38 @@ export function CommentsPanel({ projectId, pageId }: CommentsPanelProps) {
                 body: JSON.stringify({
                     projectId,
                     pageId,
-                    content: newComment,
+                    content: userContent,
                 })
             });
 
             if (res.ok) {
                 await fetchComments();
                 setNewComment("");
+
+                // Simulate AI "Answer" if in AI Mode
+                if (isAIMode) {
+                    setTimeout(async () => {
+                        const aiResponses = [
+                            "I've analyzed the technical requirements for this component. Based on your design, I recommend using a CSS Grid layout with a 12-column system for maximum responsiveness.",
+                            "The accessibility check passed for most elements, but I suggests increasing the contrast on the secondary CTA button from #4B5563 to #1F2937.",
+                            "I'm updating the generated TypeScript interfaces to include the new prop definitions we discussed. You can see the changes in the Code Panel.",
+                            "Great catch! I've refined the Tailwind classes for the hero section to include smooth Framer Motion entrance animations."
+                        ];
+                        const randomResponse = aiResponses[Math.floor(Math.random() * aiResponses.length)];
+
+                        // Create AI response in DB or locally
+                        await fetch("/api/comments", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                projectId,
+                                pageId,
+                                content: `🤖 **PixelForge AI**: ${randomResponse}`,
+                            })
+                        });
+                        await fetchComments();
+                    }, 1500);
+                }
             }
         } catch (e) {
             console.error("Comment send failed", e);

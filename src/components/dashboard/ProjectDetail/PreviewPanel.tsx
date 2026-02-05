@@ -19,7 +19,21 @@ import { ElementsPanel } from "./ElementsPanel";
 import { ColorPanel } from "./ColorPanel";
 import { TypographyPanel } from "./TypographyPanel";
 
-export function PreviewPanel() {
+interface PreviewElement {
+    id: string;
+    type: string;
+    label: string;
+    properties: {
+        x: number;
+        y: number;
+        w: number;
+        h: number;
+        text?: string;
+        color?: string;
+    };
+}
+
+export function PreviewPanel({ elements }: { elements?: PreviewElement[] }) {
     const [activeTab, setActiveTab] = useState<"preview" | "elements" | "colors" | "typography">("preview");
     const [device, setDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
     const [isRotating, setIsRotating] = useState(false);
@@ -122,19 +136,46 @@ export function PreviewPanel() {
                                         </div>
                                     </div>
 
-                                    <div className="w-full h-[calc(100%-24px)] bg-gray-50 flex items-center justify-center text-center p-8">
+                                    <div className="w-full h-[calc(100%-24px)] bg-gray-50 relative">
                                         {isRefreshing ? (
-                                            <div className="flex flex-col items-center gap-4">
+                                            <div className="h-full flex flex-col items-center justify-center gap-4">
                                                 <RefreshCw className="w-8 h-8 text-blue-500 animate-spin" />
                                                 <span className="text-gray-400 font-bold text-xs uppercase tracking-widest">Rebuilding Workspace...</span>
                                             </div>
                                         ) : (
-                                            <div className="space-y-4 max-w-xs">
-                                                <div className="w-16 h-16 bg-blue-600/10 rounded-3xl mx-auto flex items-center justify-center border border-blue-600/20">
-                                                    <Play className="w-8 h-8 text-blue-500 ml-1" />
-                                                </div>
-                                                <h4 className="text-gray-900 font-black text-xl tracking-tight">Interactive Preview</h4>
-                                                <p className="text-gray-500 text-xs leading-relaxed font-medium">Your design has been extracted into production-ready code. All interactions are now live.</p>
+                                            <div className="absolute inset-0 p-4">
+                                                {elements && elements.length > 0 ? (
+                                                    elements.map(el => (
+                                                        <div
+                                                            key={el.id}
+                                                            className={cn(
+                                                                "absolute rounded border border-blue-500/20 flex items-center justify-center transition-all hover:border-blue-500 hover:bg-blue-500/5 group/el",
+                                                                el.type === 'Button' ? "bg-blue-600 rounded-lg shadow-sm" : ""
+                                                            )}
+                                                            style={{
+                                                                left: (el.properties.x / 1.5) + 'px',
+                                                                top: (el.properties.y / 1.5) + 'px',
+                                                                width: (el.properties.w / 1.5) + 'px',
+                                                                height: (el.properties.h / 1.5) + 'px',
+                                                                color: el.properties.color || (el.type === 'Button' ? 'white' : 'black')
+                                                            }}
+                                                        >
+                                                            <span className={cn(
+                                                                "text-[8px] font-bold truncate px-1",
+                                                                el.type === 'Button' && "text-[6px] uppercase tracking-tighter"
+                                                            )}>
+                                                                {el.properties.text || el.label}
+                                                            </span>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <div className="h-full flex flex-col items-center justify-center gap-4 text-center">
+                                                        <Play className="w-8 h-8 text-gray-300" />
+                                                        <p className="text-[10px] font-medium text-gray-400 max-w-[150px]">
+                                                            No interactive elements detected yet. Run analysis to populate the preview.
+                                                        </p>
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                     </div>
