@@ -1,19 +1,14 @@
 import { callAnthropic, parseAIResponse } from "./ai-service";
 import { CanvasData } from "./canvas-utils";
 
+export interface GeneratedFile {
+    path: string;
+    content: string;
+    language: string;
+}
+
 export interface CodeGenerationResponse {
-    components: Array<{
-        name: string;
-        content: string;
-        language: "typescript" | "tsx" | "css";
-    }>;
-    apiRoutes: Array<{
-        path: string;
-        content: string;
-    }>;
-    database: {
-        schema: string;
-    };
+    files: GeneratedFile[];
     instructions: string;
 }
 
@@ -38,32 +33,34 @@ export async function generateFullStackCode(
         includeTests: false
     }
 ): Promise<CodeGenerationResponse> {
-    const systemPrompt = `You are a Senior Full-Stack Engineer and UI Architect. Your task is to transform a visual canvas design into precise, production-ready code.
+    const systemPrompt = `You are a Senior Full-Stack Engineer and UI Architect. Your task is to transform a visual canvas design into a complete, ready-to-run Next.js 14+ project.
 
 Guidelines:
-1. Framework: ${options.framework === 'nextjs' ? 'Next.js 14+ (App Router)' : options.framework}.
-2. Styling: ${options.styling}.
-3. Components: Functional React components using TypeScript (${options.namingConvention}Case naming).
-4. Database: Prisma (PostgreSQL preference).
-5. Validation: Zod.
+1. Framework: Next.js 14+ (App Router).
+2. Styling: Tailwind CSS.
+3. Components: Functional React components using TypeScript.
+4. Database: Prisma (PostgreSQL).
+5. Quality: Clean, modular, and DRY code.
 6. Design: Match the visual canvas elements (sizes, colors, layout) perfectly.
-7. Quality: Clean, modular, and DRY code.
-8. Animations: Use Framer Motion where appropriate for premium feel.
-${options.includeTests ? "9. Testing: Include Vitest/React Testing Library unit tests for components." : ""}
+7. Project Structure: 
+   - app/page.tsx (Main entry)
+   - app/layout.tsx (Root layout)
+   - app/api/... (Backend routes)
+   - components/... (Re-usable UI elements)
+   - prisma/schema.prisma (Database schema)
+   - package.json (Dependencies)
+   - tailwind.config.ts, postcss.config.js, tsconfig.json (Config files)
 
 Your response MUST be valid JSON in this exact format:
 {
-  "components": [
-    { "name": "ComponentName.tsx", "content": "file content", "language": "tsx" }
+  "files": [
+    { "path": "app/page.tsx", "content": "file content", "language": "tsx" },
+    { "path": "package.json", "content": "{...}", "language": "json" }
   ],
-  "apiRoutes": [
-    { "path": "app/api/route.ts", "content": "file content" }
-  ],
-  "database": { "schema": "prisma code here" },
   "instructions": "Brief build instructions"
 }`;
 
-    const prompt = `Convert this design into a full-stack Next.js page.
+    const prompt = `Convert this visual design into a complete, runnable Next.js 14 project.
 Project: ${projectName}
 Page: ${pageName}
 
@@ -71,13 +68,17 @@ Canvas Data:
 ${JSON.stringify(canvasData, null, 2)}
 
 Requirements:
-1. Create a main page component named "page.tsx" and any sub-components.
-2. Implement Tailwind CSS for all styling, matching the colors, borders, and spacing in the JSON.
-3. If the design contains input fields or buttons, implement a sample API route and Zod schema.
-4. Include any necessary Prisma models to support the UI data.
-5. Use Lucide-react for icons.
+1. Provide a FULL project structure.
+2. Include "package.json" with all necessary dependencies (next, react, react-dom, tailwindcss, lucide-react, framer-motion, prisma, zod, etc.).
+3. Include "tailwind.config.ts", "postcss.config.js", and "tsconfig.json".
+4. Create "app/layout.tsx" and "app/page.tsx".
+5. Create a valid "prisma/schema.prisma" file.
+6. Create an API route in "app/api/hello/route.ts" as a reference.
+7. Use Tailwind CSS for 100% of the styling. Do NOT use external CSS files.
+8. If the design has interactive elements, ensure they are functional (e.g., buttons have click handlers, inputs have state).
+9. Do NOT use placeholders. Generate real content based on the design.
 
-Return ONLY valid JSON.`;
+Return ONLY the JSON.`;
 
     try {
         const response = await callAnthropic(prompt, systemPrompt, 8000);
