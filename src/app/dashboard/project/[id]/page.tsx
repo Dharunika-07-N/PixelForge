@@ -24,6 +24,14 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
         where: { id },
         include: {
             pages: {
+                include: {
+                    optimizations: {
+                        orderBy: {
+                            createdAt: "desc"
+                        },
+                        take: 1
+                    }
+                },
                 orderBy: {
                     order: "asc"
                 }
