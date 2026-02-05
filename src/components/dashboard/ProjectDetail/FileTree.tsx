@@ -15,57 +15,57 @@ import { cn } from "@/lib/utils";
 
 interface FileNode {
     id: string;
+    path: string;
     name: string;
     type: "file" | "folder";
     children?: FileNode[];
-    lang?: string;
 }
 
 interface FileTreeProps {
-    onSelectFile: (id: string) => void;
-    activeFileId: string;
+    files: Array<{ path: string }>;
+    onSelectFile: (path: string) => void;
+    activeFilePath: string;
     className?: string;
 }
 
-export function FileTree({ onSelectFile, activeFileId, className }: FileTreeProps) {
-    const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(["root", "components", "api", "prisma"]));
+export function FileTree({ files, onSelectFile, activeFilePath, className }: FileTreeProps) {
+    const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(["root"]));
 
-    const tree: FileNode[] = [
-        {
-            id: "root",
-            name: "pixelforge-export",
-            type: "folder",
-            children: [
-                {
-                    id: "components",
-                    name: "components",
-                    type: "folder",
-                    children: [
-                        { id: "component", name: "Page.tsx", type: "file", lang: "typescript" },
-                        { id: "styles", name: "styles.css", type: "file", lang: "css" },
-                    ]
-                },
-                {
-                    id: "api",
-                    name: "app/api",
-                    type: "folder",
-                    children: [
-                        { id: "route", name: "route.ts", type: "file", lang: "typescript" },
-                    ]
-                },
-                {
-                    id: "prisma",
-                    name: "prisma",
-                    type: "folder",
-                    children: [
-                        { id: "config", name: "schema.prisma", type: "file", lang: "json" },
-                    ]
-                },
-                { id: "tests", name: "Page.test.tsx", type: "file", lang: "typescript" },
-                { id: "readme", name: "README.md", type: "file", lang: "markdown" },
-            ]
-        }
-    ];
+    // Build tree from flat file list
+    const buildTree = (): FileNode[] => {
+        const root: FileNode = { id: "root", path: "", name: "project", type: "folder", children: [] };
+
+        files.forEach(file => {
+            const parts = file.path.split('/');
+            let current = root;
+
+            parts.forEach((part, index) => {
+                const isFile = index === parts.length - 1;
+                const pathSoFar = parts.slice(0, index + 1).join('/');
+
+                let existing = current.children?.find(child => child.name === part);
+
+                if (!existing) {
+                    existing = {
+                        id: pathSoFar,
+                        path: pathSoFar,
+                        name: part,
+                        type: isFile ? "file" : "folder",
+                        children: isFile ? undefined : []
+                    };
+                    current.children?.push(existing);
+                }
+
+                if (!isFile) {
+                    current = existing;
+                }
+            });
+        });
+
+        return root.children || [];
+    };
+
+    const tree = buildTree();
 
     const toggleFolder = (id: string) => {
         const newExpanded = new Set(expandedFolders);
@@ -79,7 +79,7 @@ export function FileTree({ onSelectFile, activeFileId, className }: FileTreeProp
 
     const renderNode = (node: FileNode, level: number = 0) => {
         const isExpanded = expandedFolders.has(node.id);
-        const isActive = activeFileId === node.id;
+        const isActive = activeFilePath === node.path;
 
         if (node.type === "folder") {
             return (
@@ -98,25 +98,25 @@ export function FileTree({ onSelectFile, activeFileId, className }: FileTreeProp
             );
         }
 
-        const getIcon = (id: string) => {
-            if (id === "component") return <FileCode className="w-3.5 h-3.5 text-blue-500" />;
-            if (id === "styles") return <Hash className="w-3.5 h-3.5 text-orange-500" />;
-            if (id === "config") return <Settings className="w-3.5 h-3.5 text-purple-500" />;
-            if (id === "tests") return <Beaker className="w-3.5 h-3.5 text-green-500" />;
+        const getIcon = (name: string) => {
+            if (name.endsWith('.tsx') || name.endsWith('.ts')) return <FileCode className="w-3.5 h-3.5 text-blue-500" />;
+            if (name.endsWith('.css')) return <Hash className="w-3.5 h-3.5 text-orange-500" />;
+            if (name.endsWith('.prisma') || name.endsWith('.json')) return <Settings className="w-3.5 h-3.5 text-purple-500" />;
+            if (name.includes('test')) return <Beaker className="w-3.5 h-3.5 text-green-500" />;
             return <FileCode className="w-3.5 h-3.5 text-gray-500" />;
         };
 
         return (
             <button
                 key={node.id}
-                onClick={() => onSelectFile(node.id)}
+                onClick={() => onSelectFile(node.path)}
                 className={cn(
                     "w-full flex items-center gap-2 px-3 py-1.5 transition-all group border-l-2",
                     isActive ? "bg-blue-600/10 border-blue-500" : "hover:bg-white/5 border-transparent"
                 )}
                 style={{ paddingLeft: `${level * 12 + 12}px` }}
             >
-                {getIcon(node.id)}
+                {getIcon(node.name)}
                 <span className={cn(
                     "text-[11px] font-medium transition-colors",
                     isActive ? "text-white" : "text-gray-500 group-hover:text-gray-300"
