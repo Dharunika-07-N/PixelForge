@@ -77,6 +77,16 @@ export function ExportPanel() {
                     clearInterval(interval);
                     setIsExporting(false);
                     setIsDone(true);
+
+                    // Trigger a real download simulation
+                    const blob = new Blob(["PixelForge Export: " + selectedFormat], { type: "text/plain" });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `pixelforge-export-${selectedFormat}${currentFormat?.ext || '.txt'}`;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+
                     setTimeout(() => setIsDone(false), 3000);
                     return 100;
                 }
