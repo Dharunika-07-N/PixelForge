@@ -11,6 +11,7 @@ import {
     evaluateColors,
     evaluateAccessibility
 } from "@/lib/ai-analysis";
+import { rateLimit } from "@/lib/rate-limit";
 
 /**
  * POST /api/optimize/analyze - Run comprehensive AI analysis on a design
@@ -21,6 +22,15 @@ export async function POST(request: NextRequest) {
 
         if (!session?.user?.id) {
             throw new AppError("Unauthorized", 401, "UNAUTHORIZED");
+        }
+
+        // Rate Limiting
+        const { success, remaining } = await rateLimit(session.user.id, { limit: 10, interval: 3600 });
+        if (!success) {
+            return NextResponse.json(
+                { error: "Rate limit exceeded. Try again later." },
+                { status: 429, headers: { "X-RateLimit-Create-Remaining": "0" } }
+            );
         }
 
         const body = await request.json();
