@@ -1,3 +1,4 @@
+import * as prettier from "prettier";
 import { callAnthropic, parseAIResponse } from "./ai-service";
 import { CanvasData } from "./canvas-utils";
 
@@ -82,7 +83,28 @@ Return ONLY the JSON.`;
 
     try {
         const response = await callAnthropic(prompt, systemPrompt, 8000);
-        return parseAIResponse<CodeGenerationResponse>(response);
+        const parsedResponse = parseAIResponse<CodeGenerationResponse>(response);
+
+        // Format each file using Prettier
+        const formattedFiles = await Promise.all(
+            parsedResponse.files.map(async (file) => {
+                try {
+                    const formattedContent = await formatGeneratedCode(file.content, file.path);
+                    return {
+                        ...file,
+                        content: formattedContent,
+                    };
+                } catch (error) {
+                    console.warn(`Failed to format file ${file.path}:`, error);
+                    return file; // Return unformatted content on error
+                }
+            })
+        );
+
+        return {
+            ...parsedResponse,
+            files: formattedFiles,
+        };
     } catch (error) {
         console.error("Code generation failed:", error);
         throw error;
@@ -90,9 +112,27 @@ Return ONLY the JSON.`;
 }
 
 /**
- * Helper to format code (conceptual for now)
+ * Helper to format code using Prettier
  */
-export function formatGeneratedCode(code: string): string {
-    // In a real app, we would use Prettier here
-    return code;
+export async function formatGeneratedCode(code: string, filepath: string): Promise<string> {
+    try {
+        // Resolve prettier config from the project root (or fallback to defaults)
+        const options = (await prettier.resolveConfig(filepath)) || {};
+
+        // Inferred parser based on filepath
+        let parser = undefined;
+        if (filepath.endsWith(".json")) parser = "json";
+        if (filepath.endsWith(".css")) parser = "css";
+        if (filepath.endsWith(".ts") || filepath.endsWith(".tsx")) parser = "typescript";
+        if (filepath.endsWith(".js") || filepath.endsWith(".jsx")) parser = "babel";
+
+        return prettier.format(code, {
+            ...options,
+            filepath,
+            parser,
+        });
+    } catch (error) {
+        console.warn("Prettier formatting failed, returning raw code", error);
+        return code;
+    }
 }
