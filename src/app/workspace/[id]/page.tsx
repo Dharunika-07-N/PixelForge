@@ -22,9 +22,12 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { CollaboratorList } from "@/components/workspace/CollaboratorList";
+import { useSession } from "next-auth/react";
 
 const Canvas = dynamic(() => import("@/components/canvas/Canvas"), { ssr: false });
 const CodePreview = dynamic(() => import("@/components/workspace/CodePreview"), { ssr: false });
+import { TemplateLibrary } from "@/components/workspace/TemplateLibrary";
 
 // Mock AI Optimization Data
 const AI_PROPOSALS = [
@@ -52,6 +55,7 @@ const AI_PROPOSALS = [
 ];
 
 export default function WorkspacePage() {
+    const { data: session } = useSession();
     const [activeTab, setActiveTab] = useState("canvas");
     const [pages, setPages] = useState<{ id: string, name: string, data: any }[]>([{ id: "home", name: "Home", data: null }]);
     const [activePageId, setActivePageId] = useState("home");
@@ -204,19 +208,9 @@ export default function WorkspacePage() {
                     </div>
 
                     <div className="flex-1 flex flex-col p-4 overflow-hidden">
-                        <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-4">Element Library</h3>
-                        <div className="flex-1 overflow-y-auto space-y-4 custom-scrollbar pr-2">
-                            {[1, 2, 3, 4].map((i) => (
-                                <div key={i} className="group bg-gray-900/50 border border-gray-800/50 rounded-xl p-3 cursor-grab hover:border-blue-500/50 transition-all">
-                                    <div className="aspect-video bg-black/40 rounded-lg mb-2 flex items-center justify-center border border-white/5">
-                                        <div className="w-12 h-1 bg-blue-500/20 rounded-full" />
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-[10px] font-bold text-gray-400">Component Block {i}</span>
-                                        <CheckCircle2 className="w-3 h-3 text-green-500 opacity-0 group-hover:opacity-100" />
-                                    </div>
-                                </div>
-                            ))}
+                        <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-6">Component Library</h3>
+                        <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
+                            <TemplateLibrary onSelect={(t) => console.log("Template selected:", t)} />
                         </div>
                     </div>
                 </div>
@@ -233,6 +227,13 @@ export default function WorkspacePage() {
                         <button className="p-2 text-gray-400 hover:text-white transition-colors" title="Share"><Share2 className="w-5 h-5" /></button>
                         <button className="p-2 text-gray-400 hover:text-white transition-colors" title="Export"><Download className="w-5 h-5" /></button>
                         <div className="w-px h-6 bg-gray-800" />
+
+                        <CollaboratorList
+                            projectId={activePageId}
+                            currentUserId={session?.user?.id || "guest"}
+                            userName={session?.user?.name || "Guest"}
+                        />
+
                         <button
                             onClick={handleOptimize}
                             disabled={isOptimizing}

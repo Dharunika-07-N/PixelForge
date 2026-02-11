@@ -6,6 +6,7 @@ import { ProjectCard } from "@/components/dashboard/ProjectCard";
 import { Plus, LayoutGrid, List as ListIcon } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
+import { UsageAnalytics } from "@/components/dashboard/UsageAnalytics";
 import Link from "next/link";
 
 export default async function DashboardPage() {
@@ -31,6 +32,8 @@ export default async function DashboardPage() {
                     projectCount={user.projects.length}
                     extractionCount={0}
                 />
+
+                <UsageAnalytics />
 
                 <section className="mt-16">
                     <div className="flex items-center justify-between mb-8">
