@@ -87,7 +87,12 @@ export default function LandingPage() {
           <CodeGenerationDemo />
 
           <div className="flex justify-center gap-4">
-            <button className="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-all">Generate My Code &rarr;</button>
+            <button
+              onClick={() => router.push('/upload')}
+              className="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-all"
+            >
+              Generate My Code &rarr;
+            </button>
           </div>
         </div>
       )
@@ -125,7 +130,12 @@ export default function LandingPage() {
           </div>
 
           <div className="flex justify-center pt-4">
-            <button className="px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-all shadow-xl shadow-blue-600/20 active:scale-95">Open Live Sandbox &rarr;</button>
+            <button
+              onClick={() => router.push('/dashboard')}
+              className="px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-all shadow-xl shadow-blue-600/20 active:scale-95"
+            >
+              Open Live Sandbox &rarr;
+            </button>
           </div>
         </div>
       )
@@ -582,7 +592,7 @@ export default function LandingPage() {
                 </li>
                 <li className="flex items-center gap-3">
                   <CheckCircle2 className="w-4 h-4 text-blue-500" />
-                  Figma Plugin Access
+                  <span>Figma Plugin Access <span className="text-xs text-gray-500">(Coming Soon)</span></span>
                 </li>
               </ul>
               <button onClick={() => setShowSignupModal(true)} className="w-full py-4 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-500 transition-colors shadow-lg shadow-blue-600/30">Get Started</button>
@@ -602,14 +612,19 @@ export default function LandingPage() {
                 </li>
                 <li className="flex items-center gap-3">
                   <CheckCircle2 className="w-4 h-4 text-blue-500" />
-                  SSO & Admin Controls
+                  <span>SSO & Admin Controls <span className="text-xs text-gray-500">(Coming Soon)</span></span>
                 </li>
                 <li className="flex items-center gap-3">
                   <CheckCircle2 className="w-4 h-4 text-blue-500" />
-                  Custom Design Tokens
+                  <span>Custom Design Tokens <span className="text-xs text-gray-500">(Coming Soon)</span></span>
                 </li>
               </ul>
-              <button className="w-full py-4 rounded-xl border border-gray-800 text-white font-bold hover:bg-gray-900 transition-colors">Contact Sales</button>
+              <button
+                onClick={() => window.location.href = 'mailto:sales@pixelforge.ai?subject=Enterprise%20Inquiry'}
+                className="w-full py-4 rounded-xl border border-gray-800 text-white font-bold hover:bg-gray-900 transition-colors"
+              >
+                Contact Sales
+              </button>
             </div>
           </div>
         </div>
