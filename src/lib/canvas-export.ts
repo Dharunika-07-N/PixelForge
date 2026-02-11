@@ -70,7 +70,6 @@ export function importFromJSON(
                 const jsonString = e.target?.result as string;
                 const canvasData = JSON.parse(jsonString);
 
-                // @ts-expect-error loadFromJSON returns a promise in v6
                 canvas.loadFromJSON(canvasData).then(() => {
                     canvas.renderAll();
                     resolve();
@@ -175,7 +174,6 @@ export function importImage(
         reader.onload = (e) => {
             const imgUrl = e.target?.result as string;
 
-            // @ts-expect-error fabric Image extension
             fabric.Image.fromURL(imgUrl).then((img: fabric.Image) => {
                 // Scale image to fit canvas
                 const canvasWidth = canvas.getWidth();
@@ -205,4 +203,38 @@ export function importImage(
 
         reader.readAsDataURL(file);
     });
+}
+
+/**
+ * Export to Figma (via SVG)
+ * Figma handles SVG imports perfectly, often better than custom JSON formats.
+ */
+export function exportToFigma(canvas: fabric.Canvas | fabric.StaticCanvas, filename: string = "figma-export.svg"): void {
+    exportToSVG(canvas, filename);
+}
+
+/**
+ * Copy canvas as SVG to clipboard (Best for pasting into Figma/Sketch/XD)
+ */
+export async function copySVGToClipboard(canvas: fabric.Canvas | fabric.StaticCanvas): Promise<void> {
+    try {
+        const svg = canvas.toSVG();
+        const blob = new Blob([svg], { type: "text/plain" }); // Figma prefers text/plain for SVG string or image/svg+xml
+
+        await navigator.clipboard.write([
+            new ClipboardItem({
+                "text/plain": blob,
+            }),
+        ]);
+        // Also try writing text directly if possible, but ClipboardItem with text/plain is standard
+    } catch (_error) {
+        console.warn("ClipboardItem 'text/plain' failed, trying writeText...");
+        try {
+            const svg = canvas.toSVG();
+            await navigator.clipboard.writeText(svg);
+        } catch (err) {
+            console.error("Failed to copy SVG to clipboard:", err);
+            throw new Error("Clipboard copy failed");
+        }
+    }
 }
