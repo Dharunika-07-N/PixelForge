@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PropertyInspector } from "./PropertyInspector";
+import { exportToFigma, copySVGToClipboard } from "@/lib/canvas-export";
 
 interface CanvasProps {
     initialData?: unknown;
@@ -78,7 +79,7 @@ export default function EnhancedCanvas({ initialData, onSave }: CanvasProps) {
         historyIndexRef.current--;
         const state = historyRef.current[historyIndexRef.current];
 
-        // @ts-expect-error loadFromJSON returns a promise in fabric v6
+        // loadFromJSON returns a promise in fabric v6
         fabricRef.current.loadFromJSON(JSON.parse(state)).then(() => {
             if (!fabricRef.current) return;
             fabricRef.current.renderAll();
@@ -94,7 +95,7 @@ export default function EnhancedCanvas({ initialData, onSave }: CanvasProps) {
         historyIndexRef.current++;
         const state = historyRef.current[historyIndexRef.current];
 
-        // @ts-expect-error loadFromJSON returns a promise in fabric v6
+        // loadFromJSON returns a promise in fabric v6
         fabricRef.current.loadFromJSON(JSON.parse(state)).then(() => {
             if (!fabricRef.current) return;
             fabricRef.current.renderAll();
@@ -134,7 +135,7 @@ export default function EnhancedCanvas({ initialData, onSave }: CanvasProps) {
 
         // Load initial data or create default
         if (initialData) {
-            // @ts-expect-error loadFromJSON returns a promise in fabric v6
+            // loadFromJSON returns a promise in fabric v6
             canvas.loadFromJSON(initialData).then(() => {
                 canvas.renderAll();
                 saveHistory();
@@ -168,7 +169,7 @@ export default function EnhancedCanvas({ initialData, onSave }: CanvasProps) {
             if ((e.ctrlKey || e.metaKey) && e.key === "c") {
                 const activeObject = fabricRef.current.getActiveObject();
                 if (activeObject) {
-                    // @ts-expect-error clone returns a promise in fabric v6
+                    // clone returns a promise in fabric v6
                     activeObject.clone().then((cloned: fabric.Object) => {
                         clipboardRef.current = cloned;
                     });
@@ -179,7 +180,7 @@ export default function EnhancedCanvas({ initialData, onSave }: CanvasProps) {
             if ((e.ctrlKey || e.metaKey) && e.key === "v") {
                 if (!clipboardRef.current || !fabricRef.current) return;
 
-                // @ts-expect-error clone returns a promise in fabric v6
+                // clone returns a promise in fabric v6
                 clipboardRef.current.clone().then((clonedObj: any) => {
                     if (!fabricRef.current) return;
                     fabricRef.current.discardActiveObject();
@@ -372,6 +373,7 @@ export default function EnhancedCanvas({ initialData, onSave }: CanvasProps) {
         const dataURL = fabricRef.current.toDataURL({
             format: 'png',
             quality: 1,
+            multiplier: 2, // High resolution export
         });
         const link = document.createElement('a');
         link.download = `design-${Date.now()}.png`;
@@ -388,6 +390,22 @@ export default function EnhancedCanvas({ initialData, onSave }: CanvasProps) {
         link.download = `design-${Date.now()}.json`;
         link.href = url;
         link.click();
+    };
+
+    const handleExportToFigma = () => {
+        if (!fabricRef.current) return;
+        exportToFigma(fabricRef.current, `design-${Date.now()}.svg`);
+    };
+
+    const handleCopySVG = async () => {
+        if (!fabricRef.current) return;
+        try {
+            await copySVGToClipboard(fabricRef.current);
+            alert("Copied to clipboard as SVG! Ready to paste into Figma.");
+        } catch (error) {
+            console.error("Failed to copy SVG:", error);
+            alert("Failed to copy SVG. Check console for details.");
+        }
     };
 
     return (
@@ -486,6 +504,12 @@ export default function EnhancedCanvas({ initialData, onSave }: CanvasProps) {
                             </button>
                             <button onClick={exportAsJSON} className="w-full px-4 py-2 text-left text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-white hover:bg-gray-800 transition-colors">
                                 JSON Data
+                            </button>
+                            <button onClick={handleExportToFigma} className="w-full px-4 py-2 text-left text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-white hover:bg-gray-800 transition-colors">
+                                Figma (SVG)
+                            </button>
+                            <button onClick={handleCopySVG} className="w-full px-4 py-2 text-left text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-white hover:bg-gray-800 transition-colors">
+                                Copy as SVG
                             </button>
                         </div>
                     </div>

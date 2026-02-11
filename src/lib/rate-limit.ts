@@ -33,7 +33,7 @@ export async function rateLimit(identifier: string, config: RateLimitConfig = { 
     // Memory Strategy (Fallback)
     // Cleanup expired first to avoid memory leak
     if (memoryStore.size > 10000) {
-        for (const [key, val] of memoryStore.entries()) {
+        for (const [key, val] of Array.from(memoryStore.entries())) {
             if (val.expires < now) memoryStore.delete(key);
         }
     }
@@ -50,4 +50,29 @@ export async function rateLimit(identifier: string, config: RateLimitConfig = { 
     // New record
     memoryStore.set(identifier, { count: 1, expires: now + interval * 1000 });
     return { success: true, remaining: limit - 1 };
+}
+
+export async function getRemainingRequests(identifier: string, config: RateLimitConfig = { interval: 60, limit: 10 }): Promise<number> {
+    const { interval, limit } = config;
+    const now = Date.now();
+
+    // Redis Strategy
+    if (redis) {
+        try {
+            const key = `rate_limit:${identifier}`;
+            const current = await redis.get(key);
+            const count = current ? parseInt(current) : 0;
+            return Math.max(0, limit - count);
+        } catch (error) {
+            console.warn("Redis error in getRemainingRequests:", error);
+        }
+    }
+
+    // Memory Strategy
+    const record = memoryStore.get(identifier);
+    if (record && record.expires > now) {
+        return Math.max(0, limit - record.count);
+    }
+
+    return limit;
 }

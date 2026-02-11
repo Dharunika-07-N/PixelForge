@@ -53,12 +53,16 @@ const AI_PROPOSALS = [
 
 export default function WorkspacePage() {
     const [activeTab, setActiveTab] = useState("canvas");
-    const [pages, setPages] = useState([{ id: "home", name: "Home", data: null }]);
+    const [pages, setPages] = useState<{ id: string, name: string, data: any }[]>([{ id: "home", name: "Home", data: null }]);
     const [activePageId, setActivePageId] = useState("home");
     const [isOptimizing, setIsOptimizing] = useState(false);
     const [showAIProposal, setShowAIProposal] = useState(false);
     const [pendingApproval, setPendingApproval] = useState<typeof AI_PROPOSALS[0] | null>(null);
     const [approvedItems, setApprovedItems] = useState<string[]>([]);
+
+    const [optimizationId, setOptimizationId] = useState<string | null>(null);
+    const [feedback, setFeedback] = useState("");
+    const [isRefining, setIsRefining] = useState(false);
 
     const activePage = pages.find(p => p.id === activePageId) || pages[0];
 
@@ -68,13 +72,65 @@ export default function WorkspacePage() {
         setActivePageId(id);
     };
 
-    const handleOptimize = () => {
+    const handleOptimize = async () => {
         setIsOptimizing(true);
-        setTimeout(() => {
+        try {
+            const response = await fetch("/api/optimize/analyze", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ pageId: activePageId })
+            });
+            const data = await response.json();
+
+            if (data.optimization) {
+                setOptimizationId(data.optimization.id);
+                // In a real app, we'd use the actual suggestions
+                // For this demo, we'll continue using the mock proposals but contextually
+                setShowAIProposal(true);
+                setPendingApproval(AI_PROPOSALS[0]);
+            } else if (data.error) {
+                alert(`Optimization failed: ${data.error}`);
+            }
+        } catch (error) {
+            console.error("Optimization error:", error);
+            alert("Failed to connect to AI engine.");
+        } finally {
             setIsOptimizing(false);
-            setShowAIProposal(true);
-            setPendingApproval(AI_PROPOSALS[0]);
-        }, 2000);
+        }
+    };
+
+    const handleRefine = async () => {
+        if (!feedback.trim() || !optimizationId) return;
+
+        setIsRefining(true);
+        try {
+            const response = await fetch("/api/optimize/feedback", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    optimizationId,
+                    feedback,
+                    category: "general"
+                })
+            });
+            const data = await response.json();
+
+            if (data.refinement) {
+                // Update the proposal with AI explanation
+                if (pendingApproval) {
+                    setPendingApproval({
+                        ...pendingApproval,
+                        title: "Refined Optimization",
+                        description: data.explanation || "I've updated the design based on your feedback."
+                    });
+                }
+                setFeedback("");
+            }
+        } catch (error) {
+            console.error("Refinement error:", error);
+        } finally {
+            setIsRefining(false);
+        }
     };
 
     const handleApprove = () => {
@@ -191,7 +247,7 @@ export default function WorkspacePage() {
                 <div className="flex-1 relative overflow-hidden flex">
                     {activeTab === "canvas" ? (
                         <Canvas initialData={activePage.data} onSave={(data) => {
-                            const newPages = pages.map(p => p.id === activePageId ? { ...p, data } : p);
+                            const newPages: { id: string, name: string, data: any }[] = pages.map(p => p.id === activePageId ? { ...p, data } : p);
                             setPages(newPages);
                         }} />
                     ) : (
@@ -235,7 +291,27 @@ export default function WorkspacePage() {
                                         <span className="px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-tighter">{pendingApproval.type}</span>
                                     </div>
                                     <h3 className="text-2xl font-black mb-4">{pendingApproval.title}</h3>
-                                    <p className="text-gray-400 leading-relaxed text-lg mb-10">{pendingApproval.description}</p>
+                                    <p className="text-gray-400 leading-relaxed text-lg mb-8">{pendingApproval.description}</p>
+
+                                    {/* Feedback Section */}
+                                    <div className="mb-8 p-6 bg-gray-950/50 border border-gray-800 rounded-3xl">
+                                        <h4 className="text-xs font-black text-blue-500 uppercase tracking-widest mb-4">Refine with Feedback</h4>
+                                        <textarea
+                                            value={feedback}
+                                            onChange={(e) => setFeedback(e.target.value)}
+                                            placeholder="e.g. 'Make it more professional', 'Use a darker blue'..."
+                                            className="w-full bg-transparent border-none focus:ring-0 text-gray-300 placeholder:text-gray-700 resize-none h-20 mb-4 p-0"
+                                        />
+                                        <div className="flex justify-end">
+                                            <button
+                                                onClick={handleRefine}
+                                                disabled={isRefining || !feedback.trim()}
+                                                className="px-6 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50"
+                                            >
+                                                {isRefining ? "Refining..." : "Send Feedback"}
+                                            </button>
+                                        </div>
+                                    </div>
 
                                     <div className="flex gap-4">
                                         <button
