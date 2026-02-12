@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import { Play, ArrowRight, Code2 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { useRouter } from "next/navigation";
+import { SignupModal } from "@/components/auth/SignupModal";
 
 // Step Components
 import { StepUpload } from "@/components/how-it-works/steps/StepUpload";
@@ -18,6 +20,8 @@ import { FAQItem } from "@/components/ui/FAQItem";
 
 export default function HowItWorksPage() {
     const [activeStep, setActiveStep] = useState(1);
+    const [showSignupModal, setShowSignupModal] = useState(false);
+    const router = useRouter();
 
     // Update active step based on scroll position could be complex with IntersectionObserver
     // Simplified for now: we will stick to a simpler state or leave it static for the MVP
@@ -77,7 +81,10 @@ export default function HowItWorksPage() {
                     </p>
 
                     <div className="flex flex-col sm:flex-row justify-center gap-6">
-                        <button className="px-10 py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black text-lg transition-all shadow-2xl shadow-blue-600/40 flex items-center justify-center gap-3 active:scale-95">
+                        <button
+                            onClick={() => router.push('/upload')}
+                            className="px-10 py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black text-lg transition-all shadow-2xl shadow-blue-600/40 flex items-center justify-center gap-3 active:scale-95"
+                        >
                             Start Extraction
                             <ArrowRight className="w-5 h-5" />
                         </button>
@@ -210,10 +217,16 @@ export default function HowItWorksPage() {
                             Interact with your generated component in a sandboxed environment. Verify responsiveness and accessibility compliance before syncing to your repo.
                         </p>
                         <div className="flex items-center gap-4">
-                            <button className="px-8 py-4 bg-white text-black font-black rounded-xl hover:bg-gray-200 transition-colors shadow-xl shadow-white/10 active:scale-95">
+                            <button
+                                onClick={() => router.push('/dashboard')}
+                                className="px-8 py-4 bg-white text-black font-black rounded-xl hover:bg-gray-200 transition-colors shadow-xl shadow-white/10 active:scale-95"
+                            >
                                 Download Source
                             </button>
-                            <button className="px-8 py-4 bg-gray-900 text-white font-bold rounded-xl border border-gray-800 hover:border-green-500/50 hover:text-green-400 transition-all">
+                            <button
+                                onClick={() => router.push('/dashboard')}
+                                className="px-8 py-4 bg-gray-900 text-white font-bold rounded-xl border border-gray-800 hover:border-green-500/50 hover:text-green-400 transition-all"
+                            >
                                 Open Sandbox
                             </button>
                         </div>
@@ -241,12 +254,20 @@ export default function HowItWorksPage() {
             <section className="px-8 py-32 text-center">
                 <h2 className="text-4xl font-black mb-6">Ready to try it?</h2>
                 <p className="text-gray-400 mb-8">Join the waitlist to get early access.</p>
-                <button className="px-10 py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black text-lg transition-all shadow-2xl shadow-blue-600/40">
+                <button
+                    onClick={() => setShowSignupModal(true)}
+                    className="px-10 py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black text-lg transition-all shadow-2xl shadow-blue-600/40"
+                >
                     Get Started for Free
                 </button>
             </section>
 
             <Footer />
+
+            <SignupModal
+                isOpen={showSignupModal}
+                onClose={() => setShowSignupModal(false)}
+            />
         </div>
     );
 }
