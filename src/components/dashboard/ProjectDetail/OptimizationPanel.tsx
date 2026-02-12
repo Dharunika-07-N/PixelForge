@@ -85,7 +85,9 @@ export function OptimizationPanel({ pageId, onStatusChange, onCodeGenerated, con
             if (data.optimization) {
                 setOptimization({
                     ...data.optimization,
-                    suggestions: typeof data.optimization.suggestions === 'string' ? JSON.parse(data.optimization.suggestions) : data.optimization.suggestions
+                    suggestions: typeof data.optimization.suggestions === 'string' ? JSON.parse(data.optimization.suggestions) : data.optimization.suggestions,
+                    model: data.summary?.model,
+                    categories: data.summary?.categories
                 });
                 onStatusChange?.("ANALYZED");
             }
@@ -208,13 +210,14 @@ export function OptimizationPanel({ pageId, onStatusChange, onCodeGenerated, con
                         >
                             <OptimizationResults
                                 score={optimization.qualityScore}
-                                categories={{
-                                    layout: 85, // These would ideally come from the API too
+                                categories={optimization.categories || {
+                                    layout: 85,
                                     typography: 72,
                                     color: 90,
                                     accessibility: 65
                                 }}
                                 analysis={optimization.aiAnalysis}
+                                model={optimization.model}
                             />
 
                             <SuggestionList
