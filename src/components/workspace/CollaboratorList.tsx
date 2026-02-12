@@ -17,11 +17,12 @@ export function CollaboratorList({ projectId, currentUserId, userName }: Collabo
     const collaboratorArray = Object.values(collaborators);
 
     // Mock collaborators for demo if empty
-    const displayCollaborators = collaboratorArray.length > 0 ? collaboratorArray : [
+    const isDemo = collaboratorArray.length === 0;
+    const displayCollaborators = isDemo ? [
         { id: "user-2", name: "Sarah Chen", color: "#ec4899", avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop" },
         { id: "user-3", name: "Marcus Aurelius", color: "#8b5cf6", avatarUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop" },
         { id: "user-4", name: "Alex Rover", color: "#3b82f6", avatarUrl: undefined },
-    ];
+    ] : collaboratorArray;
 
     return (
         <div className="flex items-center -space-x-3 mr-6">
@@ -63,7 +64,7 @@ export function CollaboratorList({ projectId, currentUserId, userName }: Collabo
                                         {user.name}
                                     </div>
                                     <div className="text-[8px] font-bold text-green-500 uppercase tracking-widest mt-0.5">
-                                        Active Now
+                                        {isDemo ? "AI Simulation" : "Active Now"}
                                     </div>
                                     <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 border-l border-t border-gray-800 rotate-45" />
                                 </motion.div>
