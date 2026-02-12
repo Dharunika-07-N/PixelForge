@@ -14,6 +14,9 @@ export interface AIAnalysisResponse {
         color: number;
         accessibility: number;
     };
+    meta?: {
+        model?: string;
+    };
 }
 
 export interface AISuggestion {
@@ -91,14 +94,14 @@ export function estimateTokens(text: string): number {
 }
 
 /**
- * Call Anthropic API for text-only prompts with fallback
+ * Call Anthropic API for text-only prompts with fallback, returning metadata
  */
-export async function callAnthropic(
+export async function callAnthropicWithMeta(
     prompt: string,
     systemPrompt?: string,
     maxTokens: number = 4000,
     model: string = "claude-3-5-sonnet-20240620"
-): Promise<string> {
+): Promise<{ text: string; model: string }> {
     try {
         const client = getAnthropicClient();
 
@@ -118,7 +121,7 @@ export async function callAnthropic(
 
         const content = response.content[0];
         if (content.type === "text") {
-            return content.text;
+            return { text: content.text, model };
         }
 
         throw new AppError("Unexpected response format from AI", 500, "AI_ERROR");
@@ -127,7 +130,7 @@ export async function callAnthropic(
         if (error instanceof Anthropic.APIError && (error.status === 503 || error.status === 500 || error.status === 529)) {
             console.warn(`[AI] Primary model ${model} failed, attempting fallback to claude-3-haiku-20240307...`);
             if (model !== "claude-3-haiku-20240307") {
-                return callAnthropic(prompt, systemPrompt, maxTokens, "claude-3-haiku-20240307");
+                return callAnthropicWithMeta(prompt, systemPrompt, maxTokens, "claude-3-haiku-20240307");
             }
         }
 
@@ -140,6 +143,19 @@ export async function callAnthropic(
         }
         throw error;
     }
+}
+
+/**
+ * Call Anthropic API for text-only prompts (Legacy wrapper)
+ */
+export async function callAnthropic(
+    prompt: string,
+    systemPrompt?: string,
+    maxTokens: number = 4000,
+    model: string = "claude-3-5-sonnet-20240620"
+): Promise<string> {
+    const result = await callAnthropicWithMeta(prompt, systemPrompt, maxTokens, model);
+    return result.text;
 }
 
 /**
