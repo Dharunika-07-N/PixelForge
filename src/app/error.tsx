@@ -1,81 +1,65 @@
-'use client';
+'use client'
 
-import { useEffect } from 'react';
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
+import { useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { AlertCircle, RefreshCcw, Home } from 'lucide-react'
+import Link from 'next/link'
 
 export default function Error({
     error,
     reset,
 }: {
-    error: Error & { digest?: string };
-    reset: () => void;
+    error: Error & { digest?: string }
+    reset: () => void
 }) {
     useEffect(() => {
-        // Log the error to an error reporting service
-        console.error('Application error:', error);
-    }, [error]);
+        console.error(error)
+    }, [error])
 
     return (
         <div className="min-h-screen bg-gray-950 flex items-center justify-center p-8">
-            <div className="max-w-2xl w-full">
-                <div className="bg-gray-900/50 backdrop-blur-xl border border-red-500/20 rounded-3xl p-12 text-center">
-                    {/* Error Icon */}
-                    <div className="w-20 h-20 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-8">
-                        <AlertTriangle className="w-10 h-10 text-red-500" />
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="max-w-md w-full text-center space-y-8"
+            >
+                <div className="relative inline-block">
+                    <div className="absolute inset-0 bg-red-500/20 blur-2xl rounded-full" />
+                    <div className="relative w-24 h-24 bg-red-600/10 border border-red-500/20 rounded-3xl flex items-center justify-center mx-auto">
+                        <AlertCircle className="w-12 h-12 text-red-500" />
                     </div>
+                </div>
 
-                    {/* Error Message */}
-                    <h1 className="text-3xl font-black text-white mb-4">
-                        Something went wrong!
-                    </h1>
-                    <p className="text-gray-400 mb-2">
-                        We encountered an unexpected error while processing your request.
-                    </p>
-
-                    {/* Error Details (only in development) */}
-                    {process.env.NODE_ENV === 'development' && (
-                        <div className="mt-6 p-4 bg-gray-950 border border-gray-800 rounded-xl text-left">
-                            <p className="text-xs font-mono text-red-400 mb-2">
-                                <strong>Error:</strong> {error.message}
-                            </p>
-                            {error.digest && (
-                                <p className="text-xs font-mono text-gray-500">
-                                    <strong>Digest:</strong> {error.digest}
-                                </p>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Action Buttons */}
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-                        <button
-                            onClick={reset}
-                            className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-3 shadow-lg shadow-blue-600/20"
-                        >
-                            <RefreshCw className="w-5 h-5" />
-                            Try Again
-                        </button>
-                        <button
-                            onClick={() => window.location.href = '/'}
-                            className="px-8 py-4 bg-gray-800 hover:bg-gray-700 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-3"
-                        >
-                            <Home className="w-5 h-5" />
-                            Go Home
-                        </button>
-                    </div>
-
-                    {/* Support Link */}
-                    <p className="text-sm text-gray-500 mt-8">
-                        If this problem persists, please{' '}
-                        <a
-                            href="mailto:support@pixelforge.ai"
-                            className="text-blue-400 hover:text-blue-300 underline"
-                        >
-                            contact support
-                        </a>
+                <div className="space-y-3">
+                    <h2 className="text-3xl font-black text-white tracking-tight uppercase">Something went wrong</h2>
+                    <p className="text-gray-500 font-medium">
+                        We encountered an unexpected error. Don't worry, your progress is safe.
                     </p>
                 </div>
-            </div>
+
+                {error.digest && (
+                    <div className="py-2 px-4 bg-gray-900 border border-gray-800 rounded-xl inline-block">
+                        <code className="text-[10px] text-gray-500 font-mono">ID: {error.digest}</code>
+                    </div>
+                )}
+
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+                    <button
+                        onClick={() => reset()}
+                        className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-2xl font-black transition-all shadow-xl shadow-blue-600/20"
+                    >
+                        <RefreshCcw className="w-4 h-4" />
+                        Try again
+                    </button>
+                    <Link
+                        href="/"
+                        className="w-full sm:w-auto flex items-center justify-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-8 py-3 rounded-2xl font-black border border-gray-800 transition-all"
+                    >
+                        <Home className="w-4 h-4" />
+                        Go Home
+                    </Link>
+                </div>
+            </motion.div>
         </div>
-    );
+    )
 }
