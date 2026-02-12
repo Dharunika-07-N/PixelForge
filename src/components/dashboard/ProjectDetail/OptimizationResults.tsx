@@ -25,6 +25,7 @@ interface OptimizationResultsProps {
         accessibility: number;
     };
     analysis: string;
+    model?: string;
     className?: string;
 }
 
@@ -32,6 +33,7 @@ export function OptimizationResults({
     score,
     categories,
     analysis,
+    model,
     className
 }: OptimizationResultsProps) {
     // Determine color based on score
@@ -143,7 +145,21 @@ export function OptimizationResults({
                             </div>
                         ))}
                     </div>
-                    <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">PixelForge Inference Engine v2</span>
+                    <div className="flex flex-col items-end gap-1">
+                        <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">PixelForge Inference Engine v2</span>
+                        {model?.includes("haiku") && (
+                            <div className="flex items-center gap-1.5 px-2 py-1 bg-amber-500/10 border border-amber-500/20 rounded-md">
+                                <AlertCircle className="w-3 h-3 text-amber-500" />
+                                <span className="text-[8px] font-black text-amber-500 uppercase tracking-widest">Performance Mode Active (Fallback)</span>
+                            </div>
+                        )}
+                        {model?.includes("sonnet") && (
+                            <div className="flex items-center gap-1.5 px-2 py-1 bg-blue-500/10 border border-blue-500/20 rounded-md">
+                                <Zap className="w-3 h-3 text-blue-500" />
+                                <span className="text-[8px] font-black text-blue-500 uppercase tracking-widest">High Precision Mode Active</span>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
