@@ -33,11 +33,13 @@ import { AIExtractionDemo } from "@/components/landing/AIExtractionDemo";
 import { CodeGenerationDemo } from "@/components/landing/CodeGenerationDemo";
 import { InstantPreviewDemo } from "@/components/landing/InstantPreviewDemo";
 import { FAQItem } from "@/components/ui/FAQItem";
+import { WaitlistModal } from "@/components/auth/WaitlistModal";
 
 export default function LandingPage() {
   const [activeFeature, setActiveFeature] = useState<number | null>(null);
   const [showSignupModal, setShowSignupModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showWaitlistModal, setShowWaitlistModal] = useState(false);
   const router = useRouter();
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
@@ -620,7 +622,7 @@ export default function LandingPage() {
                 </li>
               </ul>
               <button
-                onClick={() => window.location.href = 'mailto:sales@pixelforge.ai?subject=Enterprise%20Inquiry'}
+                onClick={() => setShowWaitlistModal(true)}
                 className="w-full py-4 rounded-xl border border-gray-800 text-white font-bold hover:bg-gray-900 transition-colors"
               >
                 Contact Sales
@@ -748,6 +750,10 @@ export default function LandingPage() {
           setShowLoginModal(false);
           setShowSignupModal(true);
         }}
+      />
+      <WaitlistModal
+        isOpen={showWaitlistModal}
+        onClose={() => setShowWaitlistModal(false)}
       />
     </div >
   );
