@@ -388,7 +388,7 @@ export default function LandingPage() {
           {rightTab === "comments" && <CommentsPanel projectId={project.id} pageId={activePageId} />}
           {rightTab === "system" && <DesignSystemPanel />}
           {rightTab === "history" && <VersionHistory />}
-          {rightTab === "export" && <ExportPanel />}
+          {rightTab === "export" && <ExportPanel canvasData={activePage?.canvasData} />}
           {rightTab === "analytics" && <AnalyticsPanel projectId={project.id} />}
           {rightTab === "testing" && <TestingPanel pageId={activePageId} />}
           {rightTab === "docs" && <DocumentationPanel pageId={activePageId} />}
