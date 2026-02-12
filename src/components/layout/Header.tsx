@@ -244,7 +244,7 @@ export function Header({ showDashboardLinks = false }: HeaderProps) {
                             [
                                 { name: "Features", href: "/#features" },
                                 { name: "How it Works", href: "/how-it-works" },
-                                { name: "Docs", href: "/docs" },
+                                { name: "Docs", href: "/how-it-works" },
                             ].map((item, i) => (
                                 <MobilenavLink
                                     key={item.href}
