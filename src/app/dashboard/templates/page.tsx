@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
     Layout,
     Smartphone,
@@ -264,6 +265,7 @@ export default function TemplatesPage() {
 function TemplatePreviewModal({ template, onClose }: { template: Template | null, onClose: () => void }) {
     const [activeDevice, setActiveDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
     const [isCustomizing, setIsCustomizing] = useState(false);
+    const router = useRouter();
 
     if (!template) return null;
 
@@ -325,7 +327,10 @@ function TemplatePreviewModal({ template, onClose }: { template: Template | null
                             >
                                 Customize
                             </button>
-                            <button className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold shadow-lg shadow-blue-600/20 active:scale-95 transition-all">
+                            <button
+                                onClick={() => router.push('/dashboard')}
+                                className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold shadow-lg shadow-blue-600/20 active:scale-95 transition-all"
+                            >
                                 <Plus className="w-4 h-4" />
                                 Use Template
                             </button>
