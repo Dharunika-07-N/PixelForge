@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import * as fabric from "fabric";
+import { exportToPNG, exportToJSON, exportToSVG, copySVGToClipboard } from "@/lib/canvas-export";
 
 interface ExportFormat {
     id: string;
@@ -44,55 +46,111 @@ const FORMATS: ExportFormat[] = [
         ext: ".json"
     },
     {
+        id: "figma",
+        name: "Figma (SVG)",
+        icon: Figma,
+        description: "Standard SVG export optimized for Figma",
+        ext: ".svg",
+        pro: true
+    },
+    {
         id: "pdf",
         name: "PDF Document",
         icon: FileText,
         description: "Vector-based document for presentations",
         ext: ".pdf",
         pro: true
-    },
-    {
-        id: "figma",
-        name: "Figma File",
-        icon: Figma,
-        description: "Direct export to Figma workspace",
-        ext: ".fig",
-        pro: true
     }
 ];
 
-export function ExportPanel() {
+interface ExportPanelProps {
+    canvasData?: string;
+}
+
+export function ExportPanel({ canvasData }: ExportPanelProps) {
     const [selectedFormat, setSelectedFormat] = useState("png");
     const [isExporting, setIsExporting] = useState(false);
     const [exportProgress, setExportProgress] = useState(0);
     const [isDone, setIsDone] = useState(false);
+    const [copySuccess, setCopySuccess] = useState(false);
 
-    const handleExport = () => {
+    const handleExport = async () => {
+        if (!canvasData) {
+            alert("No design data available to export.");
+            return;
+        }
+
         setIsExporting(true);
-        setExportProgress(0);
+        setExportProgress(10);
 
-        const interval = setInterval(() => {
-            setExportProgress(prev => {
-                if (prev >= 100) {
-                    clearInterval(interval);
-                    setIsExporting(false);
-                    setIsDone(true);
-
-                    // Trigger a real download simulation
-                    const blob = new Blob(["PixelForge Export: " + selectedFormat], { type: "text/plain" });
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = `pixelforge-export-${selectedFormat}${currentFormat?.ext || '.txt'}`;
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-
-                    setTimeout(() => setIsDone(false), 3000);
-                    return 100;
-                }
-                return prev + 5;
+        try {
+            // Initialize a static canvas to render the JSON
+            const canvas = new fabric.StaticCanvas(undefined, {
+                width: 375,
+                height: 812,
             });
-        }, 100);
+
+            setExportProgress(30);
+
+            // Load from JSON
+            await new Promise<void>((resolve) => {
+                canvas.loadFromJSON(JSON.parse(canvasData), () => {
+                    canvas.renderAll();
+                    resolve();
+                });
+            });
+
+            setExportProgress(60);
+
+            const filename = `pixelforge-export-${Date.now()}`;
+
+            // Execute real export based on format
+            if (selectedFormat === "png") {
+                await exportToPNG(canvas, `${filename}.png`);
+            } else if (selectedFormat === "json") {
+                exportToJSON(canvas, `${filename}.json`);
+            } else if (selectedFormat === "figma" || selectedFormat === "svg") {
+                exportToSVG(canvas, `${filename}.svg`);
+            } else if (selectedFormat === "pdf") {
+                // PDF export might need a specific lib, for now we can do SVG as fallback
+                exportToSVG(canvas, `${filename}.svg`);
+                console.warn("PDF export falling back to SVG");
+            }
+
+            setExportProgress(100);
+            setIsDone(true);
+            setTimeout(() => {
+                setIsDone(false);
+                setIsExporting(false);
+            }, 3000);
+
+        } catch (error) {
+            console.error("Export failed:", error);
+            alert("Failed to export design. Please try again.");
+            setIsExporting(false);
+        }
+    };
+
+    const handleCopySVG = async () => {
+        if (!canvasData) return;
+
+        try {
+            const canvas = new fabric.StaticCanvas(undefined, {
+                width: 375,
+                height: 812,
+            });
+            await new Promise<void>((resolve) => {
+                canvas.loadFromJSON(JSON.parse(canvasData), () => {
+                    canvas.renderAll();
+                    resolve();
+                });
+            });
+            await copySVGToClipboard(canvas);
+            setCopySuccess(true);
+            setTimeout(() => setCopySuccess(false), 2000);
+        } catch (error) {
+            console.error("Copy failed:", error);
+        }
     };
 
     const currentFormat = FORMATS.find(f => f.id === selectedFormat);
@@ -118,7 +176,7 @@ export function ExportPanel() {
                                 className={cn(
                                     "relative flex items-center gap-4 p-4 rounded-2xl border transition-all text-left group",
                                     selectedFormat === format.id
-                                        ? "bg-blue-600/10 border-blue-500 shadow-lg shadow-blue-600/5 transition-all"
+                                        ? "bg-blue-600/10 border-blue-500 shadow-lg shadow-blue-600/5"
                                         : "bg-gray-900 border-gray-800 hover:border-gray-700"
                                 )}
                             >
@@ -163,10 +221,10 @@ export function ExportPanel() {
                             Premium Export
                         </h4>
                         <p className="text-[10px] font-medium text-gray-500 relative z-10 mb-4 max-w-[200px]">
-                            PDF and Figma exports are part of our Professional suite. Upgrade to unlock vectors and direct sync.
+                            Advanced vector exports are part of our Professional suite. You have trial access to these features.
                         </p>
                         <button className="flex items-center gap-2 text-[10px] font-black text-blue-500 uppercase tracking-widest hover:text-blue-400 transition-colors relative z-10">
-                            View Pricing Plan
+                            Upgrade Now
                             <ExternalLink className="w-3 h-3" />
                         </button>
                     </div>
@@ -175,18 +233,18 @@ export function ExportPanel() {
 
             <div className="p-6 border-t border-gray-900 bg-gray-900/10">
                 <button
-                    disabled={isExporting || isDone || currentFormat?.pro}
+                    disabled={isExporting || isDone}
                     onClick={handleExport}
                     className={cn(
                         "w-full relative py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all overflow-hidden",
-                        currentFormat?.pro
+                        isExporting || isDone
                             ? "bg-gray-800 text-gray-500 cursor-not-allowed"
                             : "bg-blue-600 text-white hover:scale-[1.02] active:scale-[0.98] shadow-2xl shadow-blue-600/20"
                     )}
                 >
                     <div className="relative z-10 flex items-center justify-center gap-2">
                         {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : (isDone ? <Check className="w-4 h-4" /> : <Zap className="w-4 h-4" />)}
-                        {isExporting ? `Exporting... ${exportProgress}%` : (isDone ? "Download Ready" : `Export ${currentFormat?.ext.toUpperCase()}`)}
+                        {isExporting ? `Exporting... ${exportProgress}%` : (isDone ? "Export Complete" : `Download ${currentFormat?.ext.toUpperCase()}`)}
                     </div>
 
                     {isExporting && (
@@ -200,9 +258,12 @@ export function ExportPanel() {
                 </button>
 
                 <div className="mt-4 flex items-center justify-center gap-6">
-                    <button className="flex items-center gap-1.5 text-[10px] font-black text-gray-600 uppercase tracking-widest hover:text-white transition-colors">
-                        <Share2 className="w-3 h-3" />
-                        Public Link
+                    <button
+                        onClick={handleCopySVG}
+                        className="flex items-center gap-1.5 text-[10px] font-black text-gray-600 uppercase tracking-widest hover:text-white transition-colors"
+                    >
+                        {copySuccess ? <Check className="w-3 h-3 text-green-500" /> : <Share2 className="w-3 h-3" />}
+                        {copySuccess ? "Copied" : "Copy SVG"}
                     </button>
                     <div className="w-px h-3 bg-gray-800" />
                     <button className="flex items-center gap-1.5 text-[10px] font-black text-gray-600 uppercase tracking-widest hover:text-white transition-colors">
