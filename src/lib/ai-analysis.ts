@@ -1,5 +1,6 @@
 import {
     callAnthropic,
+    callAnthropicWithMeta,
     parseAIResponse,
     AIAnalysisResponse,
     AISuggestion,
@@ -67,8 +68,11 @@ Focus on:
 Return ONLY valid JSON, no markdown formatting.`;
 
     try {
-        const response = await callAnthropic(prompt, systemPrompt, 6000);
-        const analysis = parseAIResponse<AIAnalysisResponse>(response);
+        const { text, model } = await callAnthropicWithMeta(prompt, systemPrompt, 6000);
+        const analysis = parseAIResponse<AIAnalysisResponse>(text);
+
+        // Include model metadata
+        analysis.meta = { model };
 
         // Validate response structure
         if (
