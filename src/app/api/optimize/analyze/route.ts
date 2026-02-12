@@ -113,7 +113,8 @@ export async function POST(request: NextRequest) {
             summary: {
                 qualityScore: mainAnalysis.qualityScore,
                 categories: mainAnalysis.categories,
-                suggestionCount: allSuggestions.length
+                suggestionCount: allSuggestions.length,
+                model: mainAnalysis.meta?.model || "primary"
             }
         }, { status: 201 });
 
