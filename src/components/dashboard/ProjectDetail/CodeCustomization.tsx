@@ -11,7 +11,8 @@ import {
     ChevronRight,
     Search,
     Code2,
-    Database
+    Database,
+    Smartphone,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -32,6 +33,8 @@ const FRAMEWORKS = [
     { id: "nextjs", label: "Next.js 14", icon: Code2, description: "App Router, Server Components" },
     { id: "vite", label: "Vite + React", icon: Workflow, description: "SPA, Fast Refresh" },
     { id: "remix", label: "Remix", icon: Box, description: "Edge Ready, Data Focused" },
+    { id: "vue", label: "Vue.js 3", icon: Box, description: "Composition API (Coming Soon)", disabled: true },
+    { id: "flutter", label: "Flutter", icon: Smartphone, description: "Mobile First (Coming Soon)", disabled: true },
 ];
 
 const STYLING = [
@@ -70,15 +73,17 @@ export function CodeCustomization({ onConfigChange, className }: CodeCustomizati
                     <span className="text-[10px] font-black text-blue-600 uppercase">{config.framework}</span>
                 </div>
                 <div className="grid grid-cols-1 gap-3">
-                    {FRAMEWORKS.map((fw) => (
+                    {FRAMEWORKS.map((fw: any) => (
                         <button
                             key={fw.id}
+                            disabled={fw.disabled}
                             onClick={() => updateConfig({ framework: fw.id as any })}
                             className={cn(
                                 "flex items-center gap-4 p-4 rounded-2xl border transition-all text-left group",
-                                config.framework === fw.id
-                                    ? "bg-blue-600 border-blue-500 shadow-xl shadow-blue-600/20"
-                                    : "bg-gray-950 border-gray-900 hover:border-gray-700"
+                                fw.disabled ? "opacity-50 grayscale cursor-not-allowed" :
+                                    (config.framework === fw.id
+                                        ? "bg-blue-600 border-blue-500 shadow-xl shadow-blue-600/20"
+                                        : "bg-gray-950 border-gray-900 hover:border-gray-700")
                             )}
                         >
                             <div className={cn(
