@@ -207,11 +207,10 @@ export async function callAnthropicVision(
         throw new AppError("Unexpected response format from AI", 500, "AI_ERROR");
     } catch (error) {
         if (error instanceof Anthropic.APIError && (error.status === 503 || error.status === 500 || error.status === 529)) {
-            // Vision fallback is tricky as Haiku supports vision too, but let's just retry logic or fail if already haiku
-            console.warn(`[AI Vision] Primary model ${model} failed...`);
+            console.warn(`[AI Vision] Primary model ${model} failed, attempting fallback...`);
+            // If primary sonnet fails, try haiku which also supports vision
             if (model === "claude-3-5-sonnet-20240620") {
-                console.log("Retrying with Haiku for vision (if suitable)... or just re-throwing for now as quality drop is significant.");
-                // For Code Gen, Haiku might be too weak. Let's just rethrow for now unless user explicitly wants fallback.
+                return callAnthropicVision(prompt, base64Image, mediaType, systemPrompt, maxTokens, "claude-3-haiku-20240307");
             }
         }
 
