@@ -1,5 +1,3 @@
-"use client"; // Wait, this is an API route, no "use client"
-
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
