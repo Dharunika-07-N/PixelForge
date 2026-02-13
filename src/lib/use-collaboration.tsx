@@ -95,21 +95,22 @@ export function useCollaboration(projectId: string, currentUserId: string, userN
                             id: userId,
                             name: presence.userName || "Unknown",
                             color: stringToColor(userId),
-                            cursor: null, // Start null, wait for cursor update
-                            lastActive: Date.now(), // Estimate
+                            cursor: null,
+                            lastActive: Date.now(),
                             avatarUrl: presence.avatarUrl
                         };
                     }
                 });
 
-                // Merge with existing logic to keep cursors if possible
                 setCollaborators(prev => {
-                    const next = { ...prev };
-                    // Add new
-                    Object.keys(newCollaborators).forEach(key => {
-                        if (!next[key]) next[key] = newCollaborators[key];
+                    const next: Record<string, Collaborator> = {};
+                    // Only keep users who are still present
+                    Object.keys(newCollaborators).forEach(id => {
+                        next[id] = {
+                            ...newCollaborators[id],
+                            cursor: prev[id]?.cursor || null // Preserve cursor position if they were already there
+                        };
                     });
-                    // Remove dropped (logic skipped for simplicity/stability)
                     return next;
                 });
             })
@@ -148,7 +149,7 @@ export function useCollaboration(projectId: string, currentUserId: string, userN
         channelRef.current = channel;
 
         return () => {
-            supabase.removeChannel(channel);
+            supabase?.removeChannel(channel);
         };
     }, [projectId, currentUserId, userName]);
 
