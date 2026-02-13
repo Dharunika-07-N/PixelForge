@@ -126,7 +126,7 @@ export async function formatGeneratedCode(code: string, filepath: string): Promi
         if (filepath.endsWith(".ts") || filepath.endsWith(".tsx")) parser = "typescript";
         if (filepath.endsWith(".js") || filepath.endsWith(".jsx")) parser = "babel";
 
-        return prettier.format(code, {
+        return await prettier.format(code, {
             ...options,
             filepath,
             parser,
