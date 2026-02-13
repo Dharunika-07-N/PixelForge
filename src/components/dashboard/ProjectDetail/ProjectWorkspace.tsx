@@ -61,6 +61,14 @@ export function ProjectWorkspace({ project, activePageId }: ProjectWorkspaceProp
     database: "prisma",
   });
 
+  React.useEffect(() => {
+    const handleTabChange = (e: any) => {
+      setRightTab(e.detail);
+    };
+    window.addEventListener('changeTab', handleTabChange);
+    return () => window.removeEventListener('changeTab', handleTabChange);
+  }, []);
+
   // Mock code data
   const mockFiles = [
     {
@@ -177,7 +185,7 @@ export default function LandingPage() {
         </div>
         <div className="flex-1 overflow-hidden relative">
           {leftTab === "screenshot" && (
-            <ScreenshotPanel imageUrl={project?.thumbnailUrl || "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop"} />
+            <ScreenshotPanel imageUrl={activePage?.sourceImageUrl || project?.thumbnailUrl || "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop"} />
           )}
           {leftTab === "elements" && <ElementsPanel elements={pageElements} />}
           {leftTab === "library" && <ComponentLibrary />}
