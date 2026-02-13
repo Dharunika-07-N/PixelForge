@@ -61,8 +61,18 @@ export function RefinementWorkflow({ pageId, onApprove, onReject, className }: R
 
     const handleFeedbackSubmit = async (feedback: string, category: string) => {
         setIsSubmitting(true);
-        // Simulate API call to /api/optimize/refine
-        setTimeout(() => {
+        try {
+            const response = await fetch("/api/optimize/refine", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ pageId, feedback, category }),
+            });
+
+            if (!response.ok) throw new Error("Failed to refine design");
+
+            const data = await response.json();
+            const { refinement } = data;
+
             const newIteration: RefinementIteration = {
                 id: `it-${iterations.length + 1}`,
                 version: iterations.length + 1,
@@ -70,11 +80,15 @@ export function RefinementWorkflow({ pageId, onApprove, onReject, className }: R
                 category,
                 timestamp: "Just now",
                 status: "PENDING",
-                aiNote: `I have analyzed your feedback regarding ${category} and applied the necessary adjustments to the design canvas.`
+                aiNote: refinement.explanation
             };
             setIterations([newIteration, ...iterations]);
+        } catch (error) {
+            console.error("Refinement failed:", error);
+            alert("Failed to refine design. Please try again.");
+        } finally {
             setIsSubmitting(false);
-        }, 1500);
+        }
     };
 
     return (
