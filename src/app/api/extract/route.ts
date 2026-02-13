@@ -24,7 +24,20 @@ export async function POST(request: NextRequest) {
         // 1. Run AI Extraction
         const extraction = await extractDesignFromImage(base64Data, mediaType);
 
-        // 2. If projectId is provided, save as a new page
+        // 2. Upload to S3 if configured
+        let sourceImageUrl = null;
+        try {
+            if (process.env.AWS_S3_BUCKET) {
+                const { uploadFile } = await import("@/lib/s3");
+                const buffer = Buffer.from(base64Data, "base64");
+                const key = `screenshots/${session?.user?.id || "anonymous"}/${Date.now()}.png`;
+                sourceImageUrl = await uploadFile(buffer, key, mediaType);
+            }
+        } catch (s3Error) {
+            console.error("S3 upload failed, continuing without storage:", s3Error);
+        }
+
+        // 3. If projectId is provided, save as a new page
         let page = null;
         if (session?.user?.id && projectId) {
             // Verify project ownership
@@ -38,7 +51,8 @@ export async function POST(request: NextRequest) {
                     data: {
                         projectId,
                         name: pageName,
-                        canvasData: JSON.stringify(extraction.canvasData)
+                        canvasData: JSON.stringify(extraction.canvasData),
+                        sourceImageUrl: sourceImageUrl
                     }
                 });
             }
