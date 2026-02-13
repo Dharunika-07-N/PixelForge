@@ -224,6 +224,21 @@ export function OptimizationPanel({ pageId, onStatusChange, onCodeGenerated, con
                                 suggestions={optimization.suggestions}
                                 onApply={(s) => console.log("Apply suggestion", s)}
                             />
+
+                            <div className="p-6 bg-gray-900 border border-gray-800 rounded-3xl flex flex-col items-center gap-4 text-center">
+                                <div className="text-xs font-black text-gray-400 uppercase tracking-widest">Not what you expected?</div>
+                                <p className="text-[10px] text-gray-500 font-medium">You can provide specific feedback to the AI for further refinement.</p>
+                                <button
+                                    onClick={() => {
+                                        // This is a bit hacky but works for now to signal tab change
+                                        const event = new CustomEvent('changeTab', { detail: 'refine' });
+                                        window.dispatchEvent(event);
+                                    }}
+                                    className="px-6 py-2 bg-purple-600/10 hover:bg-purple-600/20 text-purple-400 border border-purple-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                                >
+                                    Refine with AI
+                                </button>
+                            </div>
                         </motion.div>
                     )}
 
