@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, forwardRef, useImperativeHandle } from "react";
 import { ScreenshotPanel } from "./ScreenshotPanel";
 import { CodePanel } from "./CodePanel";
 import { PreviewPanel } from "./PreviewPanel";
@@ -42,13 +42,17 @@ import { AnalyticsPanel } from "./AnalyticsPanel";
 import { TestingPanel } from "./TestingPanel";
 import { DocumentationPanel } from "./DocumentationPanel";
 import { DeploymentPanel } from "./DeploymentPanel";
+import { getColorPalette, getTypographySystem } from "@/lib/canvas-utils";
 
 interface ProjectWorkspaceProps {
   project: any;
   activePageId: string;
 }
 
-export function ProjectWorkspace({ project, activePageId }: ProjectWorkspaceProps) {
+export const ProjectWorkspace = forwardRef((
+  { project, activePageId }: ProjectWorkspaceProps,
+  ref
+) => {
   const activePage = project.pages?.find((p: any) => p.id === activePageId) || project.pages?.[0];
   const latestOpt = activePage?.optimizations?.[0];
 
@@ -60,6 +64,16 @@ export function ProjectWorkspace({ project, activePageId }: ProjectWorkspaceProp
     styling: "tailwind",
     database: "prisma",
   });
+
+  const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  // Extract real design data
+  const canvasParsed = activePage?.canvasData ? JSON.parse(activePage.canvasData) : null;
+  const objects = canvasParsed?.objects || [];
+
+  const extractedColors = getColorPalette(objects);
+  const extractedFonts = getTypographySystem(objects);
 
   React.useEffect(() => {
     const handleTabChange = (e: any) => {
@@ -109,6 +123,25 @@ export default function LandingPage() {
     });
     setRightTab("preview");
   };
+
+  const handleDownload = async () => {
+    setIsDownloading(true);
+    try {
+      const { downloadCodeAsZip } = require("@/lib/code-export");
+      await downloadCodeAsZip(
+        project.name,
+        codeData.files
+      );
+    } catch (e) {
+      console.error("Download failed:", e);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  useImperativeHandle(ref, () => ({
+    download: handleDownload
+  }));
 
   // Map canvas data to ElementsPanel structure
   const pageElements = activePage?.canvasData ? JSON.parse(activePage.canvasData).objects?.map((obj: any, idx: number) => ({
@@ -187,7 +220,13 @@ export default function LandingPage() {
           {leftTab === "screenshot" && (
             <ScreenshotPanel imageUrl={activePage?.sourceImageUrl || project?.thumbnailUrl || "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop"} />
           )}
-          {leftTab === "elements" && <ElementsPanel elements={pageElements} />}
+          {leftTab === "elements" && (
+            <ElementsPanel
+              elements={pageElements}
+              selectedId={selectedElementId}
+              onSelect={setSelectedElementId}
+            />
+          )}
           {leftTab === "library" && <ComponentLibrary />}
         </div>
       </div>
@@ -370,7 +409,13 @@ export default function LandingPage() {
           </button>
         </div>
         <div className="flex-1 overflow-hidden relative">
-          {rightTab === "preview" && <PreviewPanel elements={pageElements} />}
+          {rightTab === "preview" && (
+            <PreviewPanel
+              elements={pageElements}
+              selectedElementId={selectedElementId}
+              onSelectElement={setSelectedElementId}
+            />
+          )}
           {rightTab === "optimize" && (
             <OptimizationPanel
               pageId={activePage?.id}
@@ -391,8 +436,8 @@ export default function LandingPage() {
               onConfigChange={setCodeConfig}
             />
           )}
-          {rightTab === "colors" && <ColorPanel />}
-          {rightTab === "typography" && <TypographyPanel />}
+          {rightTab === "colors" && <ColorPanel colors={extractedColors} />}
+          {rightTab === "typography" && <TypographyPanel fonts={extractedFonts} />}
           {rightTab === "comments" && <CommentsPanel projectId={project.id} pageId={activePage?.id} />}
           {rightTab === "system" && <DesignSystemPanel />}
           {rightTab === "history" && <VersionHistory />}
@@ -405,4 +450,4 @@ export default function LandingPage() {
       </div>
     </main>
   );
-}
+});
