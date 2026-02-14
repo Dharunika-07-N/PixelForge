@@ -33,7 +33,13 @@ interface PreviewElement {
     };
 }
 
-export function PreviewPanel({ elements }: { elements?: PreviewElement[] }) {
+interface PreviewPanelProps {
+    elements?: PreviewElement[];
+    selectedElementId?: string | null;
+    onSelectElement?: (id: string | null) => void;
+}
+
+export function PreviewPanel({ elements, selectedElementId, onSelectElement }: PreviewPanelProps) {
     const [activeTab, setActiveTab] = useState<"preview" | "elements" | "colors" | "typography">("preview");
     const [device, setDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
     const [isRotating, setIsRotating] = useState(false);
@@ -145,29 +151,37 @@ export function PreviewPanel({ elements }: { elements?: PreviewElement[] }) {
                                         ) : (
                                             <div className="absolute inset-0 p-4">
                                                 {elements && elements.length > 0 ? (
-                                                    elements.map(el => (
-                                                        <div
-                                                            key={el.id}
-                                                            className={cn(
-                                                                "absolute rounded border border-blue-500/20 flex items-center justify-center transition-all hover:border-blue-500 hover:bg-blue-500/5 group/el",
-                                                                el.type === 'Button' ? "bg-blue-600 rounded-lg shadow-sm" : ""
-                                                            )}
-                                                            style={{
-                                                                left: (el.properties.x / 1.5) + 'px',
-                                                                top: (el.properties.y / 1.5) + 'px',
-                                                                width: (el.properties.w / 1.5) + 'px',
-                                                                height: (el.properties.h / 1.5) + 'px',
-                                                                color: el.properties.color || (el.type === 'Button' ? 'white' : 'black')
-                                                            }}
-                                                        >
-                                                            <span className={cn(
-                                                                "text-[8px] font-bold truncate px-1",
-                                                                el.type === 'Button' && "text-[6px] uppercase tracking-tighter"
-                                                            )}>
-                                                                {el.properties.text || el.label}
-                                                            </span>
-                                                        </div>
-                                                    ))
+                                                    elements.map(el => {
+                                                        const isSelected = selectedElementId === el.id;
+                                                        return (
+                                                            <div
+                                                                key={el.id}
+                                                                onClick={() => onSelectElement?.(el.id)}
+                                                                className={cn(
+                                                                    "absolute rounded border flex items-center justify-center transition-all cursor-pointer group/el",
+                                                                    isSelected
+                                                                        ? "border-blue-500 bg-blue-500/10 shadow-[0_0_15px_rgba(59,130,246,0.3)] z-50 ring-2 ring-blue-500 ring-offset-1 ring-offset-white"
+                                                                        : "border-blue-500/20 hover:border-blue-500 hover:bg-blue-500/5",
+                                                                    el.type === 'Button' ? "bg-blue-600 rounded-lg shadow-sm" : ""
+                                                                )}
+                                                                style={{
+                                                                    left: (el.properties.x / 1.5) + 'px',
+                                                                    top: (el.properties.y / 1.5) + 'px',
+                                                                    width: (el.properties.w / 1.5) + 'px',
+                                                                    height: (el.properties.h / 1.5) + 'px',
+                                                                    color: el.properties.color || (el.type === 'Button' ? 'white' : 'black')
+                                                                }}
+                                                            >
+                                                                <span className={cn(
+                                                                    "text-[8px] font-bold truncate px-1",
+                                                                    el.type === 'Button' && "text-[6px] uppercase tracking-tighter",
+                                                                    isSelected && "text-blue-600"
+                                                                )}>
+                                                                    {el.properties.text || el.label}
+                                                                </span>
+                                                            </div>
+                                                        );
+                                                    })
                                                 ) : (
                                                     <div className="h-full flex flex-col items-center justify-center gap-4 text-center">
                                                         <Play className="w-8 h-8 text-gray-300" />
@@ -190,7 +204,11 @@ export function PreviewPanel({ elements }: { elements?: PreviewElement[] }) {
 
                     {activeTab === "elements" && (
                         <motion.div key="elements-tab" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="h-full">
-                            <ElementsPanel />
+                            <ElementsPanel
+                                elements={elements as any}
+                                selectedId={selectedElementId}
+                                onSelect={onSelectElement}
+                            />
                         </motion.div>
                     )}
 
