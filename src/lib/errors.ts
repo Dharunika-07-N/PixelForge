@@ -29,12 +29,14 @@ export function handleApiError(error: unknown): {
     }
 
     if (error instanceof Error) {
+        console.error("[API Error]", error);
         return {
             error: error.message,
             statusCode: 500,
         };
     }
 
+    console.error("[Unknown API Error]", error);
     return {
         error: "An unknown error occurred",
         statusCode: 500,
