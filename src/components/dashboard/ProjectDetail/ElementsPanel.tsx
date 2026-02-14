@@ -36,10 +36,18 @@ interface Element {
 
 interface ElementsPanelProps {
     elements?: Element[];
+    selectedId?: string | null;
+    onSelect?: (id: string | null) => void;
 }
 
-export function ElementsPanel({ elements: initialElements }: ElementsPanelProps) {
-    const [selectedId, setSelectedId] = useState<string | null>(null);
+export function ElementsPanel({ elements: initialElements, selectedId: propSelectedId, onSelect }: ElementsPanelProps) {
+    const [localSelectedId, setLocalSelectedId] = useState<string | null>(null);
+    const selectedId = propSelectedId !== undefined ? propSelectedId : localSelectedId;
+
+    const handleSelect = (id: string | null) => {
+        if (onSelect) onSelect(id);
+        else setLocalSelectedId(id);
+    };
     const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set(["root"]));
 
     // Mock elements tree if none provided
@@ -128,7 +136,7 @@ export function ElementsPanel({ elements: initialElements }: ElementsPanelProps)
         return (
             <div key={item.id} className="select-none">
                 <div
-                    onClick={() => setSelectedId(item.id)}
+                    onClick={() => handleSelect(item.id)}
                     className={cn(
                         "group flex items-center gap-2 py-1.5 px-2 rounded-lg cursor-pointer transition-all",
                         isSelected ? "bg-blue-600/20 text-blue-400" : "hover:bg-white/5 text-gray-400 hover:text-gray-300"
