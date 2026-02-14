@@ -51,6 +51,7 @@ export function OptimizationPanel({ pageId, onStatusChange, onCodeGenerated, con
     };
 
     const fetchLatestOptimization = async () => {
+        if (!pageId) return;
         setIsLoading(true);
         try {
             const response = await fetch(`/api/optimize?pageId=${pageId}`);
@@ -70,10 +71,14 @@ export function OptimizationPanel({ pageId, onStatusChange, onCodeGenerated, con
     };
 
     useEffect(() => {
-        fetchLatestOptimization();
+        if (pageId) fetchLatestOptimization();
     }, [pageId]);
 
     const handleRunAnalysis = async () => {
+        if (!pageId) {
+            alert("Error: Active page not identified. Please refresh the page.");
+            return;
+        }
         setIsLoading(true);
         try {
             const response = await fetch("/api/optimize/analyze", {

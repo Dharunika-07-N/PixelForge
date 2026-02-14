@@ -373,7 +373,7 @@ export default function LandingPage() {
           {rightTab === "preview" && <PreviewPanel elements={pageElements} />}
           {rightTab === "optimize" && (
             <OptimizationPanel
-              pageId={activePageId}
+              pageId={activePage?.id}
               onStatusChange={(status) => console.log("New Status:", status)}
               onCodeGenerated={handleUpdateCode}
               config={codeConfig}
@@ -381,7 +381,7 @@ export default function LandingPage() {
           )}
           {rightTab === "refine" && (
             <RefinementWorkflow
-              pageId={activePageId}
+              pageId={activePage?.id}
               onApprove={(id) => console.log("Approved", id)}
               onReject={(id) => console.log("Rejected", id)}
             />
@@ -393,13 +393,13 @@ export default function LandingPage() {
           )}
           {rightTab === "colors" && <ColorPanel />}
           {rightTab === "typography" && <TypographyPanel />}
-          {rightTab === "comments" && <CommentsPanel projectId={project.id} pageId={activePageId} />}
+          {rightTab === "comments" && <CommentsPanel projectId={project.id} pageId={activePage?.id} />}
           {rightTab === "system" && <DesignSystemPanel />}
           {rightTab === "history" && <VersionHistory />}
           {rightTab === "export" && <ExportPanel canvasData={activePage?.canvasData} />}
           {rightTab === "analytics" && <AnalyticsPanel projectId={project.id} />}
-          {rightTab === "testing" && <TestingPanel pageId={activePageId} />}
-          {rightTab === "docs" && <DocumentationPanel pageId={activePageId} />}
+          {rightTab === "testing" && <TestingPanel pageId={activePage?.id} />}
+          {rightTab === "docs" && <DocumentationPanel pageId={activePage?.id} />}
           {rightTab === "deployment" && <DeploymentPanel projectId={project.id} />}
         </div>
       </div>

@@ -75,6 +75,16 @@ export function RefinementWorkflow({ pageId, onApprove, onReject, className }: R
     }, [pageId]);
 
     const handleFeedbackSubmit = async (feedback: string, category: string) => {
+        if (!pageId) {
+            alert("Error: Active page not identified. Please refresh the page.");
+            return;
+        }
+
+        if (!feedback.trim()) {
+            alert("Please provide feedback before submitting.");
+            return;
+        }
+
         setIsSubmitting(true);
         try {
             const response = await fetch("/api/optimize/refine", {
