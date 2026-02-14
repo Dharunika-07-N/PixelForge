@@ -12,15 +12,19 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 
-interface FontConfig {
+export interface FontConfig {
     role: string;
     family: string;
     weight: string;
     sizes: { tag: string; size: string }[];
 }
 
-export function TypographyPanel() {
-    const fonts: FontConfig[] = [
+interface TypographyPanelProps {
+    fonts?: FontConfig[];
+}
+
+export function TypographyPanel({ fonts: propFonts }: TypographyPanelProps) {
+    const defaultFonts: FontConfig[] = [
         {
             role: "Heading Font",
             family: "Inter Bold",
@@ -42,6 +46,8 @@ export function TypographyPanel() {
             ]
         }
     ];
+
+    const fonts = propFonts && propFonts.length > 0 ? propFonts : defaultFonts;
 
     return (
         <div className="flex flex-col h-full bg-gray-950">
