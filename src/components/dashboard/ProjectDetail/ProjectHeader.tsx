@@ -32,6 +32,7 @@ interface ProjectHeaderProps {
     activePageId: string;
     onPageChange: (id: string) => void;
     onAddPage: () => void;
+    onDownload?: () => void;
     collaborators?: Record<string, any>;
 }
 
@@ -44,6 +45,7 @@ export function ProjectHeader({
     activePageId,
     onPageChange,
     onAddPage,
+    onDownload,
     collaborators = {}
 }: ProjectHeaderProps) {
     const router = useRouter();
@@ -256,7 +258,10 @@ export function ProjectHeader({
                     <Zap className="w-4 h-4" />
                     Upgrade
                 </button>
-                <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white border border-blue-500/50 rounded-xl text-xs font-bold transition-all shadow-lg shadow-blue-600/20 active:scale-[0.98]">
+                <button
+                    onClick={onDownload}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white border border-blue-500/50 rounded-xl text-xs font-bold transition-all shadow-lg shadow-blue-600/20 active:scale-[0.98]"
+                >
                     <Download className="w-4 h-4" />
                     Download
                 </button>
