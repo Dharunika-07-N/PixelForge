@@ -49,7 +49,6 @@ export function deserializeCanvas(
     return new Promise((resolve, reject) => {
         try {
             const canvasData = JSON.parse(jsonString);
-            // @ts-expect-error loadFromJSON returns a promise in v6
             canvas.loadFromJSON(canvasData).then(() => {
                 canvas.renderAll();
                 resolve();
@@ -66,8 +65,9 @@ export function deserializeCanvas(
  */
 export function validateCanvasData(data: unknown): data is CanvasData {
     if (!data || typeof data !== "object") return false;
-    if (!data.version || typeof data.version !== "string") return false;
-    if (!Array.isArray(data.objects)) return false;
+    const record = data as Record<string, unknown>;
+    if (!record.version || typeof record.version !== "string") return false;
+    if (!Array.isArray(record.objects)) return false;
     return true;
 }
 
@@ -175,12 +175,8 @@ export function calculateElementStats(elements: CanvasElement[]): {
         totalHeight += (el.height || 0) * (el.scaleY || 1);
     });
 
-    // Extract unique colors
-    const colors = new Set<string>();
-    elements.forEach((el) => {
-        if (el.fill && typeof el.fill === "string") colors.add(el.fill);
-        if (el.stroke && typeof el.stroke === "string") colors.add(el.stroke);
-    });
+    // Extract unique colors using the more robust method
+    const palette = getColorPalette(elements);
 
     return {
         totalElements: elements.length,
@@ -189,8 +185,114 @@ export function calculateElementStats(elements: CanvasElement[]): {
             width: elements.length > 0 ? totalWidth / elements.length : 0,
             height: elements.length > 0 ? totalHeight / elements.length : 0,
         },
-        colorPalette: Array.from(colors),
+        colorPalette: palette.map(c => c.hex),
     };
+}
+
+/**
+ * Extract color palette from elements with usage details
+ */
+export function getColorPalette(elements: CanvasElement[]): {
+    hex: string;
+    rgb: string;
+    label: string;
+    usage: string;
+    percentage: number;
+}[] {
+    const colorCounts: Record<string, number> = {};
+    let totalScore = 0;
+
+    elements.forEach((el) => {
+        const colors = [el.fill, el.stroke].filter(c => typeof c === 'string') as string[];
+        colors.forEach(color => {
+            // Normalize hex
+            const normalized = color.startsWith('#') ? color.toUpperCase() : color;
+            colorCounts[normalized] = (colorCounts[normalized] || 0) + 1;
+            totalScore += 1;
+        });
+    });
+
+    const sortedColors = Object.entries(colorCounts)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 8); // Top 8 colors
+
+    return sortedColors.map(([hex, count], idx) => {
+        const percentage = Math.round((count / (totalScore || 1)) * 100);
+
+        // Simple label/usage logic
+        let label = "Brand Color";
+        let usage = "Secondary Action";
+
+        if (idx === 0) {
+            label = "Primary Color";
+            usage = "Main UI Elements";
+        } else if (idx === 1) {
+            label = "Accent Color";
+            usage = "Highlights/Icons";
+        } else if (hex === "#FFFFFF" || hex === "#000000" || hex === "#111827") {
+            label = "Neutral";
+            usage = "Background/Text";
+        }
+
+        return {
+            hex,
+            rgb: hex.startsWith('#') ? hexToRgb(hex) : hex,
+            label,
+            usage,
+            percentage
+        };
+    });
+}
+
+/**
+ * Extract typography system from elements
+ */
+export function getTypographySystem(elements: CanvasElement[]): {
+    role: string;
+    family: string;
+    weight: string;
+    sizes: { tag: string; size: string }[];
+}[] {
+    const textElements = elements.filter(el => el.type === 'textbox' || el.type === 'text' || el.type === 'i-text');
+
+    if (textElements.length === 0) return [];
+
+    const fonts: Record<string, { family: string, weights: Set<string>, sizes: Set<number> }> = {};
+
+    textElements.forEach(el => {
+        const family = (el.fontFamily as string) || 'Inter';
+        const weight = String(el.fontWeight || '400');
+        const size = Number(el.fontSize || 16);
+
+        if (!fonts[family]) {
+            fonts[family] = { family, weights: new Set(), sizes: new Set() };
+        }
+        fonts[family].weights.add(weight);
+        fonts[family].sizes.add(size);
+    });
+
+    return Object.values(fonts).map((f, idx) => ({
+        role: idx === 0 ? "Primary Font" : "Secondary Font",
+        family: f.family,
+        weight: Array.from(f.weights).join(', '),
+        sizes: Array.from(f.sizes)
+            .sort((a, b) => b - a)
+            .slice(0, 3)
+            .map((s, i) => ({
+                tag: i === 0 ? "H1" : (i === 1 ? "Body" : "Small"),
+                size: `${s}px`
+            }))
+    }));
+}
+
+/**
+ * Helper: Hex to RGB string
+ */
+function hexToRgb(hex: string): string {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result
+        ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
+        : "0, 0, 0";
 }
 
 /**
