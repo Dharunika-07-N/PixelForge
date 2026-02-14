@@ -61,17 +61,30 @@ export async function POST(request: NextRequest) {
             category
         );
 
-        // 3. Update or Create Optimization Record
-        const updatedOptimization = await prisma.optimization.update({
-            where: { id: latestOptimization.id },
-            data: {
-                optimizedDesign: JSON.stringify(refinement.refinedDesign),
-                // Append refinement history or update suggestions if needed
-            }
-        });
+        // 3. Update Optimization and Create Refinement Record
+        const [updatedOptimization, refinementRecord] = await prisma.$transaction([
+            prisma.optimization.update({
+                where: { id: latestOptimization.id },
+                data: {
+                    optimizedDesign: JSON.stringify(refinement.refinedDesign),
+                    status: "REFINED",
+                }
+            }),
+            prisma.refinement.create({
+                data: {
+                    optimizationId: latestOptimization.id,
+                    feedback,
+                    category,
+                    refinedDesign: JSON.stringify(refinement.refinedDesign),
+                    aiExplanation: refinement.explanation,
+                    changes: JSON.stringify(refinement.changes),
+                }
+            })
+        ]);
 
         return NextResponse.json({
             refinement,
+            refinementId: refinementRecord.id,
             optimizationId: updatedOptimization.id
         }, { status: 200 });
 

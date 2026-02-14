@@ -38,6 +38,11 @@ export async function GET(request: NextRequest) {
 
         const optimizations = await prisma.optimization.findMany({
             where: { pageId },
+            include: {
+                refinements: {
+                    orderBy: { createdAt: "desc" }
+                }
+            },
             orderBy: { createdAt: "desc" }
         });
 
