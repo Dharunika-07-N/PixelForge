@@ -38,26 +38,41 @@ interface RefinementWorkflowProps {
 
 export function RefinementWorkflow({ pageId, onApprove, onReject, className }: RefinementWorkflowProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [iterations, setIterations] = useState<RefinementIteration[]>([
-        {
-            id: "it-1",
-            version: 1,
-            feedback: "Modernize the hero section and increase font size for the main title.",
-            category: "typography",
-            timestamp: "10m ago",
-            status: "APPROVED",
-            aiNote: "Increased font-size from 48px to 64px and applied modern variable font weights."
-        },
-        {
-            id: "it-2",
-            version: 2,
-            feedback: "The CTA button needs more contrast.",
-            category: "accessibility",
-            timestamp: "2m ago",
-            status: "PENDING",
-            aiNote: "Adjusted primary blue to #2563EB (WCAG AAA compliant) and added subtle depth."
+    const [iterations, setIterations] = useState<RefinementIteration[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const fetchHistory = async () => {
+        setIsLoading(true);
+        try {
+            const response = await fetch(`/api/optimize?pageId=${pageId}`);
+            if (!response.ok) throw new Error("Failed to fetch history");
+            const data = await response.json();
+
+            // Map real database records to UI iterations
+            if (data.optimizations && data.optimizations.length > 0) {
+                const latest = data.optimizations[0];
+                const refinementHistory = (latest.refinements || []).map((ref: any, idx: number) => ({
+                    id: ref.id,
+                    version: idx + 1,
+                    feedback: ref.feedback,
+                    category: ref.category,
+                    timestamp: new Date(ref.createdAt).toLocaleTimeString(),
+                    status: "APPROVED", // For history, we'll mark as approved or just show them
+                    aiNote: ref.aiExplanation
+                }));
+                // Real DB order is desc by created, but idx+1 for version needs reverse or count
+                setIterations(refinementHistory);
+            }
+        } catch (error) {
+            console.error("Failed to fetch refinement history:", error);
+        } finally {
+            setIsLoading(false);
         }
-    ]);
+    };
+
+    React.useEffect(() => {
+        if (pageId) fetchHistory();
+    }, [pageId]);
 
     const handleFeedbackSubmit = async (feedback: string, category: string) => {
         setIsSubmitting(true);
@@ -68,9 +83,17 @@ export function RefinementWorkflow({ pageId, onApprove, onReject, className }: R
                 body: JSON.stringify({ pageId, feedback, category }),
             });
 
-            if (!response.ok) throw new Error("Failed to refine design");
-
             const data = await response.json();
+
+            if (!response.ok) {
+                if (data.error === "No optimization record found. Please run analysis first.") {
+                    alert("Analysis required: Please click 'Analyze Design Quality' in the Report tab before refining.");
+                } else {
+                    throw new Error(data.error || "Failed to refine design");
+                }
+                return;
+            }
+
             const { refinement } = data;
 
             const newIteration: RefinementIteration = {
