@@ -63,7 +63,7 @@ export const updatePageSchema = z.object({
 // Optimization validation
 export const createOptimizationSchema = z.object({
     pageId: z.string().cuid(),
-    originalDesign: z.string(), // JSON string
+    originalDesign: z.string().optional(), // Can be fetched from DB
 });
 
 export const updateOptimizationSchema = z.object({
