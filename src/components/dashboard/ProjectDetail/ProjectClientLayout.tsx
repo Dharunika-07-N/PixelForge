@@ -30,6 +30,12 @@ export function ProjectClientLayout({ project, userId }: ProjectClientLayoutProp
         setActivePageId(newPage.id);
     };
 
+    const workspaceRef = React.useRef<any>(null);
+
+    const handleDownload = () => {
+        workspaceRef.current?.download();
+    };
+
     return (
         <div
             className="h-screen flex flex-col bg-gray-950 selection:bg-blue-500/30 overflow-hidden"
@@ -44,10 +50,15 @@ export function ProjectClientLayout({ project, userId }: ProjectClientLayoutProp
                 activePageId={activePageId}
                 onPageChange={setActivePageId}
                 onAddPage={handleAddPage}
+                onDownload={handleDownload}
                 collaborators={collaborators}
             />
             <div className="flex-1 relative overflow-hidden">
-                <ProjectWorkspace project={{ ...project, pages }} activePageId={activePageId} />
+                <ProjectWorkspace
+                    ref={workspaceRef}
+                    project={{ ...project, pages }}
+                    activePageId={activePageId}
+                />
 
                 {/* Collaboration Cursors Overlay */}
                 <div className="absolute inset-0 pointer-events-none z-[9999]">
