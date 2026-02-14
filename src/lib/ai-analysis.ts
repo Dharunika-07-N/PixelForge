@@ -14,7 +14,16 @@ import { CanvasData, calculateElementStats } from "./canvas-utils";
 export async function analyzeDesignQuality(
     canvasData: CanvasData
 ): Promise<AIAnalysisResponse> {
+    console.log("[AI Analysis] Starting analysis for design...");
+
+    // Defensive check for objects
+    if (!canvasData || !canvasData.objects) {
+        console.warn("[AI Analysis] Missing objects in canvasData, initializing empty array");
+        canvasData = { ...canvasData, objects: [] };
+    }
+
     const stats = calculateElementStats(canvasData.objects);
+    console.log(`[AI Analysis] Stats calculated: ${stats.totalElements} elements`);
 
     const systemPrompt = `You are an expert UI/UX designer and design analyst. Analyze the provided design and provide a comprehensive quality assessment.
 
@@ -68,7 +77,10 @@ Focus on:
 Return ONLY valid JSON, no markdown formatting.`;
 
     try {
+        console.log("[AI Analysis] Calling Anthropic API...");
         const { text, model } = await callAnthropicWithMeta(prompt, systemPrompt, 6000);
+        console.log(`[AI Analysis] Received response from model: ${model}`);
+
         const analysis = parseAIResponse<AIAnalysisResponse>(text);
 
         // Include model metadata
@@ -80,6 +92,7 @@ Return ONLY valid JSON, no markdown formatting.`;
             !analysis.categories ||
             !Array.isArray(analysis.suggestions)
         ) {
+            console.error("[AI Analysis] Invalid response structure:", analysis);
             throw new Error("Invalid AI response structure");
         }
 
@@ -101,9 +114,10 @@ Return ONLY valid JSON, no markdown formatting.`;
             id: suggestion.id || `suggestion-${index + 1}`,
         }));
 
+        console.log("[AI Analysis] Analysis successfully completed and parsed.");
         return analysis;
     } catch (error) {
-        console.error("Design analysis failed:", error);
+        console.error("[AI Analysis] Fatal design analysis failure:", error);
 
         // Return fallback analysis
         return {
@@ -292,6 +306,9 @@ export async function refineDesignWithFeedback(
     feedback: string,
     category: string
 ): Promise<AIRefinementResponse> {
+    console.log(`[AI Refinement] Starting refinement for category: ${category}`);
+    console.log(`[AI Refinement] Feedback: "${feedback}"`);
+
     const systemPrompt = `You are an AI Design Refinement Specialist. Your goal is to adjust an existing AI-optimized design based on specific user feedback.
   You MUST return a valid JSON object in this format:
   {
@@ -320,10 +337,14 @@ Instructions:
 Return ONLY valid JSON.`;
 
     try {
+        console.log("[AI Refinement] Calling Anthropic API...");
         const response = await callAnthropic(prompt, systemPrompt, 5000);
-        return parseAIResponse<AIRefinementResponse>(response);
+        console.log("[AI Refinement] Received response from model.");
+        const parsed = parseAIResponse<AIRefinementResponse>(response);
+        console.log("[AI Refinement] Refinement successfully parsed.");
+        return parsed;
     } catch (error) {
-        console.error("Design refinement failed:", error);
+        console.error("[AI Refinement] Error during design refinement:", error);
         throw error;
     }
 }
