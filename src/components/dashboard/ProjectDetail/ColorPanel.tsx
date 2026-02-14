@@ -13,7 +13,7 @@ import {
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-interface ColorItem {
+export interface ColorItem {
     hex: string;
     rgb: string;
     label: string;
@@ -21,15 +21,21 @@ interface ColorItem {
     percentage: number;
 }
 
-export function ColorPanel() {
+interface ColorPanelProps {
+    colors?: ColorItem[];
+}
+
+export function ColorPanel({ colors: propColors }: ColorPanelProps) {
     const [copiedHex, setCopiedHex] = useState<string | null>(null);
 
-    const colors: ColorItem[] = [
+    const defaultColors: ColorItem[] = [
         { hex: "#3B82F6", rgb: "59, 130, 246", label: "Brand Blue", usage: "Primary Action", percentage: 15 },
         { hex: "#9333EA", rgb: "147, 51, 234", label: "Accent Purple", usage: "Gradients", percentage: 10 },
         { hex: "#FFFFFF", rgb: "255, 255, 255", label: "Pure White", usage: "Text & Icons", percentage: 40 },
         { hex: "#111827", rgb: "17, 24, 39", label: "Midnight Black", usage: "Background", percentage: 35 },
     ];
+
+    const colors = propColors && propColors.length > 0 ? propColors : defaultColors;
 
     const handleCopy = (hex: string) => {
         navigator.clipboard.writeText(hex);
