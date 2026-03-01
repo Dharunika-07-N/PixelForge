@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     Globe,
     Rocket,
@@ -35,16 +35,25 @@ interface DeploymentPanelProps {
 export function DeploymentPanel({ projectId }: DeploymentPanelProps) {
     const [isDeploying, setIsDeploying] = useState(false);
     const [deployStep, setDeployStep] = useState(0);
-    const [environments, setEnvironments] = useState<Environment[]>([
-        {
-            id: "staging",
-            name: "Staging (v1.0.4)",
-            url: "pixelforge-demo-staging.vercel.app",
-            status: "online",
-            lastDeploy: "12 mins ago",
-            type: "staging"
-        }
-    ]);
+    const [environments, setEnvironments] = useState<Environment[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchDeployments = async () => {
+            try {
+                const res = await fetch(`/api/projects/${projectId}/deployments`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setEnvironments(data.deployments || []);
+                }
+            } catch (e) {
+                console.error("Failed to load deployments:", e);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchDeployments();
+    }, [projectId]);
 
     const handleDeploy = async () => {
         setIsDeploying(true);
