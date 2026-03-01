@@ -83,35 +83,8 @@ export const ProjectWorkspace = forwardRef((
     return () => window.removeEventListener('changeTab', handleTabChange);
   }, []);
 
-  // Mock code data
-  const mockFiles = [
-    {
-      path: "app/page.tsx",
-      language: "tsx",
-      content: `"use client";
-
-import React from 'react';
-
-export default function LandingPage() {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-      <h1 className="text-6xl font-black tracking-tight">Welcome to PixelForge</h1>
-      <button className="mt-12 px-12 py-5 bg-white text-blue-600 rounded-2xl font-black text-xl shadow-2xl">
-        Get Started
-      </button>
-    </div>
-  );
-}`
-    },
-    {
-      path: "package.json",
-      language: "json",
-      content: `{\n  "name": "pixelforge-export",\n  "version": "1.0.0",\n  "dependencies": {\n    "next": "latest",\n    "react": "latest",\n    "react-dom": "latest"\n  }\n}`
-    }
-  ];
-
   const [codeData, setCodeData] = useState<{ files: any[], instructions?: string }>(
-    latestOpt?.generatedCode ? JSON.parse(latestOpt.generatedCode) : { files: mockFiles, instructions: "" }
+    latestOpt?.generatedCode ? JSON.parse(latestOpt.generatedCode) : { files: [], instructions: "" }
   );
 
   const handleUpdateCode = (newCode: any) => {
@@ -419,7 +392,9 @@ export default function LandingPage() {
           {rightTab === "optimize" && (
             <OptimizationPanel
               pageId={activePage?.id}
-              onStatusChange={(status) => console.log("New Status:", status)}
+              onStatusChange={(_status) => {
+                // status changes are reflected in the DB; handled on next load
+              }}
               onCodeGenerated={handleUpdateCode}
               config={codeConfig}
             />
@@ -427,8 +402,15 @@ export default function LandingPage() {
           {rightTab === "refine" && (
             <RefinementWorkflow
               pageId={activePage?.id}
-              onApprove={(id) => console.log("Approved", id)}
-              onReject={(id) => console.log("Rejected", id)}
+              onApprove={(id) => {
+                // Refresh code from server after approval
+                if (latestOpt?.generatedCode) {
+                  try { setCodeData(JSON.parse(latestOpt.generatedCode)); } catch { }
+                }
+              }}
+              onReject={(_id) => {
+                // Rejection handled server-side; no local state to update
+              }}
             />
           )}
           {rightTab === "config" && (
@@ -440,7 +422,7 @@ export default function LandingPage() {
           {rightTab === "typography" && <TypographyPanel fonts={extractedFonts} />}
           {rightTab === "comments" && <CommentsPanel projectId={project.id} pageId={activePage?.id} />}
           {rightTab === "system" && <DesignSystemPanel />}
-          {rightTab === "history" && <VersionHistory />}
+          {rightTab === "history" && <VersionHistory pageId={activePage?.id} />}
           {rightTab === "export" && <ExportPanel canvasData={activePage?.canvasData} />}
           {rightTab === "analytics" && <AnalyticsPanel projectId={project.id} />}
           {rightTab === "testing" && <TestingPanel pageId={activePage?.id} />}
