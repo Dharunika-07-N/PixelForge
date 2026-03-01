@@ -167,13 +167,33 @@ export function DocumentationPanel({ pageId }: DocumentationPanelProps) {
                 <div className="space-y-4">
                     <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Hand-off Documentation</label>
                     <div className="grid grid-cols-2 gap-3">
-                        <button className="flex flex-col items-center gap-3 p-6 bg-gray-900 border border-gray-800 rounded-[2rem] hover:border-blue-500/30 transition-all group">
+                        <button
+                            onClick={() => {
+                                const content = sections.map(s => `## ${s.title}\n${s.content || ""}`).join("\n\n");
+                                if (!content.trim()) return;
+                                const blob = new Blob([content], { type: "text/markdown" });
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement("a");
+                                a.href = url;
+                                a.download = "documentation.md";
+                                a.click();
+                                URL.revokeObjectURL(url);
+                            }}
+                            className="flex flex-col items-center gap-3 p-6 bg-gray-900 border border-gray-800 rounded-[2rem] hover:border-blue-500/30 transition-all group"
+                        >
                             <FileText className="w-8 h-8 text-blue-500 group-hover:scale-110 transition-transform" />
-                            <span className="text-[10px] font-black text-white uppercase tracking-widest">PDF Export</span>
+                            <span className="text-[10px] font-black text-white uppercase tracking-widest">MD Export</span>
                         </button>
-                        <button className="flex flex-col items-center gap-3 p-6 bg-gray-900 border border-gray-800 rounded-[2rem] hover:border-purple-500/30 transition-all group">
+                        <button
+                            onClick={() => {
+                                const summary = sections.map(s => `- ${s.title}`).join("\n");
+                                const msg = `docs: update project documentation\n\n${summary}`;
+                                navigator.clipboard.writeText(msg);
+                            }}
+                            className="flex flex-col items-center gap-3 p-6 bg-gray-900 border border-gray-800 rounded-[2rem] hover:border-purple-500/30 transition-all group"
+                        >
                             <Github className="w-8 h-8 text-purple-500 group-hover:scale-110 transition-transform" />
-                            <span className="text-[10px] font-black text-white uppercase tracking-widest">Git Summary</span>
+                            <span className="text-[10px] font-black text-white uppercase tracking-widest">Copy Git Msg</span>
                         </button>
                     </div>
                 </div>

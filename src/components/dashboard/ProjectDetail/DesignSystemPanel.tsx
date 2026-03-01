@@ -48,6 +48,25 @@ export function DesignSystemPanel() {
         setTimeout(() => setCopied(null), 2000);
     };
 
+    const handleDownloadTheme = () => {
+        const cssVars = `:root {\n${TOKENS.colors.map(c => `  ${c.var}: ${c.value};`).join("\n")}\n\n${TOKENS.spacing.map(s => `  --spacing-${s.name.toLowerCase()}: ${s.value};`).join("\n")}\n}\n`;
+        const tailwindConfig = `module.exports = {\n  theme: {\n    extend: {\n      colors: {\n${TOKENS.colors.map(c => `        '${c.name.toLowerCase().replace(/ /g, "-")}': '${c.value}',`).join("\n")}\n      },\n      spacing: {\n${TOKENS.spacing.filter(s => s.name !== "None").map(s => `        '${s.name.toLowerCase()}': '${s.value}',`).join("\n")}\n      }\n    }\n  }\n};\n`;
+        // Inline zip creation using data URIs for CSS + config
+        const files = [
+            { name: "tokens.css", content: cssVars },
+            { name: "tailwind.config.js", content: tailwindConfig },
+        ];
+        files.forEach(({ name, content }) => {
+            const blob = new Blob([content], { type: "text/plain" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = name;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+    };
+
     return (
         <div className="flex flex-col h-full bg-gray-950">
             <div className="p-6 border-b border-gray-900 flex items-center justify-between">
@@ -136,7 +155,7 @@ export function DesignSystemPanel() {
                             <Wind className="absolute -right-4 -bottom-4 w-32 h-32 opacity-10 rotate-12 group-hover:scale-110 transition-transform duration-700" />
                             <h4 className="text-xl font-black mb-2 relative z-10">Production Ready</h4>
                             <p className="text-sm font-bold text-blue-100/80 mb-6 relative z-10">Export your design system as a theme configuration or CSS variables.</p>
-                            <button className="w-full py-4 bg-white text-blue-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all relative z-10">
+                            <button onClick={handleDownloadTheme} className="w-full py-4 bg-white text-blue-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all relative z-10">
                                 <Download className="w-4 h-4 inline-block mr-2" />
                                 Download theme.zip
                             </button>
