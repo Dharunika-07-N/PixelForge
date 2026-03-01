@@ -32,6 +32,8 @@ interface ProjectHeaderProps {
     activePageId: string;
     onPageChange: (id: string) => void;
     onAddPage: () => void;
+    onDeletePage: (pageId: string) => void;
+    onRenamePage: (pageId: string, newName: string) => void;
     onDownload?: () => void;
     collaborators?: Record<string, any>;
 }
@@ -45,6 +47,8 @@ export function ProjectHeader({
     activePageId,
     onPageChange,
     onAddPage,
+    onDeletePage,
+    onRenamePage,
     onDownload,
     collaborators = {}
 }: ProjectHeaderProps) {
@@ -179,8 +183,8 @@ export function ProjectHeader({
                     activePageId={activePageId}
                     onPageSelect={onPageChange}
                     onAddPage={onAddPage}
-                    onDeletePage={(id) => console.log("Delete page", id)}
-                    onRenamePage={(id, name) => console.log("Rename page", id, name)}
+                    onDeletePage={onDeletePage}
+                    onRenamePage={onRenamePage}
                 />
 
                 <div className="w-px h-8 bg-gray-900 mx-1" />

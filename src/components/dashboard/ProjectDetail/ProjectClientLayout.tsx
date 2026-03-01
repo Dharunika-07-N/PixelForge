@@ -19,15 +19,50 @@ export function ProjectClientLayout({ project, userId }: ProjectClientLayoutProp
     const activePage = pages.find((p: any) => p.id === activePageId) || pages[0];
 
     const handleAddPage = async () => {
-        // Mock add page
-        const newPage = {
-            id: `new-page-${Date.now()}`,
-            name: `Page ${pages.length + 1}`,
-            status: "DRAFT",
-            canvasData: null
-        };
-        setPages([...pages, newPage]);
-        setActivePageId(newPage.id);
+        try {
+            const res = await fetch(`/api/projects/${project.id}/pages`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name: `Page ${pages.length + 1}` }),
+            });
+            if (res.ok) {
+                const newPage = await res.json();
+                setPages((prev: any[]) => [...prev, newPage]);
+                setActivePageId(newPage.id);
+            }
+        } catch (e) {
+            console.error("Failed to add page:", e);
+        }
+    };
+
+    const handleDeletePage = async (pageId: string) => {
+        if (pages.length <= 1) return; // prevent deleting the last page
+        try {
+            const res = await fetch(`/api/projects/${project.id}/pages/${pageId}`, { method: "DELETE" });
+            if (res.ok) {
+                const remaining = pages.filter((p: any) => p.id !== pageId);
+                setPages(remaining);
+                if (activePageId === pageId) setActivePageId(remaining[0]?.id || "");
+            }
+        } catch (e) {
+            console.error("Failed to delete page:", e);
+        }
+    };
+
+    const handleRenamePage = async (pageId: string, newName: string) => {
+        if (!newName.trim()) return;
+        try {
+            const res = await fetch(`/api/projects/${project.id}/pages/${pageId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name: newName }),
+            });
+            if (res.ok) {
+                setPages((prev: any[]) => prev.map((p: any) => p.id === pageId ? { ...p, name: newName } : p));
+            }
+        } catch (e) {
+            console.error("Failed to rename page:", e);
+        }
     };
 
     const workspaceRef = React.useRef<any>(null);
@@ -50,6 +85,8 @@ export function ProjectClientLayout({ project, userId }: ProjectClientLayoutProp
                 activePageId={activePageId}
                 onPageChange={setActivePageId}
                 onAddPage={handleAddPage}
+                onDeletePage={handleDeletePage}
+                onRenamePage={handleRenamePage}
                 onDownload={handleDownload}
                 collaborators={collaborators}
             />
