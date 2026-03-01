@@ -31,46 +31,9 @@ export function useCollaboration(projectId: string, currentUserId: string, userN
 
     // Setup Collaboration
     useEffect(() => {
-        // Fallback to Mock if Supabase is not configured
+        // Supabase not configured — no mock collaborators, no fake cursors
         if (!supabase) {
-            console.warn("Supabase not configured, using mock collaboration.");
-            setCollaborators({
-                "user-2": {
-                    id: "user-2",
-                    name: "Sarah Chen",
-                    color: "#ec4899", // pink-500
-                    cursor: { x: 400, y: 300 },
-                    lastActive: Date.now(),
-                    avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop"
-                },
-                "user-3": {
-                    id: "user-3",
-                    name: "Marcus Aurelius",
-                    color: "#8b5cf6", // violet-500
-                    cursor: { x: 800, y: 500 },
-                    lastActive: Date.now(),
-                    avatarUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop"
-                }
-            });
-
-            // Simulate random mouse movements for "Marcus"
-            simulationInterval.current = setInterval(() => {
-                setCollaborators(prev => ({
-                    ...prev,
-                    "user-3": {
-                        ...prev["user-3"],
-                        cursor: {
-                            x: Math.max(100, Math.min(1000, (prev["user-3"]?.cursor?.x || 800) + (Math.random() - 0.5) * 50)),
-                            y: Math.max(100, Math.min(800, (prev["user-3"]?.cursor?.y || 500) + (Math.random() - 0.5) * 50)),
-                        },
-                        lastActive: Date.now()
-                    }
-                }));
-            }, 100);
-
-            return () => {
-                if (simulationInterval.current) clearInterval(simulationInterval.current);
-            };
+            return;
         }
 
         // Real Supabase Implementation

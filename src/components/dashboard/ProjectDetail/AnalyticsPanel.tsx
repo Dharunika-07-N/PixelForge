@@ -2,19 +2,16 @@
 
 import React, { useEffect, useState } from "react";
 import {
-    BarChart3,
-    TrendingUp,
-    Users,
     Zap,
     Clock,
     MousePointer2,
-    ArrowUpRight,
-    ArrowDownRight,
     Activity,
     Sparkles,
-    Loader2,
-    Calendar
+    TrendingUp,
+    BarChart3,
+    Loader2
 } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
@@ -62,8 +59,6 @@ export function AnalyticsPanel({ projectId }: AnalyticsPanelProps) {
         {
             label: "AI Adaptations",
             value: data?.totalOptimizations || 0,
-            change: "+12%",
-            trend: "up",
             icon: Zap,
             color: "text-blue-500",
             bg: "bg-blue-500/10"
@@ -71,8 +66,6 @@ export function AnalyticsPanel({ projectId }: AnalyticsPanelProps) {
         {
             label: "Total Refinements",
             value: data?.totalRefinements || 0,
-            change: "+8%",
-            trend: "up",
             icon: MousePointer2,
             color: "text-purple-500",
             bg: "bg-purple-500/10"
@@ -80,8 +73,6 @@ export function AnalyticsPanel({ projectId }: AnalyticsPanelProps) {
         {
             label: "Avg Quality",
             value: `${data?.avgQualityScore || 0}%`,
-            change: "+15%",
-            trend: "up",
             icon: Sparkles,
             color: "text-green-500",
             bg: "bg-green-500/10"
@@ -89,8 +80,6 @@ export function AnalyticsPanel({ projectId }: AnalyticsPanelProps) {
         {
             label: "Time Saved",
             value: `${((data?.totalOptimizations || 0) * 0.2).toFixed(1)}h`,
-            change: "+1.5h",
-            trend: "up",
             icon: Clock,
             color: "text-orange-500",
             bg: "bg-orange-500/10"
@@ -123,16 +112,7 @@ export function AnalyticsPanel({ projectId }: AnalyticsPanelProps) {
                                 <m.icon className="w-5 h-5" />
                             </div>
                             <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">{m.label}</div>
-                            <div className="flex items-end justify-between">
-                                <div className="text-2xl font-black text-white">{m.value}</div>
-                                <div className={cn(
-                                    "flex items-center gap-0.5 text-[10px] font-black uppercase mb-1",
-                                    m.trend === "up" ? "text-green-500" : "text-red-500"
-                                )}>
-                                    {m.trend === "up" ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                                    {m.change}
-                                </div>
-                            </div>
+                            <div className="text-2xl font-black text-white">{m.value}</div>
                         </motion.div>
                     ))}
                 </div>
@@ -207,7 +187,10 @@ export function AnalyticsPanel({ projectId }: AnalyticsPanelProps) {
                             ? "Your design quality is in the top 5% of projects this week. Great consistency!"
                             : "Consider focusing on layout alignment in your next iteration to boost overall quality score."}
                     </p>
-                    <button className="w-full py-4 bg-white text-blue-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all relative z-10 shadow-xl">
+                    <button
+                        onClick={() => window.dispatchEvent(new CustomEvent("changeTab", { detail: "optimize" }))}
+                        className="w-full py-4 bg-white text-blue-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all relative z-10 shadow-xl"
+                    >
                         Optimize All Pages
                     </button>
                 </div>
